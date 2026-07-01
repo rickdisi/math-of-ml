@@ -1,0 +1,56 @@
+% ── Encoding & fonts ──────────────────────────────────────────────────────────
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+% ── Page geometry ─────────────────────────────────────────────────────────────
+\usepackage[a4paper, margin=2.5cm]{geometry}
+
+% ── Mathematics ───────────────────────────────────────────────────────────────
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{newtxtext,newtxmath}
+
+% ── Hyperlinks ────────────────────────────────────────────────────────────────
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks = true,
+    linkcolor  = blue,
+    citecolor  = blue,
+    urlcolor   = blue
+}
+
+% ── Code listings ─────────────────────────────────────────────────────────────
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+
+\lstdefinestyle{cpp}{
+    language        = C++,
+    basicstyle      = \ttfamily\small,
+    keywordstyle    = \color{blue},
+    commentstyle    = \color{codegray}\itshape,
+    stringstyle     = \color{codepurple},
+    numberstyle     = \tiny\color{codegray},
+    numbers         = left,
+    stepnumber      = 1,
+    breaklines      = true,
+    frame           = single,
+    showstringspaces= false,
+    tabsize         = 4
+}
+\lstset{style=cpp}
+
+% ── Theorem environments ──────────────────────────────────────────────────────
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[chapter]
+\newtheorem{example}{Example}[chapter]
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{proposition}{Proposition}[chapter]
+\newtheorem{lemma}{Lemma}[chapter]
+\newtheorem{corollary}{Corollary}[chapter]
+
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}[chapter]

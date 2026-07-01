@@ -1,0 +1,37 @@
+.env
+
+# Excel workbooks
+*.xlsx
+
+# Data files
+*.csv
+*.tsv
+
+# LaTeX files
+*.aux
+*.log
+*.out
+*.toc
+*.fls
+*.synctex.gz
+*.fdb_latexmk
+
+# C++ build artifacts
+*.o
+*.out
+a.out
+impl/**/*.out
+impl/**/build/
+
+# LaTeX build directory
+paper/build/
+*.pdf
+
+# Poetry files
+poetry.lock
+
+# Other
+*.DS_Store
+
+CLAUDE.md
+STATUS.md
