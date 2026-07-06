@@ -14,6 +14,6 @@ int main() {
     Matrix w = x * z;
     Matrix v = y.transpose();
 
-    std::cout << (4,2) << std::endl;
+    std::cout << y(4,2) << std::endl;
     return 0;
 }
