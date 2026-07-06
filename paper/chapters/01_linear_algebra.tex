@@ -1,245 +1,533 @@
 \chapter{Linear Algebra}
 
-\section{Vector Spaces}
+\section{Vector Spaces and Linear Operators}
+\label{sec:vector-spaces-and-linear-operators}
 
-	\indent \indent Let $V$ be a non-empty set with operation '+', called vector addition. Assume that the pair ($V,\, +$) forms an Abelian group i.e. it satisfies the following Axioms:
+	\subsection{Vector Spaces}
 	
-	\begin{enumerate}[label=($A_\arabic*$), leftmargin=3em]
-		\setcounter{enumi}{-1}
-		\item \label{ax:A0} For all $u, v \in V$, $u + v \in V$, i.e. $V$ is closed under vector addition.
-		\item \label{ax:A1} For all $u, v, w \in V$, $u + (v + w) = (u + v) + w$, that is, vector addition is associative.
-		\item \label{ax:A2} For all $u, v \in V$, $u + v = v + u$, i.e. vector addition is commutative.
-		\item \label{ax:A3} There is a zero element $0_V \in V$ such that $v + 0_V = v$ for all $v \in V$.
-		\item \label{ax:A4} Any $v \in V$ has a negative (or additive inverse) $-v \in V$ such that $-v + v = 0_V$.
-	\end{enumerate}
+		\indent \indent Let $V$ be a non-empty set with operation '+', called vector addition. Assume that the pair ($V,\, +$) forms an Abelian group i.e. it satisfies the following Axioms:
+		
+		\begin{enumerate}[label=($A_\arabic*$), leftmargin=3em]
+			\setcounter{enumi}{-1}
+			\item \label{ax:A0} For all $u, v \in V$, $u + v \in V$, i.e. $V$ is closed under vector addition.
+			\item \label{ax:A1} For all $u, v, w \in V$, $u + (v + w) = (u + v) + w$, that is, vector addition is associative.
+			\item \label{ax:A2} For all $u, v \in V$, $u + v = v + u$, i.e. vector addition is commutative.
+			\item \label{ax:A3} There is a zero element $0_V \in V$ such that $v + 0_V = v$ for all $v \in V$.
+			\item \label{ax:A4} Any $v \in V$ has a negative (or additive inverse) $-v \in V$ such that $-v + v = 0_V$.
+		\end{enumerate}
+		
+		\noindent In addition, let $\mathbb{F}$ be a field (e.g. $\mathbb{F} = \mathbb{R}$) and assume that $\mathbb{F}$ acts on $V$ via a mapping $\cdot$ called scalar multiplication and is required to satisfy the following properties.
+		
+		\begin{enumerate}[label=($M_\arabic*$), leftmargin=3em]
+			\item \label{ax:M1} For all $\mu \in \mathbb{F}$ and $u, v \in V$, $\mu \cdot (u + v) = \mu \cdot u + \mu \cdot v$, that is, scalar multiplication is distributive over vector addition.
+			\item \label{ax:M2} For all $\mu, \nu \in \mathbb{F}$ and $v \in V$, $(\mu + \nu) \cdot v = \mu \cdot v + \nu \cdot v$, that is, scalar multiplication is distributive over scalar addition.
+			\item \label{ax:M3} For all $\mu, \nu \in \mathbb{F}$ and $v \in V$, $\mu \cdot (\nu \cdot v) = (\mu\nu) \cdot v$, that is, scalar multiplication is associative.
+			\item \label{ax:M4} For $1 \in \mathbb{F}$, $1 \cdot v = v$ for all $v \in V$.
+		\end{enumerate}
 	
-	\noindent In addition, let $\mathbb{F}$ be a field (e.g. $\mathbb{F} = \mathbb{R}$) and assume that $\mathbb{F}$ acts on $V$ via a mapping $\cdot$ called scalar multiplication and is required to satisfy the following properties.
+		\begin{definition}[Vector Space]
+			A vector space over a field $\mathbb{F}$ is a set $V$ along with addition and scalar multiplication on $V$, i.e. $\left(V, +, \cdot \right)$ that obeys all axioms above. Elements of $V$ are vectors and elements of $\mathbb{F}$ are scalars.
+		\end{definition}
+		
+		\noindent The element $0_v \in V$ is called the zero-vector, while the element $0 \in \mathbb{F}$ is called the zero-scalar. Further, subtraction in a vector space is defined as $u + (- v) \; \forall \; u, v \in V$. That is, the sum of an element with an inverse element yields a subtraction.
+		
+		\begin{proposition}
+			\label{prop:vspace-properties}
+			Let $V$ be a $\mathbb{F}$-vector space
+			\begin{enumerate}[label=\roman*.]
+				\item For all $\mu \in \mathbb{F}, \, \mu \cdot 0_v = 0_v$ and for all $v \in V, \, 0 \cdot v = 0_v$
+				\item If $\mu \cdot v = 0_v$ and $\mathbb{F} \ni \mu \not= 0$, then $V \ni v = 0_v$.
+				\item For all $v \in V$, $(-1) \cdot v = -v$
+			\end{enumerate}
+		\end{proposition}
+		
+		\begin{proof} This can be proven using the axioms ($A_0$)-($A_4$) and ($M_1$)-($M_4$).
+			\begin{enumerate}[label=\roman*.]
+				\item From axioms ($A_3$) and ($M_1$), $\mu \cdot 0_V = \mu \cdot (0_V + 0_V) = \mu \cdot 0_V + \mu \cdot 0_V$, and hence, by ($A_3$), $\mu \cdot 0_V = 0_V$. Likewise, from ($M_2$), $0 \cdot v = (0 + 0) \cdot v = 0 \cdot v + 0 \cdot v$, and hence, by ($A_3$), $0 \cdot v = 0_V$.
+				\item As $\mathbb{F} \ni \mu \neq 0$, there exists $\mu^{-1} \in \mathbb{F}$ with $\mu^{-1}\mu = 1$. From axioms ($M_4$) and ($M_3$), $v = 1 \cdot v = (\mu^{-1}\mu) \cdot v = \mu^{-1} \cdot (\mu \cdot v)$. Thus, if $\mu \cdot v = 0_V$ we find that $v = \mu^{-1} \cdot 0_V$, and by (i), $v = 0_V$.
+				\item From (i) and axioms ($M_2$) and ($M_4$), $0_V = 0 \cdot v = (1 + (-1)) \cdot v = 1 \cdot v + (-1) \cdot v = v + (-1) \cdot v$, and hence $(-1) \cdot v = -v$.
+			\end{enumerate}
+		\end{proof}
+		
+		\begin{example}[Matrices]
+			The set of all $\left(m \times n\right)$-matrices with entries in $\mathbb{F}$, Mat$(m,n,\mathbb{F})$, is a $\mathbb{F}$-vector space with the usual definitions of adding matrices and multiplying by constants. For $m = n$ we write Mat$(n, \mathbb{F})$.
+		\end{example}
+		
 	
-	\begin{enumerate}[label=($M_\arabic*$), leftmargin=3em]
-		\item \label{ax:M1} For all $\mu \in \mathbb{F}$ and $u, v \in V$, $\mu \cdot (u + v) = \mu \cdot u + \mu \cdot v$, that is, scalar multiplication is distributive over vector addition.
-		\item \label{ax:M2} For all $\mu, \nu \in \mathbb{F}$ and $v \in V$, $(\mu + \nu) \cdot v = \mu \cdot v + \nu \cdot v$, that is, scalar multiplication is distributive over scalar addition.
-		\item \label{ax:M3} For all $\mu, \nu \in \mathbb{F}$ and $v \in V$, $\mu \cdot (\nu \cdot v) = (\mu\nu) \cdot v$, that is, scalar multiplication is associative.
-		\item \label{ax:M4} For $1 \in \mathbb{F}$, $1 \cdot v = v$ for all $v \in V$.
-	\end{enumerate}
+	\subsection{Vector Subspaces}
+		
+		\indent \indent A non-empty subset $U \subseteq V$ of a vector space need not be a vector space itself, since in general it is not closed under vector addition/scalar multiplication. For example, for any $u_1, u_2 \in U$ it is not necessarily true that $u_1 + u_2 \in U$.
+		
+		\begin{definition}[Vector Subspace]
+			Let $V$ be a $\mathbb{F}$-vector space. A vector subspace of $V$ is a non-empty subset $U$ of $V$ such that $U$ is a $\mathbb{F}$-vector space under the same operations as in $V$.
+		\end{definition}
+		
+		\noindent If $U$ is a subset of a vector space $V$, then axioms \ref{ax:A1}, \ref{ax:A2} and \ref{ax:M1}–\ref{ax:M4} automatically hold in $U$ because they hold throughout $V$.
+		
+		\begin{definition}[Linear Combination]
+			Let $V$ be a $\mathbb{F}$-vector space. A linear combination of the vectors $v_1, \dots, v_m \in V$ is a vector of the form 
+			\[
+				v = \sum_{i=1}^{m} \mu_i v_i \in V \qquad \text{with} \quad \mu_1, \dots \mu_m \in \mathbb{F}
+			\]
+		\end{definition}
+		
+		\begin{proposition}[Subspace Test]
+			Let $V$ be a $\mathbb{F}$-vector space and let $U$ be a non-empty subset of $V$. Then $U$ is a vector subspace of $V$ if and only if 
+			\[
+				\mu_1 u_1 + \mu_2 u_2 \in U \qquad \forall \: u_1, u_2 \in U \; \textnormal{and scalars} \; \mu_1, \mu_2 \in \mathbb{F}
+			\]
+		\end{proposition}
+		
+		\noindent Thus, to decide whether $U$ is a vector subspace we do not have to check all the axioms. It is enough to show that $U$ is closed under linear combinations and that it is non-empty. \newline
+		\indent Non-emptiness can be shown by demonstrating that the zero-vector is contained in $U$ (note also \ref{ax:A3}).
+		
 
-	\begin{definition}[Vector Space]
-		A vector space over a field $\mathbb{F}$ is a set $V$ along with addition and scalar multiplication on $V$, i.e. $\left(V, +, \cdot \right)$ that obeys all axioms above. Elements of $V$ are vectors and elements of $\mathbb{F}$ are scalars.
+	\subsection{Linear Independence}
+		
+		\begin{definition}[Span]
+			\label{def:span}
+			Let $V$ be a $\mathbb{F}$-vector space and $v_1, \dots, v_m \in V$. The span of the set $\{v_1, \dots, v_m\}$ is the set of all possible linear combinations of $v_1, \dots, v_m$, that is,
+			\[
+				\operatorname{span}_{\mathbb{F}} \{ v_1, \dots, v_m \} := \left\{ \sum_{i=1}^{m} \mu_i v_i \; \middle| \; \mu_1, \dots, \mu_m \in \mathbb{F} \right\}.
+			\]
+			If $V = \operatorname{span}_{\mathbb{F}}\{v_1, \dots, v_m\}$, then $\{v_1, \dots, v_m\}$ is said to be a spanning set for the vector space $V$.
+		\end{definition}
+		
+		\noindent We also note that the zero-vector $0 \in V$ is always contained in the span of any vectors $v_1, \dots, v_m \in V$ since by Proposition~\ref{prop:vspace-properties}, we have $0 = 0v_1 + \dots + 0v_m \in \operatorname{span}_{\mathbb{F}} \{ v_1, \dots, v_m \}$
+		
+		\begin{example}[Span in $\mathbb{R}^3$]
+			In $\mathbb{R}^3$,
+			\[
+			\operatorname{span}_{\mathbb{R}}\left\{ (1,0,0)^T, (0,1,0)^T \right\} = \left\{ (x,y,0)^T \in \mathbb{R}^3 \;\middle|\; x, y \in \mathbb{R} \right\}
+			\]
+			describes the $(x,y)$-plane, which is a special instance of a two-dimensional plane in $\mathbb{R}^3$ through the ``origin'' $0 \in \mathbb{R}^3$.
+		\end{example}
+	
+		\noindent Now, let $V$ be a $\mathbb{F}$-vector space and let $v_1, \dots, v_m \in V$.
+		
+		\begin{definition}[Linear Dependence]
+			\label{def:lin-dep}
+			The vectors $v_1, \dots, v_m$ are said to be linearly dependent if and only if at least one of the vectors is a linear combination of the others.
+		\end{definition} 
+		
+		\begin{definition}[Linear Independence]
+			\label{def:lin-indep}
+			The vectors $v_1, \dots, v_m$ are said to be linearly independent if and only if they are not linearly dependent.
+		\end{definition}
+		
+		\begin{remark} 
+			If a set $\{v_1, \dots, v_m\}$ contains the zero-vector $0_V \in V$, then the set is linearly dependent since $\mu \cdot 0_V = 0_V$ for all $\mu \in \mathbb{F}$ by Proposition~\ref{prop:vspace-properties}.
+		\end{remark}
+		
+		\begin{proposition}[Extension Lemma]
+			\label{prop:extension-lemma}
+			Let $\{v_1, \dots, v_m\}$ be a linearly independent set of vectors in a $\mathbb{F}$-vector space $V$. Then, for any $v \in V$,
+			$v \in \operatorname{span}_{\mathbb{F}}\{v_1, \dots, v_m\} \iff \{v, v_1, \dots, v_m\}$ is a linearly dependent set of vectors.
+		\end{proposition}
+		
+		\begin{proof}
+			($\Rightarrow$) Suppose $v \in \operatorname{span}_{\mathbb{F}}\{v_1, \dots, v_m\}$. Then $v = \sum_{i=1}^{m} \mu_i v_i $. By Definition~\ref{def:lin-dep}, $v$ is linearly dependent.
+			
+			($\Leftarrow$) Suppose $\{v, v_1, \dots, v_m\}$ is linearly dependent.
+			
+			\textit{Case 1:} $v$ is a linear combination of $v_1, \dots, v_m$. Then by the definition of span, $v \in \operatorname{span}_{\mathbb{F}}\{v_1,\dots,v_m\}$.
+	
+			\textit{Case 2:} some $v_i$ is a linear combination of the other vectors in $\{v, v_1, \dots, v_m\}$, i.e. $v_i = av + \sum_{j \neq i} b_j v_j$. If the coefficient on $v$ were zero, then $v_i$ becomes just a combination of the other $v_j$'s, contradicting linear independence. Hence that coefficient is non-zero, and solving for $v$ gives $v = a^{-1}v_i - \sum_{j\neq i} a^{-1}b_j v_j$, hence $v \in \operatorname{span}_{\mathbb{F}}\{v_1,\dots,v_m\}$.
+		\end{proof}
+			
+		\noindent By contraposition, we now have that $V \ni v \notin \operatorname{span}_{\mathbb{F}}\{v_1, \dots, v_m\}$ if and only if $\{v, v_1, \dots, v_m\}$ forms a linearly independent set of vectors.
+		
+		\begin{definition}[Dimension]
+			A $\mathbb{F}$-vector space $V$ is said to be $n$-dimensional if and only if there is a linearly independent set of $n$ vectors and every set consisting of $n+1$ vectors is linearly dependent. $\dim_{\mathbb{F}}(V) = n$ expresses the dimension of $V$. Furthermore, a vector space is said to be of infinite dimension if and only if there is a linearly independent set of vectors of arbitrarily large order.
+		\end{definition}
+		
+	
+	\subsection{Bases of Vector Spaces}
+		
+		\indent \indent We now seek to represent any vector $v \in V$ as a linear combination of a "minimal" set of vectors, also called a basis.
+		
+		\begin{definition}[Basis]
+			Let $V$ be an n-dimensional $\mathbb{F}$-vector space. Any linear independent set of n vectors in $V$ is called a \textit{basis} of $V$.
+		\end{definition}
+		
+		\begin{proposition}
+			\label{prop:v-basis}
+			Let $V$ be a $\mathbb{F}$-vector space. Any linearly independent spanning set for $V$ is a basis of $V$ and vice versa.
+		\end{proposition}
+		
+		\begin{proof}
+			($\Rightarrow$) Let $\{v_1, \dots, v_n\}$ be a spanning set for $V$. Hence, any $v \in V$ lies in the span of $\{v_1, \dots, v_n\}$, that is, $v \in \operatorname{span}_{\mathbb{F}}\{v_1, \dots, v_n\}$. If, in addition, $\{v_1, \dots, v_n\}$ is linearly independent, then Proposition~\ref{prop:extension-lemma} implies that $\{v, v_1, \dots, v_n\}$ is a linearly dependent set. Thus, $\dim_{\mathbb{F}}(V) = n$ and so $\{v_1, \dots, v_n\}$ is a basis.
+			
+			($\Leftarrow$) Conversely, let $n = \dim_{\mathbb{F}}(V)$ and let $\{v_1, \dots, v_n\}$ be a basis of $V$. Then, for any $v \in V$, the set $\{v, v_1, \dots, v_n\}$ is linearly dependent by the definition of a basis. Finally, Proposition~\ref{prop:extension-lemma} implies that $v \in \operatorname{span}_{\mathbb{F}}\{v_1, \dots, v_n\}$, which concludes the proof.
+		\end{proof}
+		
+		\begin{example}[Standard Basis for Mat$(m,n,\mathbb{F})$]
+			The vector space Mat$(m,n,\mathbb{F})$ is spanned by the matrices $E_{ij}$ having $1$ in the $(i,j)$ position and zero elsewhere. The set of all such matrices is easily shown to be linearly independent. It is the standard basis for Mat$(m,n,\mathbb{F})$ and $\dim_{\mathbb{F}}(\text{Mat}(m,n,\mathbb{F})) = mn$.
+		\end{example}
+		
+		\begin{theorem}[Uniqueness of Representation]
+			\label{thm:unique-repr}
+			Let $V$ be a $\mathbb{F}$-vector space equipped with a basis. Any vector $v \in V$ can be represented uniquely as a linear combination of the given basis vectors with coefficients in $\mathbb{F}$.
+		\end{theorem}
+		
+		\begin{proof}
+			Let $n = \dim_{\mathbb{F}}(V)$ and let $\{v_1, \dots, v_n\}$ be a basis of $V$. By virtue of Proposition~\ref{prop:v-basis}, $V = \operatorname{span}_{\mathbb{F}}\{v_1, \dots, v_n\}$, and thus any $v \in V$ can be written as $v = \sum_{i=1}^{n} \mu_i v_i$ for some $\mu_1, \dots, \mu_n \in \mathbb{F}$. To show uniqueness, let $v = \sum_{i=1}^{n} \mu_i v_i$ and $v = \sum_{i=1}^{n} \nu_i v_i$ be any two representations of $v \in V$ in terms of the basis vectors. Then, equating both expressions, we find that $\sum_{i=1}^{n} (\mu_i - \nu_i) v_i = 0$. Since the basis vectors are linearly independent, all the coefficients must vanish, that is, $\mu_i = \nu_i$ for all $i \in \{1, \dots, n\}$.
+		\end{proof}
+		
+	
+	\subsection{Linear Operators}
+		
+		\begin{definition}[Linear Operator]
+			Let $V$ and $W$ be two $\mathbb{F}$-vector spaces. A linear operator is a mapping $T : V \to W$ with $T(\mu u + \nu v) = \mu T(u) + \nu T(v)$ for all $\mu, \nu \in \mathbb{F}$ and $u, v \in V$. Here, $V$ is called the domain of $T$, $W$ the codomain, and $T(v)$ the image of $v \in V$ under $T$.
+		\end{definition}
+		
+		\noindent Linear operators are also called linear transformations, linear maps or homomorphisms. The set of all linear operators from $V$ to $W$ is denoted by $\operatorname{Hom}_{\mathbb{F}}(V,W)$. For any $T_1, T_2 \in \operatorname{Hom}_{\mathbb{F}}(V,W)$, we define 
+		\[
+			(\mu_1 T_1 + \mu_2 T_2)(v) := \mu_1 T_1(v) + \mu_2 T_2(v) \quad \text{for all} \: v \in V \: \text{and} \: \mu_1, \mu_2 \in \mathbb{F}
+		\]
+		
+		\begin{example}[Transposition as a Linear Operator]
+			Let $T : \text{Mat}(m,n,\mathbb{F}) \to \text{Mat}(n,m,\mathbb{F})$ be given by transposition $T : A \mapsto A^T$. For any $A, B \in \text{Mat}(m,n,\mathbb{F})$ and $a, b \in \mathbb{F}$, we have
+			\(
+				T(aA + bB) = (aA + bB)^T = aA^T + bB^T = aT(A) + bT(B),
+			\)
+			so $T$ is a linear operator.
+		\end{example}
+		
+		\begin{definition}[Kernel and Image]
+			Let $T \in \operatorname{Hom}_{F}(V,W)$. The \textbf{kernel} of $T$ is the set $\ker(T) := \left\{ v \in V | T(v) = 0 \right\} \subseteq V$. The \textbf{image} of T is the set $\operatorname{im}(T) := \left\{ T(v) \in W | v \in V \right\} \subseteq W$.
+		\end{definition}
+		
+		\begin{remark}
+			Let $T : V \to W$ be a linear map between $\mathbb{F}$-vector spaces. Then:
+			\begin{enumerate}[label=\roman*.]
+				\item $\ker(T)=\{v\in V : T(v)=0_W\}$ is a subspace of $V$.
+				\item $\operatorname{im}(T)=\{T(v):v\in V\}\subseteq W$ is a subspace of $W$.
+			\end{enumerate}
+		\end{remark}
+		
+		\begin{theorem}[Rank-Nullity Theorem]
+			\label{thm:rank-nullity}
+			For $T \in \operatorname{Hom}_{\mathbb{F}}(V,W)$, we have
+			\[
+				\dim_{\mathbb{F}}(\operatorname{im}(T)) + \dim_{\mathbb{F}}(\ker(T)) = \dim_{\mathbb{F}}(V).
+			\]
+		\end{theorem}
+		
+		\begin{proof}
+			Set $n := \dim_{\mathbb{F}}(V)$ and $d := \dim_{\mathbb{F}}(\ker(T))$. Let $\{v_1,\dots,v_d\}$ be a basis of $\ker(T)$. Extend this to a basis $\{v_1,\dots,v_d,u_{d+1},\dots,u_n\}$ of $V$.
+			
+			We show that $\{T(u_{d+1}),\dots,T(u_n)\}$ is a basis of $\operatorname{im}(T)$. This suffices, since it gives
+			\[
+				\dim_{\mathbb{F}}(\operatorname{im}(T)) = n-d = \dim_{\mathbb{F}}(V) - \dim_{\mathbb{F}}(\ker(T)).
+			\]
+			
+			\textbf{Linear independence.} Suppose
+			\[
+				0 = \sum_{i=1}^{n-d}\mu_i\, T(u_{d+i}) = T\left(\sum_{i=1}^{n-d}\mu_i u_{d+i}\right).
+			\]
+			Then $\sum_{i=1}^{n-d}\mu_i u_{d+i} \in \ker(T)$, so it can be written in terms of the basis $\{v_1,\dots,v_d\}$:
+			\[
+				\sum_{i=1}^{n-d}\mu_i u_{d+i} = \sum_{j=1}^{d}\nu_j v_j
+				\quad\Longleftrightarrow\quad
+				\sum_{i=1}^{n-d}\mu_i u_{d+i} - \sum_{j=1}^{d}\nu_j v_j = 0.
+			\]
+			Since $\{v_1,\dots,v_d,u_{d+1},\dots,u_n\}$ is a basis of $V$, these vectors are linearly independent. Hence all coefficients $\mu_i$ and $\nu_j$ vanish. In particular $\mu_i=0$ for all $i$, so $\{T(u_{d+1}),\dots,T(u_n)\}$ is linearly independent.
+			
+			\textbf{Spanning.} Let $v\in V$. Write
+			\[
+				v = \sum_{j=1}^{d}\alpha_j v_j + \sum_{i=1}^{n-d}\beta_i u_{d+i}.
+			\]
+			Applying $T$ and using $T(v_j)=0$ for all $j$ (since $v_j\in\ker(T)$):
+			\[
+				T(v) = \sum_{i=1}^{n-d}\beta_i\, T(u_{d+i}).
+			\]
+			So every element of $\operatorname{im}(T)$ is a linear combination of $\{T(u_{d+1}),\dots,T(u_n)\}$; these vectors span $\operatorname{im}(T)$.
+			
+			Hence $\{T(u_{d+1}),\dots,T(u_n)\}$ is a basis of $\operatorname{im}(T)$, completing the proof.
+		\end{proof}
+	
+	
+\section{The LU Decomposition}
+
+	\subsection{Gaussian Elimination}
+	
+	\indent \indent Consider a system of $m$ linear equations in $n$ unknowns $x_1, x_2, \dots, x_n$, written in matrix form $Ax = b$, or explicitly, as:
+
+	\begin{equation*}
+		\begin{bmatrix}
+			A_{11} & A_{12} & \dots & A_{1n} \\
+			A_{21} & A_{22} & \dots & A_{2n} \\
+			\vdots & \vdots & \ddots & \vdots \\
+			A_{m1} & A_{m2} & \dots & A_{mn} \\
+		\end{bmatrix}
+		\begin{bmatrix}
+			x_1 \\
+			x_2 \\
+			\vdots \\
+			x_n \\
+		\end{bmatrix}
+		=
+		\begin{bmatrix}
+			b_1 \\
+			b_2 \\
+			\vdots \\
+			b_n \\
+		\end{bmatrix}
+	\end{equation*}
+	
+	\noindent The key idea of Gaussian elimination is to transform a system of linear equations into a simpler system, while keeping fixed the set of solutions. This leads to the following definition.
+	
+	\begin{definition}[Elementary Row Operations]
+		The following operations are called elementary row operations on a matrix $A$:
+		\begin{enumerate}[label=\roman*.]
+			\item Interchanging two rows.
+			\item Multiplying a row by a non-zero scalar.
+			\item Adding a multiple of one row to another row.
+		\end{enumerate}
+		A matrix $A$ is row-equivalent to another matrix $A'$ if and only if it can be transformed to $A'$ via elementary row operations. 
 	\end{definition}
 	
-	\noindent The element $0_v \in V$ is called the zero-vector, while the element $0 \in \mathbb{F}$ is called the zero-scalar. Further, subtraction in a vector space is defined as $u + (- v) \; \forall \; u, v \in V$. That is, the sum of an element with an inverse element yields a subtraction.
+	\noindent Gaussian elimination is the repeated application of elementary row operations, mainly used to zero out entries below each pivot.
 	
-	\begin{proposition}
-		\label{prop:vspace-properties}
-		Let $V$ be a $\mathbb{F}$-vector space
-		\begin{enumerate}[label=\roman*.]
-			\item For all $\mu \in \mathbb{F}, \, \mu \cdot 0_v = 0_v$ and for all $v \in V, \, 0 \cdot v = 0_v$
-			\item If $\mu \cdot v = 0_v$ and $\mathbb{F} \ni \mu \not= 0$, then $V \ni v = 0_v$.
-			\item For all $v \in V$, $(-1) \cdot v = -v$
-		\end{enumerate}
-	\end{proposition}
+	\begin{definition}[Pivot]
+		The leading/first non-zero entry in a row.
+	\end{definition}
 	
-	\begin{proof} This can be proven using the axioms ($A_0$)-($A_4$) and ($M_1$)-($M_4$).
-		\begin{enumerate}[label=\roman*.]
-			\item From axioms ($A_3$) and ($M_1$), $\mu \cdot 0_V = \mu \cdot (0_V + 0_V) = \mu \cdot 0_V + \mu \cdot 0_V$, and hence, by ($A_3$), $\mu \cdot 0_V = 0_V$. Likewise, from ($M_2$), $0 \cdot v = (0 + 0) \cdot v = 0 \cdot v + 0 \cdot v$, and hence, by ($A_3$), $0 \cdot v = 0_V$.
-			\item As $\mathbb{F} \ni \mu \neq 0$, there exists $\mu^{-1} \in \mathbb{F}$ with $\mu^{-1}\mu = 1$. From axioms ($M_4$) and ($M_3$), $v = 1 \cdot v = (\mu^{-1}\mu) \cdot v = \mu^{-1} \cdot (\mu \cdot v)$. Thus, if $\mu \cdot v = 0_V$ we find that $v = \mu^{-1} \cdot 0_V$, and by (i), $v = 0_V$.
-			\item From (i) and axioms ($M_2$) and ($M_4$), $0_V = 0 \cdot v = (1 + (-1)) \cdot v = 1 \cdot v + (-1) \cdot v = v + (-1) \cdot v$, and hence $(-1) \cdot v = -v$.
-		\end{enumerate}
+	\subsection{The LU Factorisation}
+
+	\noindent It is often convenient to decompose a matrix $A$ into a product of two other matrices. This is called a $LU$ decomposition. We restrict our attention to square, invertible matrices $A \in \text{Mat}(n, \mathbb{F})$, since this is the setting in which the system $Ax = b$ has a unique solution.
+
+	\begin{definition}[LU Decomposition]
+		Let $A \in \text{Mat}(n, \mathbb{F})$. An LU decomposition of $A$ is a factorisation
+		\[
+			A = LU
+		\]
+		where $L \in \text{Mat}(n, \mathbb{F})$ is unit lower triangular (that is, lower triangular with $1$'s on the diagonal) and $U \in \text{Mat}(n, \mathbb{F})$ is upper triangular.
+	\end{definition}
+
+	\begin{definition}[Leading Principal Minor]
+		Let $A \in \text{Mat}(n, \mathbb{F})$. For $k = 1, \dots, n$, the $k$-th leading principal minor of $A$, denoted $\Delta_k$, is the determinant of the $k \times k$ submatrix formed by the first $k$ rows and first $k$ columns of $A$, that is,
+		\[
+			\Delta_k := \det \begin{bmatrix} 
+				A_{11} & \dots & A_{1k} \\ 
+				\vdots & \ddots & \vdots \\ 
+				A_{k1} & \dots & A_{kk} 
+				\end{bmatrix}
+		\]
+	\end{definition}
+
+	\begin{theorem}[Existence and Uniqueness of the LU Decomposition]
+		\label{thm:lu-existence}
+		Let $A \in \text{Mat}(n, \mathbb{F})$ be invertible. Then $A$ admits a unique LU decomposition if and only if every leading principal minor of $A$ is non-zero, that is, $\Delta_k \neq 0$ for all $k = 1, \dots, n$.
+	\end{theorem}
+
+	\begin{proof}
+		A full treatment of this proof is given in \cite{GolubVanLoan2013}.
 	\end{proof}
 	
-	\begin{example}[Matrices]
-		The set of all $\left(m \times n\right)$-matrices with entries in $\mathbb{F}$, Mat$(m,n,\mathbb{F})$, is a $\mathbb{F}$-vector space with the usual definitions of adding matrices and multiplying by constants. For $m = n$ we write Mat$(n, \mathbb{F})$.
+	\begin{example}[A Zero Pivot]
+		\label{ex:zero-pivot}
+		Consider the matrix
+		\[
+			A = \begin{bmatrix} 0 & 1 \\ 1 & 0 \end{bmatrix}
+		\]
+		This matrix is invertible, since $\det(A) = -1 \neq 0$. However, its leading principal minors are
+		\[
+			\Delta_1 = A_{11} = 0, \qquad \Delta_2 = \det(A) = -1,
+		\]
+		and since $\Delta_1 = 0$, by Theorem~\ref{thm:lu-existence} there does not exist a unique LU decomposition for $A$.
 	\end{example}
 	
-	
-	\section{Vector Subspaces}
-	
-	\indent \indent A non-empty subset $U \subseteq V$ of a vector space need not be a vector space itself, since in general it is not closed under vector addition/scalar multiplication. For example, for any $u_1, u_2 \in U$ it is not necessarily true that $u_1 + u_2 \in U$.
-	
-	\begin{definition}[Vector Subspace]
-		Let $V$ be a $\mathbb{F}$-vector space. A vector subspace of $V$ is a non-empty subset $U$ of $V$ such that $U$ is a $\mathbb{F}$-vector space under the same operations as in $V$.
+	\begin{definition}[Permutation Matrix]
+		\label{def:permutation-matrix}
+		A matrix $P \in \mathrm{Mat}(n, \mathbb{F})$ is called a \emph{permutation matrix} if it is obtained from the identity matrix $\mathbb{1}$ by permuting its rows. That is, there exists a permutation $\sigma \in S_n$ such that
+		\[
+			P_{ij} = \begin{cases} 
+						1 & \text{if } j = \sigma(i) \\ 
+						0 & \text{otherwise}
+					\end{cases}
+		\]
+		Equivalently, each row and each column of $P$ contains exactly one entry equal to $1$, with all other entries $0$.
 	\end{definition}
 	
-	\noindent If $U$ is a subset of a vector space $V$, then axioms \ref{ax:A1}, \ref{ax:A2} and \ref{ax:M1}–\ref{ax:M4} automatically hold in $U$ because they hold throughout $V$.
+	\noindent To extend the definition of a $LU$ decomposition to any invertible square matrix, we use the permutation matrix $P$ that acts on $A$. This gives the following extension of Theorem~\ref{thm:lu-existence}.
 	
-	\begin{definition}[Linear Combination]
-		Let $V$ be a $\mathbb{F}$-vector space. A linear combination of the vectors $v_1, \dots, v_m \in V$ is a vector of the form 
+	\begin{theorem}[Existence of the $PA=LU$ Decomposition]
+		\label{thm:pa-lu-existence}
+		Let $A \in \mathrm{Mat}(n, \mathbb{F})$ be invertible. Then there exists a permutation matrix $P \in \mathrm{Mat}(n, \mathbb{F})$ such that $PA$ has all leading principal minors non-zero, and hence, by Theorem~\ref{thm:lu-existence}, a unique decomposition
 		\[
-			v = \sum_{i=1}^{m} \mu_i v_i \in V \qquad \text{with} \quad \mu_1, \dots \mu_m \in \mathbb{F}
+			PA = LU,
 		\]
-	\end{definition}
+		where $L$ is unit lower triangular and $U$ is upper triangular.
+	\end{theorem}
+	\begin{proof}
+		A full treatment of this proof is given in \cite{GolubVanLoan2013}.
+	\end{proof}
 	
-	\begin{proposition}[Subspace Test]
-		Let $V$ be a $\mathbb{F}$-vector space and let $U$ be a non-empty subset of $V$. Then $U$ is a vector subspace of $V$ if and only if 
+	\subsection{Solving the Linear System}
+	We now seek to solve the system of linear equations $Ax=b$ via a $LU$ decomposition.
+	
+	\begin{proposition}[Solving $Ax=b$ via $PA=LU$]
+		\label{prop:solve-pa-lu}
+		Let $A \in \mathrm{Mat}(n,\mathbb{F})$ be invertible, let $P$ be a permutation matrix and $L,U$ unit-lower and upper triangular matrices respectively such that $PA = LU$ (Theorem~\ref{thm:pa-lu-existence}), and let $b \in \mathbb{F}^n$. Then the system
 		\[
-			\mu_1 u_1 + \mu_2 u_2 \in U \qquad \forall \: u_1, u_2 \in U \; \textnormal{and scalars} \; \mu_1, \mu_2 \in \mathbb{F}
+			Ax = b
 		\]
+		has a unique solution $x$, obtained by first solving $Ly = Pb$ for $y$ by forward substitution, then solving $Ux = y$ for $x$ by back substitution.
 	\end{proposition}
 	
-	\noindent Thus, to decide whether $U$ is a vector subspace we do not have to check all the axioms. It is enough to show that $U$ is closed under linear combinations and that it is non-empty. \newline
-	\indent Non-emptiness can be shown by demonstrating that the zero-vector is contained in $U$ (note also \ref{ax:A3}).
-	
-	
-	\section{Linear Independence}
-	
-	\begin{definition}[Span]
-		\label{def:span}
-		Let $V$ be a $\mathbb{F}$-vector space and $v_1, \dots, v_m \in V$. The span of the set $\{v_1, \dots, v_m\}$ is the set of all possible linear combinations of $v_1, \dots, v_m$, that is,
+	\begin{proof}
+		$Ax=b$ is equivalent to
 		\[
-			\operatorname{span}_{\mathbb{F}} \{ v_1, \dots, v_m \} := \left\{ \sum_{i=1}^{m} \mu_i v_i \; \middle| \; \mu_1, \dots, \mu_m \in \mathbb{F} \right\}.
+			PAx = Pb.
 		\]
-		If $V = \operatorname{span}_{\mathbb{F}}\{v_1, \dots, v_m\}$, then $\{v_1, \dots, v_m\}$ is said to be a spanning set for the vector space $V$.
-	\end{definition}
-	
-	\noindent We also note that the zero-vector $0 \in V$ is always contained in the span of any vectors $v_1, \dots, v_m \in V$ since by Proposition~\ref{prop:vspace-properties}, we have $0 = 0v_1 + \dots + 0v_m \in \operatorname{span}_{\mathbb{F}} \{ v_1, \dots, v_m \}$
-	
-	\begin{example}[Span in $\mathbb{R}^3$]
-		In $\mathbb{R}^3$,
+		Substituting $PA = LU$,
 		\[
-		\operatorname{span}_{\mathbb{R}}\left\{ (1,0,0)^T, (0,1,0)^T \right\} = \left\{ (x,y,0)^T \in \mathbb{R}^3 \;\middle|\; x, y \in \mathbb{R} \right\}
+			LUx = Pb.
 		\]
-		describes the $(x,y)$-plane, which is a special instance of a two-dimensional plane in $\mathbb{R}^3$ through the ``origin'' $0 \in \mathbb{R}^3$.
-	\end{example}
-
-	\noindent Now, let $V$ be a $\mathbb{F}$-vector space and let $v_1, \dots, v_m \in V$.
+		Set $y := Ux$. Then the system splits into two triangular systems:
+		\[
+			Ly = Pb, \qquad Ux = y.
+		\]
+		Since $L$ is unit lower triangular, $L_{kk}=1\neq 0$ for all $k$, so $Ly=Pb$ has a unique solution obtained by forward substitution:
+		\[
+			y_k = (Pb)_k - \sum_{j=1}^{k-1} L_{kj} y_j, \qquad k = 1,\dots,n.
+		\]
+		Since $A$ is invertible and $P$ is invertible, $U = L^{-1}PA$ is invertible, hence $U_{kk} \neq 0$ for all $k$ (an upper triangular matrix is invertible if and only if all diagonal entries are non-zero). So $Ux=y$ has a unique solution obtained by back substitution:
+		\[
+			x_k = \frac{1}{U_{kk}}\left(y_k - \sum_{j=k+1}^{n} U_{kj}x_j\right), \qquad k = n,n-1,\dots,1.
+		\]
+		Existence and uniqueness of $y$ and then $x$ give existence and uniqueness of a solution to $Ax=b$.
+	\end{proof}
 	
-	\begin{definition}[Linear Dependence]
-		\label{def:lin-dep}
-		The vectors $v_1, \dots, v_m$ are said to be linearly dependent if and only if at least one of the vectors is a linear combination of the others.
-	\end{definition} 
-	
-	\begin{definition}[Linear Independence]
-		\label{def:lin-indep}
-		The vectors $v_1, \dots, v_m$ are said to be linearly independent if and only if they are not linearly dependent.
-	\end{definition}
-	
-	\begin{remark} 
-		If a set $\{v_1, \dots, v_m\}$ contains the zero-vector $0_V \in V$, then the set is linearly dependent since $\mu \cdot 0_V = 0_V$ for all $\mu \in \mathbb{F}$ by Proposition~\ref{prop:vspace-properties}.
+	\begin{remark}[The $PA=LU$ Solution Method]
+		\label{rem:pa-lu-method}
+		Theorem~\ref{thm:pa-lu-existence} and Proposition~\ref{prop:solve-pa-lu} combine into a single procedure for solving $Ax=b$:
+		\begin{enumerate}[label=\roman*.]
+			\item \textbf{Factor once:} compute $P$, $L$, $U$ such that $PA = LU$ (Theorem~\ref{thm:pa-lu-existence}). This step costs $O(n^3)$ operations.
+			\item \textbf{Solve twice:} for any $b \in \mathbb{F}^n$, solve $Ly = Pb$ by forward substitution, then $Ux = y$ by back substitution (Proposition~\ref{prop:solve-pa-lu}). Each substitution costs $O(n^2)$.
+		\end{enumerate}
+		The point of separating factorisation from substitution is that the $O(n^3)$ cost is paid only once per matrix $A$, while each additional right-hand side $b$ costs only $O(n^2)$. This is the practical motivation for the $PA=LU$ approach over recomputing a full solve (e.g. via Cramer's rule or a fresh elimination) for every new $b$.
 	\end{remark}
 	
-	\begin{proposition}[Extension Lemma]
-		\label{prop:extension-lemma}
-		Let $\{v_1, \dots, v_m\}$ be a linearly independent set of vectors in a $\mathbb{F}$-vector space $V$. Then, for any $v \in V$,
-		$v \in \operatorname{span}_{\mathbb{F}}\{v_1, \dots, v_m\} \iff \{v, v_1, \dots, v_m\}$ is a linearly dependent set of vectors.
-	\end{proposition}
-	
-	\begin{proof}
-		($\Rightarrow$) Suppose $v \in \operatorname{span}_{\mathbb{F}}\{v_1, \dots, v_m\}$. Then $v = \sum_{i=1}^{m} \mu_i v_i $. By Definition~\ref{def:lin-dep}, $v$ is linearly dependent.
+	\begin{example}[Solving $Ax=b$ via $PA=LU$]
+		\label{ex:solve-pa-lu-nontrivial}
+		Let
+		\[
+			A = \begin{bmatrix} 
+					2 & 3 \\ 4 & 7 
+				\end{bmatrix}, 
+				\qquad b = \begin{bmatrix} 
+					5 \\ 11 
+				\end{bmatrix}
+		\]
+		Here $\Delta_1 = 2 \neq 0$ and $\Delta_2 = \det(A) = 14-12 = 2 \neq 0$, so by Theorem~\ref{thm:lu-existence} $A$ admits an LU decomposition directly, with $P = \mathbb{1}$ (no row swap needed).
 		
-		($\Leftarrow$) Suppose $\{v, v_1, \dots, v_m\}$ is linearly dependent.
+		\textbf{Factorisation.} Eliminate the $(2,1)$ entry using multiplier $m_{21} = A_{21}/A_{11} = 4/2 = 2$:
+		\[
+			R_2 \leftarrow R_2 - 2R_1 = 
+			\begin{bmatrix} 
+				4 & 7 
+			\end{bmatrix} 
+			- 2\begin{bmatrix}
+				2 & 3 
+			\end{bmatrix}
+			= \begin{bmatrix} 
+				0 & 1 
+			\end{bmatrix}
+		\]
+		This gives
+		\[
+			L = \begin{bmatrix}
+					1 & 0 \\ 2 & 1 
+				\end{bmatrix}, \qquad 
+				U = 
+				\begin{bmatrix}
+					2 & 3 \\ 0 & 1
+				\end{bmatrix}
+		\]
+		Check: $LU = \begin{bmatrix}
+						1 & 0 \\ 2 & 1
+					\end{bmatrix}
+					\begin{bmatrix}
+						2 & 3 \\ 0 & 1
+					\end{bmatrix} 
+					= \begin{bmatrix}
+						2 & 3 \\ 4 & 7
+					\end{bmatrix} = A$.
+		Correct, and since $P=I$, $PA=LU$ holds trivially.
 		
-		\textit{Case 1:} $v$ is a linear combination of $v_1, \dots, v_m$. Then by the definition of span, $v \in \operatorname{span}_{\mathbb{F}}\{v_1,\dots,v_m\}$.
+		\textbf{Step 1 (forward substitution):} solve $Ly = Pb = b$.
+		\[
+			y_1 = b_1 = 5 \qquad y_2 = b_2 - L_{21}y_1 = 11 - 2(5) = 1
+		\]
+		\begin{center}
+		So $y = \begin{bmatrix} 
+					5 \\ 1 
+				\end{bmatrix}$
+		\end{center}
 
-		\textit{Case 2:} some $v_i$ is a linear combination of the other vectors in $\{v, v_1, \dots, v_m\}$, i.e. $v_i = av + \sum_{j \neq i} b_j v_j$. If the coefficient on $v$ were zero, then $v_i$ becomes just a combination of the other $v_j$'s, contradicting linear independence. Hence that coefficient is non-zero, and solving for $v$ gives $v = a^{-1}v_i - \sum_{j\neq i} a^{-1}b_j v_j$, hence $v \in \operatorname{span}_{\mathbb{F}}\{v_1,\dots,v_m\}$.
-	\end{proof}
+		\textbf{Step 2 (back substitution):} solve $Ux = y$.
+		\[
+			x_2 = \frac{y_2}{U_{22}} = \frac{1}{1} = 1, \qquad x_1 = \frac{1}{U_{11}}\left(y_1 - U_{12}x_2\right) = \frac{1}{2}(5 - 3(1)) = 1
+		\]
+		\begin{center}
+			So $x = \begin{bmatrix}
+				1 \\ 1
+			\end{bmatrix}$
+		\end{center}
 		
-	\noindent By contraposition, we now have that $V \ni v \notin \operatorname{span}_{\mathbb{F}}\{v_1, \dots, v_m\}$ if and only if $\{v, v_1, \dots, v_m\}$ forms a linearly independent set of vectors.
+		\textbf{Check:} $Ax = \begin{bmatrix}
+								2 & 3 \\ 4 & 7 
+							\end{bmatrix}
+							\begin{bmatrix}
+								1 \\ 1
+							\end{bmatrix} = \begin{bmatrix}
+								5 \\ 11\end{bmatrix} = b$.
+		Correct.
+	\end{example}
 	
-	\begin{definition}[Dimension]
-		A $\mathbb{F}$-vector space $V$ is said to be $n$-dimensional if and only if there is a linearly independent set of $n$ vectors and every set consisting of $n+1$ vectors is linearly dependent. $\dim_{\mathbb{F}}(V) = n$ expresses the dimension of $V$. Furthermore, a vector space is said to be of infinite dimension if and only if there is a linearly independent set of vectors of arbitrarily large order.
+	
+	\subsection{Partial Pivoting}
+	
+	\indent \indent The example above shows that the leading-principal-minor condition in Theorem~\ref{thm:lu-existence} can fail in two ways: exactly (Example~\ref{ex:zero-pivot}), or nearly, via a small pivot that leaves the algorithm formally intact but numerically unreliable. \emph{Partial pivoting} is the standard modification to Gaussian elimination that addresses both.
+	
+	\begin{definition}[Partial Pivoting]
+		\label{def:partial-pivoting}
+		Let $A \in \mathrm{Mat}(n,\mathbb{F})$. Set $A^{(1)} := A$, and for $k = 2, \dots, n$, let $A^{(k)}$ denote the matrix obtained after the eliminations and row swaps of steps $1,\dots,k-1$ have been applied. At step $k$ of Gaussian elimination, define the \emph{active column} to be the entries $A^{(k)}_{kk}, A^{(k)}_{k+1,k}, \dots, A^{(k)}_{nk}$, i.e.\ column $k$ restricted to rows $k,\dots,n$. Let
+		\[
+			r := \operatorname*{arg\,max}_{k \le i \le n} |A^{(k)}_{ik}|
+		\]
+		be a row index attaining the largest absolute value in the active column. Partial pivoting swaps row $r$ with row $k$ before proceeding with elimination as normal. Each such swap is a transposition; the composition of these transpositions, in the order performed across steps $k=1,\dots,n-1$, defines the permutation $\sigma \in S_n$ of Definition~\ref{def:permutation-matrix}, and hence the permutation matrix $P$.
 	\end{definition}
 	
+	\noindent With this modification, the substantive question is whether the procedure can always be carried out. That is, whether a valid pivot always exists at every step, for any invertible $A$.
 	
-	\section{Bases of Vector Spaces}
-	
-	\indent \indent We now seek to represent any vector $v \in V$ as a linear combination of a "minimal" set of vectors, also called a basis.
-	
-	\begin{definition}[Basis]
-		Let $V$ be an n-dimensional $\mathbb{F}$-vector space. Any linear independent set of n vectors in $V$ is called a \textit{basis} of $V$.
-	\end{definition}
-	
-	\begin{proposition}
-		\label{prop:v-basis}
-		Let $V$ be a $\mathbb{F}$-vector space. Any linearly independent spanning set for $V$ is a basis of $V$ and vice versa.
+	\begin{proposition}[Partial Pivoting on an Invertible Matrix]
+		\label{prop:partial-pivoting-exists}
+		Let $A \in \mathrm{Mat}(n,\mathbb{F})$ be invertible. Then at every step $k=1,\dots,n-1$ of Gaussian elimination with partial pivoting, the active column contains at least one non-zero entry, so a valid pivot row $r$ always exists.
 	\end{proposition}
-	
 	\begin{proof}
-		($\Rightarrow$) Let $\{v_1, \dots, v_n\}$ be a spanning set for $V$. Hence, any $v \in V$ lies in the span of $\{v_1, \dots, v_n\}$, that is, $v \in \operatorname{span}_{\mathbb{F}}\{v_1, \dots, v_n\}$. If, in addition, $\{v_1, \dots, v_n\}$ is linearly independent, then Proposition~\ref{prop:extension-lemma} implies that $\{v, v_1, \dots, v_n\}$ is a linearly dependent set. Thus, $\dim_{\mathbb{F}}(V) = n$ and so $\{v_1, \dots, v_n\}$ is a basis.
-		
-		($\Leftarrow$) Conversely, let $n = \dim_{\mathbb{F}}(V)$ and let $\{v_1, \dots, v_n\}$ be a basis of $V$. Then, for any $v \in V$, the set $\{v, v_1, \dots, v_n\}$ is linearly dependent by the definition of a basis. Finally, Proposition~\ref{prop:extension-lemma} implies that $v \in \operatorname{span}_{\mathbb{F}}\{v_1, \dots, v_n\}$, which concludes the proof.
+		A full treatment of this proof is given in \cite{GolubVanLoan2013}.
 	\end{proof}
 	
-	\begin{example}[Standard Basis for Mat$(m,n,\mathbb{F})$]
-		The vector space Mat$(m,n,\mathbb{F})$ is spanned by the matrices $E_{ij}$ having $1$ in the $(i,j)$ position and zero elsewhere. The set of all such matrices is easily shown to be linearly independent. It is the standard basis for Mat$(m,n,\mathbb{F})$ and $\dim_{\mathbb{F}}(\text{Mat}(m,n,\mathbb{F})) = mn$.
-	\end{example}
+	\noindent But why should one bother with partial pivoting? After all, Theorem~\ref{thm:pa-lu-existence} already guarantees some valid $P$ exists for any invertible $A$, so why does the specific pivoting strategy matter?
 	
-	\begin{theorem}[Uniqueness of Representation]
-		\label{thm:unique-repr}
-		Let $V$ be a $\mathbb{F}$-vector space equipped with a basis. Any vector $v \in V$ can be represented uniquely as a linear combination of the given basis vectors with coefficients in $\mathbb{F}$.
-	\end{theorem}
-	
+	\begin{proposition}[Bounded Multipliers Under Partial Pivoting]
+		\label{prop:bounded-multipliers}
+		Suppose partial pivoting is used at every step of Gaussian elimination. Then every multiplier satisfies
+		\[
+			|m_{ik}| \le 1 \qquad \text{for all } i > k
+		\]
+	\end{proposition}
 	\begin{proof}
-		Let $n = \dim_{\mathbb{F}}(V)$ and let $\{v_1, \dots, v_n\}$ be a basis of $V$. By virtue of Proposition~\ref{prop:v-basis}, $V = \operatorname{span}_{\mathbb{F}}\{v_1, \dots, v_n\}$, and thus any $v \in V$ can be written as $v = \sum_{i=1}^{n} \mu_i v_i$ for some $\mu_1, \dots, \mu_n \in \mathbb{F}$. To show uniqueness, let $v = \sum_{i=1}^{n} \mu_i v_i$ and $v = \sum_{i=1}^{n} \nu_i v_i$ be any two representations of $v \in V$ in terms of the basis vectors. Then, equating both expressions, we find that $\sum_{i=1}^{n} (\mu_i - \nu_i) v_i = 0$. Since the basis vectors are linearly independent, all the coefficients must vanish, that is, $\mu_i = \nu_i$ for all $i \in \{1, \dots, n\}$.
-	\end{proof}
-	
-	
-	\section{Linear Operators}
-	
-	\begin{definition}[Linear Operator]
-		Let $V$ and $W$ be two $\mathbb{F}$-vector spaces. A linear operator is a mapping $T : V \to W$ with $T(\mu u + \nu v) = \mu T(u) + \nu T(v)$ for all $\mu, \nu \in \mathbb{F}$ and $u, v \in V$. Here, $V$ is called the domain of $T$, $W$ the codomain, and $T(v)$ the image of $v \in V$ under $T$.
-	\end{definition}
-	
-	\noindent Linear operators are also called linear transformations, linear maps or homomorphisms. The set of all linear operators from $V$ to $W$ is denoted by $\operatorname{Hom}_{\mathbb{F}}(V,W)$. For any $T_1, T_2 \in \operatorname{Hom}_{\mathbb{F}}(V,W)$, we define 
-	\[
-		(\mu_1 T_1 + \mu_2 T_2)(v) := \mu_1 T_1(v) + \mu_2 T_2(v) \quad \text{for all} \: v \in V \: \text{and} \: \mu_1, \mu_2 \in \mathbb{F}
-	\]
-	
-	\begin{example}[Transposition as a Linear Operator]
-		Let $T : \text{Mat}(m,n,\mathbb{F}) \to \text{Mat}(n,m,\mathbb{F})$ be given by transposition $T : A \mapsto A^T$. For any $A, B \in \text{Mat}(m,n,\mathbb{F})$ and $a, b \in \mathbb{F}$, we have
-		\(
-			T(aA + bB) = (aA + bB)^T = aA^T + bB^T = aT(A) + bT(B),
-		\)
-		so $T$ is a linear operator.
-	\end{example}
-	
-	\begin{definition}[Kernel and Image]
-		Let $T \in \operatorname{Hom}_{F}(V,W)$. The \textbf{kernel} of $T$ is the set $\ker(T) := \left\{ v \in V | T(v) = 0 \right\} \subseteq V$. The \textbf{image} of T is the set $\operatorname{im}(T) := \left\{ T(v) \in W | v \in V \right\} \subseteq W$.
-	\end{definition}
-	
-	\begin{remark}
-		Let $T : V \to W$ be a linear map between $\mathbb{F}$-vector spaces. Then:
-		\begin{enumerate}[label=\roman*.]
-			\item $\ker(T)=\{v\in V : T(v)=0_W\}$ is a subspace of $V$.
-			\item $\operatorname{im}(T)=\{T(v):v\in V\}\subseteq W$ is a subspace of $W$.
-		\end{enumerate}
-	\end{remark}
-	
-	\begin{theorem}[Rank-Nullity Theorem]
-		\label{thm:rank-nullity}
-		For $T \in \operatorname{Hom}_{\mathbb{F}}(V,W)$, we have
+		Fix step $k$. By construction, the pivot $A^{(k)}_{kk}$ (after the swap) satisfies
 		\[
-			\dim_{\mathbb{F}}(\operatorname{im}(T)) + \dim_{\mathbb{F}}(\ker(T)) = \dim_{\mathbb{F}}(V).
+			|A^{(k)}_{kk}| \ge |A^{(k)}_{ik}| \qquad \text{for all } i = k, \dots, n
 		\]
-	\end{theorem}
-	
-	\begin{proof}
-		Set $n := \dim_{\mathbb{F}}(V)$ and $d := \dim_{\mathbb{F}}(\ker(T))$. Let $\{v_1,\dots,v_d\}$ be a basis of $\ker(T)$. Extend this to a basis $\{v_1,\dots,v_d,u_{d+1},\dots,u_n\}$ of $V$.
-		
-		We show that $\{T(u_{d+1}),\dots,T(u_n)\}$ is a basis of $\operatorname{im}(T)$. This suffices, since it gives
+		since $A^{(k)}_{kk}$ was chosen to be the entry of largest absolute value among the active column. In particular, for every $i > k$,
 		\[
-			\dim_{\mathbb{F}}(\operatorname{im}(T)) = n-d = \dim_{\mathbb{F}}(V) - \dim_{\mathbb{F}}(\ker(T)).
+			|m_{ik}| = \left|\frac{A^{(k)}_{ik}}{A^{(k)}_{kk}}\right| \le 1
 		\]
-		
-		\textbf{Linear independence.} Suppose
-		\[
-			0 = \sum_{i=1}^{n-d}\mu_i\, T(u_{d+i}) = T\left(\sum_{i=1}^{n-d}\mu_i u_{d+i}\right).
-		\]
-		Then $\sum_{i=1}^{n-d}\mu_i u_{d+i} \in \ker(T)$, so it can be written in terms of the basis $\{v_1,\dots,v_d\}$:
-		\[
-			\sum_{i=1}^{n-d}\mu_i u_{d+i} = \sum_{j=1}^{d}\nu_j v_j
-			\quad\Longleftrightarrow\quad
-			\sum_{i=1}^{n-d}\mu_i u_{d+i} - \sum_{j=1}^{d}\nu_j v_j = 0.
-		\]
-		Since $\{v_1,\dots,v_d,u_{d+1},\dots,u_n\}$ is a basis of $V$, these vectors are linearly independent. Hence all coefficients $\mu_i$ and $\nu_j$ vanish. In particular $\mu_i=0$ for all $i$, so $\{T(u_{d+1}),\dots,T(u_n)\}$ is linearly independent.
-		
-		\textbf{Spanning.} Let $v\in V$. Write
-		\[
-			v = \sum_{j=1}^{d}\alpha_j v_j + \sum_{i=1}^{n-d}\beta_i u_{d+i}.
-		\]
-		Applying $T$ and using $T(v_j)=0$ for all $j$ (since $v_j\in\ker(T)$):
-		\[
-			T(v) = \sum_{i=1}^{n-d}\beta_i\, T(u_{d+i}).
-		\]
-		So every element of $\operatorname{im}(T)$ is a linear combination of $\{T(u_{d+1}),\dots,T(u_n)\}$; these vectors span $\operatorname{im}(T)$.
-		
-		Hence $\{T(u_{d+1}),\dots,T(u_n)\}$ is a basis of $\operatorname{im}(T)$, completing the proof.
 	\end{proof}
