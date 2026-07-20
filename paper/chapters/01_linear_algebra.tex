@@ -249,285 +249,646 @@
 	
 	
 \section{The LU Decomposition}
-
+\label{sec:lu-decomposition}
 	\subsection{Gaussian Elimination}
+		
+		\indent \indent Consider a system of $m$ linear equations in $n$ unknowns $x_1, x_2, \dots, x_n$, written in matrix form $Ax = b$, or explicitly, as:
 	
-	\indent \indent Consider a system of $m$ linear equations in $n$ unknowns $x_1, x_2, \dots, x_n$, written in matrix form $Ax = b$, or explicitly, as:
-
-	\begin{equation*}
-		\begin{bmatrix}
-			A_{11} & A_{12} & \dots & A_{1n} \\
-			A_{21} & A_{22} & \dots & A_{2n} \\
-			\vdots & \vdots & \ddots & \vdots \\
-			A_{m1} & A_{m2} & \dots & A_{mn} \\
-		\end{bmatrix}
-		\begin{bmatrix}
-			x_1 \\
-			x_2 \\
-			\vdots \\
-			x_n \\
-		\end{bmatrix}
-		=
-		\begin{bmatrix}
-			b_1 \\
-			b_2 \\
-			\vdots \\
-			b_n \\
-		\end{bmatrix}
-	\end{equation*}
-	
-	\noindent The key idea of Gaussian elimination is to transform a system of linear equations into a simpler system, while keeping fixed the set of solutions. This leads to the following definition.
-	
-	\begin{definition}[Elementary Row Operations]
-		The following operations are called elementary row operations on a matrix $A$:
-		\begin{enumerate}[label=\roman*.]
-			\item Interchanging two rows.
-			\item Multiplying a row by a non-zero scalar.
-			\item Adding a multiple of one row to another row.
-		\end{enumerate}
-		A matrix $A$ is row-equivalent to another matrix $A'$ if and only if it can be transformed to $A'$ via elementary row operations. 
-	\end{definition}
-	
-	\noindent Gaussian elimination is the repeated application of elementary row operations, mainly used to zero out entries below each pivot.
-	
-	\begin{definition}[Pivot]
-		The leading/first non-zero entry in a row.
-	\end{definition}
+		\begin{equation*}
+			\begin{bmatrix}
+				A_{11} & A_{12} & \dots & A_{1n} \\
+				A_{21} & A_{22} & \dots & A_{2n} \\
+				\vdots & \vdots & \ddots & \vdots \\
+				A_{m1} & A_{m2} & \dots & A_{mn} \\
+			\end{bmatrix}
+			\begin{bmatrix}
+				x_1 \\
+				x_2 \\
+				\vdots \\
+				x_n \\
+			\end{bmatrix}
+			=
+			\begin{bmatrix}
+				b_1 \\
+				b_2 \\
+				\vdots \\
+				b_n \\
+			\end{bmatrix}
+		\end{equation*}
+		
+		\noindent The key idea of Gaussian elimination is to transform a system of linear equations into a simpler system, while keeping fixed the set of solutions. This leads to the following definition.
+		
+		\begin{definition}[Elementary Row Operations]
+			The following operations are called elementary row operations on a matrix $A$:
+			\begin{enumerate}[label=\roman*.]
+				\item Interchanging two rows.
+				\item Multiplying a row by a non-zero scalar.
+				\item Adding a multiple of one row to another row.
+			\end{enumerate}
+			A matrix $A$ is row-equivalent to another matrix $A'$ if and only if it can be transformed to $A'$ via elementary row operations. 
+		\end{definition}
+		
+		\noindent Gaussian elimination is the repeated application of elementary row operations, mainly used to zero out entries below each pivot.
+		
+		\begin{definition}[Pivot]
+			The leading/first non-zero entry in a row.
+		\end{definition}
 	
 	\subsection{The LU Factorisation}
-
-	\noindent It is often convenient to decompose a matrix $A$ into a product of two other matrices. This is called a $LU$ decomposition. We restrict our attention to square, invertible matrices $A \in \text{Mat}(n, \mathbb{F})$, since this is the setting in which the system $Ax = b$ has a unique solution.
-
-	\begin{definition}[LU Decomposition]
-		Let $A \in \text{Mat}(n, \mathbb{F})$. An LU decomposition of $A$ is a factorisation
-		\[
-			A = LU
-		\]
-		where $L \in \text{Mat}(n, \mathbb{F})$ is unit lower triangular (that is, lower triangular with $1$'s on the diagonal) and $U \in \text{Mat}(n, \mathbb{F})$ is upper triangular.
-	\end{definition}
-
-	\begin{definition}[Leading Principal Minor]
-		Let $A \in \text{Mat}(n, \mathbb{F})$. For $k = 1, \dots, n$, the $k$-th leading principal minor of $A$, denoted $\Delta_k$, is the determinant of the $k \times k$ submatrix formed by the first $k$ rows and first $k$ columns of $A$, that is,
-		\[
-			\Delta_k := \det \begin{bmatrix} 
-				A_{11} & \dots & A_{1k} \\ 
-				\vdots & \ddots & \vdots \\ 
-				A_{k1} & \dots & A_{kk} 
-				\end{bmatrix}
-		\]
-	\end{definition}
-
-	\begin{theorem}[Existence and Uniqueness of the LU Decomposition]
-		\label{thm:lu-existence}
-		Let $A \in \text{Mat}(n, \mathbb{F})$ be invertible. Then $A$ admits a unique LU decomposition if and only if every leading principal minor of $A$ is non-zero, that is, $\Delta_k \neq 0$ for all $k = 1, \dots, n$.
-	\end{theorem}
-
-	\begin{proof}
-		A full treatment of this proof is given in \cite{GolubVanLoan2013}.
-	\end{proof}
 	
-	\begin{example}[A Zero Pivot]
-		\label{ex:zero-pivot}
-		Consider the matrix
-		\[
-			A = \begin{bmatrix} 0 & 1 \\ 1 & 0 \end{bmatrix}
-		\]
-		This matrix is invertible, since $\det(A) = -1 \neq 0$. However, its leading principal minors are
-		\[
-			\Delta_1 = A_{11} = 0, \qquad \Delta_2 = \det(A) = -1,
-		\]
-		and since $\Delta_1 = 0$, by Theorem~\ref{thm:lu-existence} there does not exist a unique LU decomposition for $A$.
-	\end{example}
+		\noindent It is often convenient to decompose a matrix $A$ into a product of two other matrices. This is called a $LU$ decomposition. We restrict our attention to square, invertible matrices $A \in \text{Mat}(n, \mathbb{F})$, since this is the setting in which the system $Ax = b$ has a unique solution.
 	
-	\begin{definition}[Permutation Matrix]
-		\label{def:permutation-matrix}
-		A matrix $P \in \mathrm{Mat}(n, \mathbb{F})$ is called a \emph{permutation matrix} if it is obtained from the identity matrix $\mathbb{1}$ by permuting its rows. That is, there exists a permutation $\sigma \in S_n$ such that
-		\[
-			P_{ij} = \begin{cases} 
-						1 & \text{if } j = \sigma(i) \\ 
-						0 & \text{otherwise}
-					\end{cases}
-		\]
-		Equivalently, each row and each column of $P$ contains exactly one entry equal to $1$, with all other entries $0$.
-	\end{definition}
+		\begin{definition}[LU Decomposition]
+			Let $A \in \text{Mat}(n, \mathbb{F})$. An LU decomposition of $A$ is a factorisation
+			\[
+				A = LU
+			\]
+			where $L \in \text{Mat}(n, \mathbb{F})$ is unit lower triangular (that is, lower triangular with $1$'s on the diagonal) and $U \in \text{Mat}(n, \mathbb{F})$ is upper triangular.
+		\end{definition}
 	
-	\noindent To extend the definition of a $LU$ decomposition to any invertible square matrix, we use the permutation matrix $P$ that acts on $A$. This gives the following extension of Theorem~\ref{thm:lu-existence}.
+		\begin{definition}[Leading Principal Minor]
+			Let $A \in \text{Mat}(n, \mathbb{F})$. For $k = 1, \dots, n$, the $k$-th leading principal minor of $A$, denoted $\Delta_k$, is the determinant of the $k \times k$ submatrix formed by the first $k$ rows and first $k$ columns of $A$, that is,
+			\[
+				\Delta_k := \det \begin{bmatrix} 
+					A_{11} & \dots & A_{1k} \\ 
+					\vdots & \ddots & \vdots \\ 
+					A_{k1} & \dots & A_{kk} 
+					\end{bmatrix}
+			\]
+		\end{definition}
 	
-	\begin{theorem}[Existence of the $PA=LU$ Decomposition]
-		\label{thm:pa-lu-existence}
-		Let $A \in \mathrm{Mat}(n, \mathbb{F})$ be invertible. Then there exists a permutation matrix $P \in \mathrm{Mat}(n, \mathbb{F})$ such that $PA$ has all leading principal minors non-zero, and hence, by Theorem~\ref{thm:lu-existence}, a unique decomposition
-		\[
-			PA = LU,
-		\]
-		where $L$ is unit lower triangular and $U$ is upper triangular.
-	\end{theorem}
-	\begin{proof}
-		A full treatment of this proof is given in \cite{GolubVanLoan2013}.
-	\end{proof}
+		\begin{theorem}[Existence and Uniqueness of the LU Decomposition]
+			\label{thm:lu-existence}
+			Let $A \in \text{Mat}(n, \mathbb{F})$ be invertible. Then $A$ admits a unique LU decomposition if and only if every leading principal minor of $A$ is non-zero, that is, $\Delta_k \neq 0$ for all $k = 1, \dots, n$.
+		\end{theorem}
+	
+		\begin{proof}
+			A full treatment of this proof is given in \cite{GolubVanLoan2013}.
+		\end{proof}
+		
+		\begin{example}[A Zero Pivot]
+			\label{ex:zero-pivot}
+			Consider the matrix
+			\[
+				A = \begin{bmatrix} 0 & 1 \\ 1 & 0 \end{bmatrix}
+			\]
+			This matrix is invertible, since $\det(A) = -1 \neq 0$. However, its leading principal minors are
+			\[
+				\Delta_1 = A_{11} = 0, \qquad \Delta_2 = \det(A) = -1,
+			\]
+			and since $\Delta_1 = 0$, by Theorem~\ref{thm:lu-existence} there does not exist a unique LU decomposition for $A$.
+		\end{example}
+		
+		\begin{definition}[Permutation Matrix]
+			\label{def:permutation-matrix}
+			A matrix $P \in \mathrm{Mat}(n, \mathbb{F})$ is called a \emph{permutation matrix} if it is obtained from the identity matrix $\mathbb{1}$ by permuting its rows. That is, there exists a permutation $\sigma \in S_n$ such that
+			\[
+				P_{ij} = \begin{cases} 
+							1 & \text{if } j = \sigma(i) \\ 
+							0 & \text{otherwise}
+						\end{cases}
+			\]
+			Equivalently, each row and each column of $P$ contains exactly one entry equal to $1$, with all other entries $0$.
+		\end{definition}
+		
+		\noindent To extend the definition of a $LU$ decomposition to any invertible square matrix, we use the permutation matrix $P$ that acts on $A$. This gives the following extension of Theorem~\ref{thm:lu-existence}.
+		
+		\begin{theorem}[Existence of the $PA=LU$ Decomposition]
+			\label{thm:pa-lu-existence}
+			Let $A \in \mathrm{Mat}(n, \mathbb{F})$ be invertible. Then there exists a permutation matrix $P \in \mathrm{Mat}(n, \mathbb{F})$ such that $PA$ has all leading principal minors non-zero, and hence, by Theorem~\ref{thm:lu-existence}, a unique decomposition
+			\[
+				PA = LU,
+			\]
+			where $L$ is unit lower triangular and $U$ is upper triangular.
+		\end{theorem}
+		\begin{proof}
+			A full treatment of this proof is given in \cite{GolubVanLoan2013}.
+		\end{proof}
 	
 	\subsection{Solving the Linear System}
-	We now seek to solve the system of linear equations $Ax=b$ via a $LU$ decomposition.
-	
-	\begin{proposition}[Solving $Ax=b$ via $PA=LU$]
-		\label{prop:solve-pa-lu}
-		Let $A \in \mathrm{Mat}(n,\mathbb{F})$ be invertible, let $P$ be a permutation matrix and $L,U$ unit-lower and upper triangular matrices respectively such that $PA = LU$ (Theorem~\ref{thm:pa-lu-existence}), and let $b \in \mathbb{F}^n$. Then the system
-		\[
-			Ax = b
-		\]
-		has a unique solution $x$, obtained by first solving $Ly = Pb$ for $y$ by forward substitution, then solving $Ux = y$ for $x$ by back substitution.
-	\end{proposition}
-	
-	\begin{proof}
-		$Ax=b$ is equivalent to
-		\[
-			PAx = Pb.
-		\]
-		Substituting $PA = LU$,
-		\[
-			LUx = Pb.
-		\]
-		Set $y := Ux$. Then the system splits into two triangular systems:
-		\[
-			Ly = Pb, \qquad Ux = y.
-		\]
-		Since $L$ is unit lower triangular, $L_{kk}=1\neq 0$ for all $k$, so $Ly=Pb$ has a unique solution obtained by forward substitution:
-		\[
-			y_k = (Pb)_k - \sum_{j=1}^{k-1} L_{kj} y_j, \qquad k = 1,\dots,n.
-		\]
-		Since $A$ is invertible and $P$ is invertible, $U = L^{-1}PA$ is invertible, hence $U_{kk} \neq 0$ for all $k$ (an upper triangular matrix is invertible if and only if all diagonal entries are non-zero). So $Ux=y$ has a unique solution obtained by back substitution:
-		\[
-			x_k = \frac{1}{U_{kk}}\left(y_k - \sum_{j=k+1}^{n} U_{kj}x_j\right), \qquad k = n,n-1,\dots,1.
-		\]
-		Existence and uniqueness of $y$ and then $x$ give existence and uniqueness of a solution to $Ax=b$.
-	\end{proof}
-	
-	\begin{remark}[The $PA=LU$ Solution Method]
-		\label{rem:pa-lu-method}
-		Theorem~\ref{thm:pa-lu-existence} and Proposition~\ref{prop:solve-pa-lu} combine into a single procedure for solving $Ax=b$:
-		\begin{enumerate}[label=\roman*.]
-			\item \textbf{Factor once:} compute $P$, $L$, $U$ such that $PA = LU$ (Theorem~\ref{thm:pa-lu-existence}). This step costs $O(n^3)$ operations.
-			\item \textbf{Solve twice:} for any $b \in \mathbb{F}^n$, solve $Ly = Pb$ by forward substitution, then $Ux = y$ by back substitution (Proposition~\ref{prop:solve-pa-lu}). Each substitution costs $O(n^2)$.
-		\end{enumerate}
-		The point of separating factorisation from substitution is that the $O(n^3)$ cost is paid only once per matrix $A$, while each additional right-hand side $b$ costs only $O(n^2)$. This is the practical motivation for the $PA=LU$ approach over recomputing a full solve (e.g. via Cramer's rule or a fresh elimination) for every new $b$.
-	\end{remark}
-	
-	\begin{example}[Solving $Ax=b$ via $PA=LU$]
-		\label{ex:solve-pa-lu-nontrivial}
-		Let
-		\[
-			A = \begin{bmatrix} 
-					2 & 3 \\ 4 & 7 
-				\end{bmatrix}, 
-				\qquad b = \begin{bmatrix} 
-					5 \\ 11 
-				\end{bmatrix}
-		\]
-		Here $\Delta_1 = 2 \neq 0$ and $\Delta_2 = \det(A) = 14-12 = 2 \neq 0$, so by Theorem~\ref{thm:lu-existence} $A$ admits an LU decomposition directly, with $P = \mathbb{1}$ (no row swap needed).
+		We now seek to solve the system of linear equations $Ax=b$ via a $LU$ decomposition.
 		
-		\textbf{Factorisation.} Eliminate the $(2,1)$ entry using multiplier $m_{21} = A_{21}/A_{11} = 4/2 = 2$:
-		\[
-			R_2 \leftarrow R_2 - 2R_1 = 
-			\begin{bmatrix} 
-				4 & 7 
-			\end{bmatrix} 
-			- 2\begin{bmatrix}
-				2 & 3 
-			\end{bmatrix}
-			= \begin{bmatrix} 
-				0 & 1 
-			\end{bmatrix}
-		\]
-		This gives
-		\[
-			L = \begin{bmatrix}
-					1 & 0 \\ 2 & 1 
-				\end{bmatrix}, \qquad 
-				U = 
-				\begin{bmatrix}
-					2 & 3 \\ 0 & 1
-				\end{bmatrix}
-		\]
-		Check: $LU = \begin{bmatrix}
-						1 & 0 \\ 2 & 1
+		\begin{proposition}[Solving $Ax=b$ via $PA=LU$]
+			\label{prop:solve-pa-lu}
+			Let $A \in \mathrm{Mat}(n,\mathbb{F})$ be invertible, let $P$ be a permutation matrix and $L,U$ unit-lower and upper triangular matrices respectively such that $PA = LU$ (Theorem~\ref{thm:pa-lu-existence}), and let $b \in \mathbb{F}^n$. Then the system
+			\[
+				Ax = b
+			\]
+			has a unique solution $x$, obtained by first solving $Ly = Pb$ for $y$ by forward substitution, then solving $Ux = y$ for $x$ by back substitution.
+		\end{proposition}
+		
+		\begin{proof}
+			$Ax=b$ is equivalent to
+			\[
+				PAx = Pb.
+			\]
+			Substituting $PA = LU$,
+			\[
+				LUx = Pb.
+			\]
+			Set $y := Ux$. Then the system splits into two triangular systems:
+			\[
+				Ly = Pb, \qquad Ux = y.
+			\]
+			Since $L$ is unit lower triangular, $L_{kk}=1\neq 0$ for all $k$, so $Ly=Pb$ has a unique solution obtained by forward substitution:
+			\[
+				y_k = (Pb)_k - \sum_{j=1}^{k-1} L_{kj} y_j, \qquad k = 1,\dots,n.
+			\]
+			Since $A$ is invertible and $P$ is invertible, $U = L^{-1}PA$ is invertible, hence $U_{kk} \neq 0$ for all $k$ (an upper triangular matrix is invertible if and only if all diagonal entries are non-zero). So $Ux=y$ has a unique solution obtained by back substitution:
+			\[
+				x_k = \frac{1}{U_{kk}}\left(y_k - \sum_{j=k+1}^{n} U_{kj}x_j\right), \qquad k = n,n-1,\dots,1.
+			\]
+			Existence and uniqueness of $y$ and then $x$ give existence and uniqueness of a solution to $Ax=b$.
+		\end{proof}
+		
+		\begin{remark}[The $PA=LU$ Solution Method]
+			\label{rem:pa-lu-method}
+			Theorem~\ref{thm:pa-lu-existence} and Proposition~\ref{prop:solve-pa-lu} combine into a single procedure for solving $Ax=b$:
+			\begin{enumerate}[label=\roman*.]
+				\item \textbf{Factor once:} compute $P$, $L$, $U$ such that $PA = LU$ (Theorem~\ref{thm:pa-lu-existence}). This step costs $O(n^3)$ operations.
+				\item \textbf{Solve twice:} for any $b \in \mathbb{F}^n$, solve $Ly = Pb$ by forward substitution, then $Ux = y$ by back substitution (Proposition~\ref{prop:solve-pa-lu}). Each substitution costs $O(n^2)$.
+			\end{enumerate}
+			The point of separating factorisation from substitution is that the $O(n^3)$ cost is paid only once per matrix $A$, while each additional right-hand side $b$ costs only $O(n^2)$. This is the practical motivation for the $PA=LU$ approach over recomputing a full solve (e.g. via Cramer's rule or a fresh elimination) for every new $b$.
+		\end{remark}
+		
+		\begin{example}[Solving $Ax=b$ via $PA=LU$]
+			\label{ex:solve-pa-lu-nontrivial}
+			Let
+			\[
+				A = \begin{bmatrix} 
+						2 & 3 \\ 4 & 7 
+					\end{bmatrix}, 
+					\qquad b = \begin{bmatrix} 
+						5 \\ 11 
 					\end{bmatrix}
+			\]
+			Here $\Delta_1 = 2 \neq 0$ and $\Delta_2 = \det(A) = 14-12 = 2 \neq 0$, so by Theorem~\ref{thm:lu-existence} $A$ admits an LU decomposition directly, with $P = \mathbb{1}$ (no row swap needed).
+			
+			\textbf{Factorisation.} Eliminate the $(2,1)$ entry using multiplier $m_{21} = A_{21}/A_{11} = 4/2 = 2$:
+			\[
+				R_2 \leftarrow R_2 - 2R_1 = 
+				\begin{bmatrix} 
+					4 & 7 
+				\end{bmatrix} 
+				- 2\begin{bmatrix}
+					2 & 3 
+				\end{bmatrix}
+				= \begin{bmatrix} 
+					0 & 1 
+				\end{bmatrix}
+			\]
+			This gives
+			\[
+				L = \begin{bmatrix}
+						1 & 0 \\ 2 & 1 
+					\end{bmatrix}, \qquad 
+					U = 
 					\begin{bmatrix}
 						2 & 3 \\ 0 & 1
-					\end{bmatrix} 
-					= \begin{bmatrix}
-						2 & 3 \\ 4 & 7
-					\end{bmatrix} = A$.
-		Correct, and since $P=I$, $PA=LU$ holds trivially.
-		
-		\textbf{Step 1 (forward substitution):} solve $Ly = Pb = b$.
-		\[
-			y_1 = b_1 = 5 \qquad y_2 = b_2 - L_{21}y_1 = 11 - 2(5) = 1
-		\]
-		\begin{center}
-		So $y = \begin{bmatrix} 
-					5 \\ 1 
+					\end{bmatrix}
+			\]
+			Check: $LU = \begin{bmatrix}
+							1 & 0 \\ 2 & 1
+						\end{bmatrix}
+						\begin{bmatrix}
+							2 & 3 \\ 0 & 1
+						\end{bmatrix} 
+						= \begin{bmatrix}
+							2 & 3 \\ 4 & 7
+						\end{bmatrix} = A$.
+			Correct, and since $P=I$, $PA=LU$ holds trivially.
+			
+			\textbf{Step 1 (forward substitution):} solve $Ly = Pb = b$.
+			\[
+				y_1 = b_1 = 5 \qquad y_2 = b_2 - L_{21}y_1 = 11 - 2(5) = 1
+			\]
+			\begin{center}
+			So $y = \begin{bmatrix} 
+						5 \\ 1 
+					\end{bmatrix}$
+			\end{center}
+	
+			\textbf{Step 2 (back substitution):} solve $Ux = y$.
+			\[
+				x_2 = \frac{y_2}{U_{22}} = \frac{1}{1} = 1, \qquad 	x_1 = \frac{1}{U_{11}}\left(y_1 - U_{12}x_2\right) = \frac{1}{2}(5 - 3(1)) = 1
+			\]
+			\begin{center}
+				So $x = \begin{bmatrix}
+					1 \\ 1
 				\end{bmatrix}$
-		\end{center}
-
-		\textbf{Step 2 (back substitution):} solve $Ux = y$.
-		\[
-			x_2 = \frac{y_2}{U_{22}} = \frac{1}{1} = 1, \qquad x_1 = \frac{1}{U_{11}}\left(y_1 - U_{12}x_2\right) = \frac{1}{2}(5 - 3(1)) = 1
-		\]
-		\begin{center}
-			So $x = \begin{bmatrix}
-				1 \\ 1
-			\end{bmatrix}$
-		\end{center}
+			\end{center}
+			
+			\textbf{Check:} 
+			$Ax = 
+				\begin{bmatrix}
+					2 & 3 \\ 
+					4 & 7 
+				\end{bmatrix}
+				\begin{bmatrix}
+					1 \\
+					1
+				\end{bmatrix} 
+				= 
+				\begin{bmatrix}
+					5 \\ 
+					11
+				\end{bmatrix} 
+				= b$.
+			Correct.
+		\end{example}
 		
-		\textbf{Check:} $Ax = \begin{bmatrix}
-								2 & 3 \\ 4 & 7 
-							\end{bmatrix}
-							\begin{bmatrix}
-								1 \\ 1
-							\end{bmatrix} = \begin{bmatrix}
-								5 \\ 11\end{bmatrix} = b$.
-		Correct.
-	\end{example}
-	
-	
+		
 	\subsection{Partial Pivoting}
+		
+		\indent \indent The example above shows that the leading-principal-minor condition in Theorem~\ref{thm:lu-existence} can fail in two ways: exactly (Example~\ref{ex:zero-pivot}), or nearly, via a small pivot that leaves the algorithm formally intact but numerically unreliable. \emph{Partial pivoting} is the standard modification to Gaussian elimination that addresses both.
+		
+		\begin{definition}[Partial Pivoting]
+			\label{def:partial-pivoting}
+			Let $A \in \mathrm{Mat}(n,\mathbb{F})$. Set $A^{(1)} := A$, and for $k = 2, \dots, n$, let $A^{(k)}$ denote the matrix obtained after the eliminations and row swaps of steps $1,\dots,k-1$ have been applied. At step $k$ of Gaussian elimination, define the \emph{active column} to be the entries $A^{(k)}_{kk}, A^{(k)}_{k+1,k}, \dots, A^{(k)}_{nk}$, i.e.\ column $k$ restricted to rows $k,\dots,n$. Let
+			\[
+				r := \operatorname*{arg\,max}_{k \le i \le n} 	|A^{(k)}_{ik}|
+			\]
+			be a row index attaining the largest absolute value in the active column. Partial pivoting swaps row $r$ with row $k$ before proceeding with elimination as normal. Each such swap is a transposition; the composition of these transpositions, in the order performed across steps $k=1,\dots,n-1$, defines the permutation $\sigma \in S_n$ of Definition~\ref{def:permutation-matrix}, and hence the permutation matrix $P$.
+		\end{definition}
+		
+		\noindent With this modification, the substantive question is whether the procedure can always be carried out. That is, whether a valid pivot always exists at every step, for any invertible $A$.
+		
+		\begin{proposition}[Partial Pivoting on an Invertible Matrix]
+			\label{prop:partial-pivoting-exists}
+			Let $A \in \mathrm{Mat}(n,\mathbb{F})$ be invertible. Then at every step $k=1,\dots,n-1$ of Gaussian elimination with partial pivoting, the active column contains at least one non-zero entry, so a valid pivot row $r$ always exists.
+		\end{proposition}
+		\begin{proof}
+			A full treatment of this proof is given in \cite{GolubVanLoan2013}.
+		\end{proof}
+		
+		\noindent But why should one bother with partial pivoting? After all, Theorem~\ref{thm:pa-lu-existence} already guarantees some valid $P$ exists for any invertible $A$, so why does the specific pivoting strategy matter?
+		
+		\begin{proposition}[Bounded Multipliers Under Partial Pivoting]
+			\label{prop:bounded-multipliers}
+			Suppose partial pivoting is used at every step of Gaussian elimination. Then every multiplier satisfies
+			\[
+				|m_{ik}| \le 1 \qquad \text{for all } i > k
+			\]
+		\end{proposition}
+		\begin{proof}
+			Fix step $k$. By construction, the pivot $A^{(k)}_{kk}$ (after the swap) satisfies
+			\[
+				|A^{(k)}_{kk}| \ge |A^{(k)}_{ik}| \qquad \text{for 	all } i = k, \dots, n
+			\]
+			since $A^{(k)}_{kk}$ was chosen to be the entry of largest absolute value among the active column. In particular, for every $i > k$,
+			\[
+				|m_{ik}| = 	\left|\frac{A^{(k)}_{ik}}{A^{(k)}_{kk}}\right| \le 1
+			\]
+		\end{proof}
 	
-	\indent \indent The example above shows that the leading-principal-minor condition in Theorem~\ref{thm:lu-existence} can fail in two ways: exactly (Example~\ref{ex:zero-pivot}), or nearly, via a small pivot that leaves the algorithm formally intact but numerically unreliable. \emph{Partial pivoting} is the standard modification to Gaussian elimination that addresses both.
 	
-	\begin{definition}[Partial Pivoting]
-		\label{def:partial-pivoting}
-		Let $A \in \mathrm{Mat}(n,\mathbb{F})$. Set $A^{(1)} := A$, and for $k = 2, \dots, n$, let $A^{(k)}$ denote the matrix obtained after the eliminations and row swaps of steps $1,\dots,k-1$ have been applied. At step $k$ of Gaussian elimination, define the \emph{active column} to be the entries $A^{(k)}_{kk}, A^{(k)}_{k+1,k}, \dots, A^{(k)}_{nk}$, i.e.\ column $k$ restricted to rows $k,\dots,n$. Let
+\section{Inner Product Spaces and QR Decomposition}
+\label{sec:inner-products}
+	
+	\subsection{Inner Product Spaces}
+		
+		\indent \indent In Section~\ref{sec:vector-spaces-and-linear-operators}, we defined a vector space $V$, but a vector space alone carries no notion of length or angle between vectors. Equipping $V$ with such a notion is the first step toward orthogonality, which in turn is the basis of the QR decomposition developed later in this section.
+		
+		Recall the dot product for $\mathbb{R}^n$:
 		\[
-			r := \operatorname*{arg\,max}_{k \le i \le n} |A^{(k)}_{ik}|
+			x \cdot y = \sum_{i=1}^{n} x_i y_i.
 		\]
-		be a row index attaining the largest absolute value in the active column. Partial pivoting swaps row $r$ with row $k$ before proceeding with elimination as normal. Each such swap is a transposition; the composition of these transpositions, in the order performed across steps $k=1,\dots,n-1$, defines the permutation $\sigma \in S_n$ of Definition~\ref{def:permutation-matrix}, and hence the permutation matrix $P$.
-	\end{definition}
+		
+		This immediately gives a notion of length via $\|x\| := \sqrt{x \cdot x}$.
+		
+		The dot product on $\mathbb{R}^n$ has three properties worth isolating: it is symmetric in $x$ and $y$, linear in each argument and positive-definite ($x \cdot x \ge 0$, with equality iff $x=0$). Abstracting exactly these properties to an arbitrary vector space yields the definition of an inner product.
+		
+		Throughout this section, $V$ will denote a real vector space, i.e.\ $\mathbb{F} = \mathbb{R}$.
+		
+		
+		\begin{definition}[Inner Product / Inner Product Space]
+			\label{def:inner-product}
+			An inner product on a real vector space $V$ is a map $\langle \cdot, \cdot \rangle : V \times V \to \mathbb{R}$ that satisfies the following properties for all $u, v, w \in V$ and all $\lambda \in \mathbb{R}$:
+			
+			\begin{enumerate}[label=(IP\arabic*)]
+				\item \label{ax:IP1} \textbf{Symmetry:} $\langle u, v \rangle = \langle v, u \rangle$
+				\item \label{ax:IP2} \textbf{Linearity in the first argument:} $\langle u + v, w \rangle = \langle u, w \rangle + \langle v, w \rangle$ and $\langle \lambda u, v \rangle = \lambda \langle u, v \rangle$
+				\item \label{ax:IP3} \textbf{Positive-definiteness:} $\langle v, v \rangle \ge 0$ for all $v \in V$, with equality $\langle v, v \rangle = 0$ if and only if $v = 0_V$
+			\end{enumerate}
+			
+			The pair $(V, \langle \cdot, \cdot \rangle)$ is called an \textbf{inner product space}.
+			
+		\end{definition}
+		
+		\begin{example}[Trace Inner Product]
+			Consider $\mathrm{Mat}(n, \mathbb{R})$. Equipped with the trace inner product $\langle x | y \rangle := \operatorname{tr}(A^\top B)$ for all $x, y \in \mathrm{Mat}(n, \mathbb{R})$ the pair $(\mathrm{Mat}(n, \mathbb{R}), \langle \cdot, \cdot \rangle)$ is an inner product space.
+		\end{example}
+		
+		\begin{remark}
+			In a real vector space, the properties of symmetry \ref{ax:IP1} and linearity in the first argument \ref{ax:IP2} together imply linearity in the second argument, meaning the inner product is fully bilinear.
+		\end{remark} 
+		
+		
+		\begin{definition}[Induced Norm] 
+			\label{def:induced-norm}
+			Let $(V, \langle \cdot, \cdot \rangle)$ be an inner product space. For each vector $v \in V$, the \textbf{norm} of $v$ induced by the inner product, denoted by $\|v\|$, is defined as:
+			\[
+				\|v\| := \sqrt{\langle v, v \rangle} 
+			\]
+		\end{definition}
+		
+		\begin{remark}
+			\label{rem:bilinearity}
+			Note that the quantity ${\langle v, v \rangle}$ is non-negative from positive-definiteness \ref{ax:IP3}, hence the induced norm is always well-defined in $\mathbb{R}$.
+		\end{remark}
+		
+		\begin{theorem}[Cauchy-Schwarz Inequality] \label{thm:cauchy-schwarz}
+			Let $V$ be an inner product space. For all vectors $u, v \in V$, the following inequality holds:
+			\[ 
+				|\langle u, v \rangle| \le \|u\| \|v\|
+			\]
+			This inequality is an equality if and only if $u, v$ are linearly dependent (Definition~\ref{def:lin-dep}).
+		\end{theorem}
+		
+		\begin{proof}
+			Let $V$ be a real inner product space. We wish to show that for all $u, v \in V$, $|\langle u, v \rangle| \le \|u\| \|v\|$.
+			
+			Suppose $v = 0_V$. $0_V = 0 \cdot u$ (Proposition~\ref{prop:vspace-properties}); combined with symmetry \ref{ax:IP1} and linearity in the first argument \ref{ax:IP2}, $\langle u, 0_V \rangle = \langle u, 0 \cdot u \rangle = \langle 0\cdot u, u\rangle = 0\langle u,u\rangle = 0$. The inequality then becomes:
+			\[ 
+				|\langle u, 0_V \rangle| = 0 \le \|u\| \cdot 0 = 0
+			\]
+			which holds as an equality. Thus, the theorem is true for $v = 0_V$.
+			
+			Now assume $v \neq 0_V$. For any real number $t \in \mathbb{R}$, consider the function:
+			\[ 
+				f(t) = \|u - tv\|^2
+			\]
+			By the definition of the induced norm, $f(t) = \langle u - tv, u - tv \rangle$. By positive-definiteness \ref{ax:IP3}, the inner product of any vector with itself is non-negative, and is zero iff the vector is the zero vector. Therefore, $f(t) \ge 0$ for all $t \in \mathbb{R}$.
+			
+			Using bilinearity (Remark~\ref{rem:bilinearity}), we expand the inner product:
+			
+			\begin{align*}
+				f(t) &= \langle u, u - tv \rangle - t\langle v, u - tv \rangle \\
+				&= \langle u, u \rangle - t\langle u, v \rangle - t\langle v, u \rangle + t^2\langle v, v \rangle \\
+				&= \|u\|^2 - 2t\langle u, v \rangle + t^2\|v\|^2
+			\end{align*}
+			
+			This is a quadratic in $t$ of the form $at^2 + bt + c$, where $a = \|v\|^2$, $b = -2\langle u, v \rangle$, and $c = \|u\|^2$.
+			
+			Since $v \neq 0_V$, positive-definiteness \ref{ax:IP3} gives $\|v\|^2 = \langle v,v\rangle > 0$, so $\|v\|^2 \neq 0$ and division by it below is valid.
+			
+			Following the minimisation route, we choose the specific value of $t$ that minimises $f(t)$. For a quadratic $at^2 + bt + c$, the minimum occurs at $t = -b/(2a)$. Here, we set:
+			\[
+				t_0 = \frac{2\langle u, v \rangle}{2\|v\|^2} = \frac{\langle u, v \rangle}{\|v\|^2}
+			\]
+			Plugging $t_0$ into our inequality $f(t) \ge 0$:
+			
+			\begin{align*}
+				0 &\le \|u\|^2 - 2\left(\frac{\langle u, v \rangle}{\|v\|^2}\right)\langle u, v \rangle + \left(\frac{\langle u, v \rangle}{\|v\|^2}\right)^2 \|v\|^2 \\
+				0 &\le \|u\|^2 - \frac{2\langle u, v \rangle^2}{\|v\|^2} + \frac{\langle u, v \rangle^2}{\|v\|^2} \\
+				0 &\le \|u\|^2 - \frac{\langle u, v \rangle^2}{\|v\|^2}
+			\end{align*}
+			
+			Rearranging terms, we find $\frac{\langle u, v \rangle^2}{\|v\|^2} \le \|u\|^2$, which implies $\langle u, v \rangle^2 \le \|u\|^2 \|v\|^2$. Taking the square root of both sides yields the desired inequality:
+			\[ 
+				|\langle u, v \rangle| \le \|u\| \|v\|
+			\]
+			
+			Equality $|\langle u, v \rangle| = \|u\| \|v\|$ holds iff $f(t_0) = 0$. By positive-definiteness \ref{ax:IP3}, $f(t_0) = \|u - t_0v\|^2 = 0$ iff $u - t_0v = 0_V$. This implies $u = t_0v$, meaning $u$ is a scalar multiple of $v$. Thus, equality holds iff $u$ and $v$ are linearly dependent.
+		\end{proof}
+		
+		\begin{remark}[Angle Between Vectors]
+			\label{rem:angle-between-vectors}
+			Let $V$ be a real inner product space and let $u, v \in V$ with $u, v \neq 0_V$. By Cauchy-Schwarz (Theorem~\ref{thm:cauchy-schwarz}),
+			\[
+				|\langle u, v \rangle| \le \|u\|\|v\|
+			\]
+			Since $u, v \neq 0_V$, positive-definiteness \ref{ax:IP3} gives $\|u\|^2 > 0$ and $\|v\|^2 > 0$, so $\|u\| \neq 0$ and $\|v\| \neq 0$, and we may divide through by $\|u\|\|v\|$:
+			\[
+				\left| \frac{\langle u,v \rangle}{\|u\|\|v\|} \right| \le 1
+			\]
+			That is, the ratio $\frac{\langle u, v \rangle}{\|u\|\|v\|}$ always lies in $[-1,1]$, which is exactly the range of $\cos$. Since $\cos : [0,\pi] \to [-1,1]$ is a bijection, there is a unique $\theta \in [0,\pi]$ satisfying
+			\[
+				\cos\theta = \frac{\langle u,v \rangle}{\|u\|\|v\|}
+			\]
+			This uniqueness is precisely what licenses calling $\theta$ \textbf{the angle between} $u$ and $v$: without Cauchy-Schwarz bounding the ratio into $[-1,1]$ first, no such $\theta$ would be well-defined at all.
+		\end{remark}
+		
+		\begin{proposition}[Triangle Inequality]
+			\label{prop:triangle-inequality}
+			Let $V$ be a real inner product space. Then for all $u, v \in V$
+			\[
+				\|u+v\| \le \|u\| + \|v\|
+			\]
+			(a consequence of Cauchy-Schwarz, Theorem~\ref{thm:cauchy-schwarz}).
+		\end{proposition}
+		
+		\begin{proof}
+			We bound $\|u+v\|^2$ and take square roots at the end.
+			
+			By the definition of the induced norm and bilinearity (Remark~\ref{rem:bilinearity}),
+			\begin{align*}
+				\|u+v\|^2 &= \langle u+v, u+v \rangle \\
+				&= \langle u,u\rangle + \langle u,v\rangle + \langle v,u\rangle + \langle v,v\rangle \\
+				&= \|u\|^2 + 2\langle u,v\rangle + \|v\|^2
+			\end{align*}
+			using symmetry \ref{ax:IP1} to combine $\langle u,v\rangle$ and $\langle v,u\rangle$.
+			
+			By Cauchy-Schwarz (Theorem~\ref{thm:cauchy-schwarz}), $|\langle u,v\rangle| \le \|u\|\|v\|$, and in particular $\langle u,v\rangle \le |\langle u,v\rangle| \le \|u\|\|v\|$. Substituting this bound on the cross term,
+			\[
+				\|u+v\|^2 \le \|u\|^2 + 2\|u\|\|v\| + \|v\|^2
+			\]
+			The right-hand side is a perfect square:
+			\[
+				\|u\|^2 + 2\|u\|\|v\| + \|v\|^2 = \left(\|u\| + \|v\|\right)^2
+			\]
+			So $\|u+v\|^2 \le \left(\|u\|+\|v\|\right)^2$. Since both $\|u+v\|$ and $\|u\|+\|v\|$ are non-negative, taking square roots preserves the inequality:
+			\[
+				\|u+v\| \le \|u\| + \|v\|
+			\]
+		\end{proof}
+		
+	\subsection{Orthogonality}
+		
+		\noindent The angle between vectors (Remark~\ref{rem:angle-between-vectors}) showed that $\theta = \pi/2$ if and only if $\cos\theta = 0$, which by that same remark holds if and only if $\langle u, v \rangle = 0$. This special case (i.e. an inner product of zero) is important enough to warrant its own name.
+		
+		\begin{definition}[Orthogonal Set / Orthonormal Set]
+			\label{def:orthogonal-orthonormal-set}
+			Let $V$ be an inner product space and let $v_1, \dots, v_m \in V$ be a set of vectors.
+			\begin{enumerate}[label=\roman*.]
+				\item The set $\{v_1,\dots,v_m\}$ is \emph{orthogonal} if $\langle v_i, v_j \rangle = 0$ for all $i \neq j$.
+				\item The set $\{v_1,\dots,v_m\}$ is \emph{orthonormal} if it is orthogonal and, in addition, $\|v_i\| = 1$ for all $i$.
+			\end{enumerate}
+		\end{definition}
+		
+		\begin{remark}
+			Both conditions in Definition~\ref{def:orthogonal-orthonormal-set} compress into a single statement using the Kronecker delta: $\{v_1,\dots,v_m\}$ is orthonormal if and only if
+			\[
+				\langle v_i, v_j \rangle = \delta_{ij} \qquad \text{for all } i,j
+			\]
+			where $\delta_{ij} = 1$ if $i=j$ and $0$ otherwise.
+		\end{remark}
+		
+		\begin{proposition}[Orthogonality and Linear Independence]
+			\label{prop:orthogonal-and-linearly-independent}
+			Let $V$ be an inner product space and let $v_1, \dots, v_m \in V$ be an orthogonal set of nonzero vectors. Then $v_1, \dots, v_m$ are linearly independent.
+		\end{proposition}
+		
+		\begin{proof}
+			Suppose
+			\[
+				c_1 v_1 + \cdots + c_m v_m = 0_V
+			\]
+			for some scalars $c_1,\dots,c_m \in \mathbb{R}$. We show $c_i = 0$ for all $i$.
+			
+			Fix $k \in \{1,\dots,m\}$ and take the inner product of both sides with $v_k$:
+			\[
+				\left\langle \sum_{i=1}^{m} c_i v_i,\; v_k \right\rangle = \langle 0_V, v_k \rangle
+			\]
+			By symmetry \ref{ax:IP1} and the same argument as in the Cauchy–Schwarz proof, $\langle 0_V, v_k \rangle = \langle v_k, 0_V \rangle = 0$.
+			
+			Expanding the left-hand side by bilinearity (Remark~\ref{rem:bilinearity}),
+			\[
+				\sum_{i=1}^{m} c_i \langle v_i, v_k \rangle = 0
+			\]
+			Since $\{v_1,\dots,v_m\}$ is orthogonal, $\langle v_i, v_k\rangle = 0$ for all $i \neq k$, so every term with $i\neq k$ vanishes, leaving only the $i=k$ term:
+			\[
+				c_k \langle v_k, v_k \rangle = 0, \qquad \text{i.e.} \qquad c_k \|v_k\|^2 = 0
+			\]
+			Since $v_k \neq 0_V$, positive-definiteness \ref{ax:IP3} gives $\|v_k\|^2 > 0$, so $\|v_k\|^2 \neq 0$, and hence $c_k = 0$.
+			
+			Since $k$ was arbitrary, $c_k = 0$ for every $k=1,\dots,m$, so $v_1,\dots,v_m$ are linearly independent.
+		\end{proof}
+		
+		\begin{theorem}[Gram-Schmidt Process]
+			\label{thm:gram-schmidt}
+			Let $V$ be an inner product space and let $v_1, \dots, v_m \in V$ be linearly independent. Define
+			\[
+				u_1 = v_1, \qquad u_k = v_k - \sum_{j=1}^{k-1} \frac{\langle v_k, u_j \rangle}{\langle u_j, u_j \rangle} u_j \quad \text{for } k = 2, \dots, m
+			\]
+			Then $u_1, \dots, u_m$ is an orthogonal, hence linearly independent (Proposition~\ref{prop:orthogonal-and-linearly-independent}), set of nonzero vectors satisfying
+			\[
+				\operatorname{span}\{u_1, \dots, u_k\} = \operatorname{span}\{v_1, \dots, v_k\} \qquad \text{for every } k = 1, \dots, m
+			\]
+		\end{theorem}
+		
+		\begin{proof}
+			A full treatment of this proof is given in \cite{GolubVanLoan2013}.
+		\end{proof}
+		
+		\begin{corollary}[Existence of an Orthonormal Basis]
+			\label{cor:orthonormal-basis-exists}
+			Let $V$ be a finite-dimensional inner product space with $\dim V = n$. Then, by Theorem~\ref{thm:gram-schmidt}, $V$ has an orthonormal basis.
+		\end{corollary}
+		
+		\begin{proof}
+			Since $\dim V = n$, $V$ has a basis $v_1,\dots,v_n$.
+			
+			Apply Gram-Schmidt (Theorem~\ref{thm:gram-schmidt}) to $v_1,\dots,v_n$, producing an orthogonal set $u_1,\dots,u_n$ with
+			\[
+				\operatorname{span}_{\mathbb{R}}\{u_1,\dots,u_n\} = \operatorname{span}_{\mathbb{R}}\{v_1,\dots,v_n\} = V
+			\]
+			By Theorem~\ref{thm:gram-schmidt}, $u_1,\dots,u_n$ is an orthogonal, linearly independent set of nonzero vectors, with nonzero vectors. Being $n$ linearly independent vectors spanning the $n$-dimensional space $V$, $u_1,\dots,u_n$ form a basis of $V$ by Proposition~\ref{prop:v-basis}.
+			
+			Define $e_k := u_k / \|u_k\|$ for each $k=1,\dots,n$. Since $u_k \neq 0_V$, positive-definiteness \ref{ax:IP3} gives $\|u_k\| \neq 0$, so this division is well-defined.
+			
+			For $i \neq k$, by bilinearity (Remark~\ref{rem:bilinearity}),
+			\[
+				\langle e_i, e_k \rangle = \left\langle \frac{u_i}{\|u_i\|}, \frac{u_k}{\|u_k\|} \right\rangle = \frac{1}{\|u_i\|\|u_k\|}\langle u_i, u_k \rangle = \frac{1}{\|u_i\|\|u_k\|} \cdot 0 = 0
+			\]
+			since $\langle u_i, u_k\rangle = 0$ by orthogonality of $u_1,\dots,u_n$, and dividing zero by the nonzero scalar $\|u_i\|\|u_k\|$ leaves zero.
+			
+			By bilinearity (Remark~\ref{rem:bilinearity}),
+			\[
+				\|\lambda v\|^2 = \langle \lambda v, \lambda v \rangle = \lambda^2 \langle v,v \rangle = \lambda^2 \|v\|^2
+			\]
+			so $\|\lambda v\| = |\lambda| \, \|v\|$ (taking non-negative square roots). Applying this with $\lambda = 1/\|u_k\|$,
+			\[
+				\|e_k\| = \left\| \frac{u_k}{\|u_k\|} \right\| = \frac{1}{\|u_k\|}\|u_k\| = 1
+			\]
+			
+			Hence $\{e_1,\dots,e_n\}$ is orthonormal (Definition~\ref{def:orthogonal-orthonormal-set}). Since scaling each $u_k$ by the nonzero scalar $1/\|u_k\|$ changes neither the span nor linear independence of $\{u_1,\dots,u_n\}$, $\{e_1,\dots,e_n\}$ remains a basis of $V$. Thus $\{e_1,\dots,e_n\}$ is an orthonormal basis of $V$.
+		\end{proof}
+		
+	\subsection{QR Decomposition}
+		
+		\begin{definition}[QR Decomposition]
+			\label{def:qr-decomp}
+			Let $A \in \mathrm{Mat}(n, \mathbb{R})$. A QR decomposition of $A$ is a factorisation $A=QR$ where $Q \in \mathrm{Mat}(n,\mathbb{R})$ has orthonormal columns, that is, the columns $q_1, \dots, q_n$ form an orthonormal set (Definition~\ref{def:orthogonal-orthonormal-set}); and $R \in \mathrm{Mat}(n,\mathbb{R})$ is upper triangular with positive diagonal entries.
+		\end{definition}
+		
+		\begin{theorem}[Existence and Uniqueness of the QR Decomposition]
+			\label{thm:existence-qr-decomp}
+			Let $A \in \mathrm{Mat}(n,\mathbb{R})$ be invertible. Then $A$ admits a QR decomposition $A=QR$ (as in Definition~\ref{def:qr-decomp}), and this decomposition is unique.
+		\end{theorem}
+		
+		\begin{proof}
+			Let $a_1,\dots, a_n$ denote the columns of $A$. Since $A$ is invertible, its columns are linearly independent.
+			
+			Apply Gram-Schmidt (Theorem~\ref{thm:gram-schmidt}) to $a_1,\dots,a_n$ to obtain an orthogonal set $u_1,\dots,u_n$ with
+			\[
+				\operatorname{span}_{\mathbb{R}}\{u_1,\dots,u_k\} = \operatorname{span}_{\mathbb{R}}\{a_1,\dots,a_k\} \qquad \text{for every } k=1, \dots, n
+			\]
+			and normalise $q_k := u_k/\|u_k\|$ for each $k$, exactly as in the construction of Corollary~\ref{cor:orthonormal-basis-exists}; we do not re-derive well-definedness or orthonormality of $q_1,\dots,q_n$ here, having already established both.
+			
+			Let $Q$ be the matrix with columns $q_1,\dots,q_n$. By construction, $Q$ has orthonormal columns.
+			
+			We now construct $R$. Since $\operatorname{span}_{\mathbb{R}}\{q_1,\dots,q_k\} = \operatorname{span}_{\mathbb{R}}\{u_1,\dots,u_k\} = \operatorname{span}_{\mathbb{R}}\{a_1,\dots,a_k\}$ for every $k$, each $a_k$ lies in $\operatorname{span}_{\mathbb{R}}\{q_1,\dots,q_k\}$, so
+			\[
+			a_k = \sum_{j=1}^{k} c_j\, q_j
+			\]
+			for some scalars $c_1,\dots,c_k$. Fix $i \le k$ and take the inner product of both sides with $q_i$. By bilinearity (Remark~\ref{rem:bilinearity}),
+			\[
+				\langle a_k, q_i \rangle = \sum_{j=1}^{k} c_j \langle q_j, q_i \rangle
+			\]
+			Since $\{q_1,\dots,q_n\}$ is orthonormal, $\langle q_j,q_i\rangle = 0$ for $j\neq i$ and $\langle q_i,q_i\rangle = 1$, so every term vanishes except $j=i$, leaving $\langle a_k, q_i\rangle = c_i$. As $i \le k$ was arbitrary, this identifies every coefficient: $c_j = \langle a_k, q_j\rangle$ for all $j=1,\dots,k$, so
+			\[
+				a_k = \sum_{j=1}^{k} \langle a_k, q_j \rangle\, q_j
+			\]
+			Define $R_{jk} := \langle a_k, q_j \rangle$ for $j \le k$ and $R_{jk} := 0$ for $j > k$. This is upper triangular by construction, and the identity above shows precisely that $a_k = \sum_{j=1}^n R_{jk} q_j$ is the $k$-th column of $QR$, so $A = QR$.
+			
+			It remains to show $R_{kk} > 0$ for every $k$. Fix $k$. By the Gram-Schmidt relation,
+			\[
+				u_k = a_k - \sum_{j<k} \operatorname{proj}_{u_j}(a_k)
+			\]
+			so
+			\[
+				a_k = u_k + \sum_{j<k} \operatorname{proj}_{u_j}(a_k)
+			\]
+			Each $\operatorname{proj}_{u_j}(a_k)$ is by definition a scalar multiple of $u_j$, hence of $q_j$. So $a_k = u_k + \sum_{j<k} d_j q_j$ for some scalars $d_j$. Taking the inner product with $q_k$ and using bilinearity (Remark~\ref{rem:bilinearity}),
+			\[
+				\langle a_k, q_k \rangle = \langle u_k, q_k \rangle + \sum_{j<k} d_j \langle q_j, q_k \rangle
+			\]
+			Since $\{q_1,\dots,q_n\}$ is orthonormal, $\langle q_j,q_k\rangle = 0$ for $j \neq k$, so every term in the sum vanishes, leaving
+			\[
+				R_{kk} = \langle a_k, q_k \rangle = \langle u_k, q_k \rangle = \left\langle u_k, \frac{u_k}{\|u_k\|} \right\rangle = \frac{\|u_k\|^2}{\|u_k\|} = \|u_k\|
+			\]
+			Since $u_k \neq 0_V$ (Gram-Schmidt produces nonzero vectors, as used already in Corollary~\ref{cor:orthonormal-basis-exists}), positive-definiteness \ref{ax:IP3} gives $\|u_k\| > 0$. Hence $R_{kk} > 0$ for all $k$. This establishes existence of the decomposition $A = QR$ with the stated properties.
+			
+			To prove uniqueness of the QR decomposition, we rely on \cite{GolubVanLoan2013}.
+		\end{proof}
+		
+		\begin{proposition}[Solving $Ax=b$ via $A=QR$]
+			\label{prop:solve-qr}
+			Let $A \in \mathrm{Mat}(n,\mathbb{R})$ be invertible, let $Q, R$ be such that $A = QR$ (Theorem~\ref{thm:existence-qr-decomp}), and let $b \in \mathbb{R}^n$. Then the system $Ax=b$ has a unique solution $x$, obtained by first computing $c := Q^\top b$, then solving $Rx = c$ for $x$ by back substitution.
+		\end{proposition}
+		
+		\begin{proof}
+			Substituting $A = QR$, the system $Ax=b$ becomes
+			\[
+				QRx = b
+			\]
+			Since $Q$ has orthonormal columns, $Q^\top Q = I$. As $Q$ is square, this left inverse is automatically a two-sided inverse, so $Q$ is invertible with $Q^{-1} = Q^\top$.
+			
+			Multiplying both sides of $QRx=b$ on the left by $Q^\top$,
+			\[
+				Q^\top Q R x = Q^\top b \quad \Longrightarrow \quad Rx = Q^\top b
+			\]
+			Define $c := Q^\top b$. Unlike the analogous step in the $PA=LU$ method, computing $c$ requires no triangular solve — it is a single direct matrix-vector product.
+			
+			It remains to solve $Rx = c$. Since $R$ is upper triangular with $R_{kk} > 0$ for all $k$ (Theorem~\ref{thm:existence-qr-decomp}), $R$ is invertible, so $Rx=c$ has a unique solution obtained by back substitution:
+			\[
+				x_k = \frac{1}{R_{kk}}\left(c_k - \sum_{j=k+1}^{n} R_{kj}x_j\right) \qquad k = n, n-1, \dots, 1
+			\]
+			Existence and uniqueness of $c$ and then $x$ give existence and uniqueness of a solution to $Ax=b$.
+		\end{proof}
+		
+		
+
 	
-	\noindent With this modification, the substantive question is whether the procedure can always be carried out. That is, whether a valid pivot always exists at every step, for any invertible $A$.
 	
-	\begin{proposition}[Partial Pivoting on an Invertible Matrix]
-		\label{prop:partial-pivoting-exists}
-		Let $A \in \mathrm{Mat}(n,\mathbb{F})$ be invertible. Then at every step $k=1,\dots,n-1$ of Gaussian elimination with partial pivoting, the active column contains at least one non-zero entry, so a valid pivot row $r$ always exists.
-	\end{proposition}
-	\begin{proof}
-		A full treatment of this proof is given in \cite{GolubVanLoan2013}.
-	\end{proof}
-	
-	\noindent But why should one bother with partial pivoting? After all, Theorem~\ref{thm:pa-lu-existence} already guarantees some valid $P$ exists for any invertible $A$, so why does the specific pivoting strategy matter?
-	
-	\begin{proposition}[Bounded Multipliers Under Partial Pivoting]
-		\label{prop:bounded-multipliers}
-		Suppose partial pivoting is used at every step of Gaussian elimination. Then every multiplier satisfies
-		\[
-			|m_{ik}| \le 1 \qquad \text{for all } i > k
-		\]
-	\end{proposition}
-	\begin{proof}
-		Fix step $k$. By construction, the pivot $A^{(k)}_{kk}$ (after the swap) satisfies
-		\[
-			|A^{(k)}_{kk}| \ge |A^{(k)}_{ik}| \qquad \text{for all } i = k, \dots, n
-		\]
-		since $A^{(k)}_{kk}$ was chosen to be the entry of largest absolute value among the active column. In particular, for every $i > k$,
-		\[
-			|m_{ik}| = \left|\frac{A^{(k)}_{ik}}{A^{(k)}_{kk}}\right| \le 1
-		\]
-	\end{proof}
