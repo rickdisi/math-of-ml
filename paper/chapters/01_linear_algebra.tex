@@ -341,7 +341,7 @@
 		
 		\begin{definition}[Permutation Matrix]
 			\label{def:permutation-matrix}
-			A matrix $P \in \mathrm{Mat}(n, \mathbb{F})$ is called a \emph{permutation matrix} if it is obtained from the identity matrix $\mathbb{1}$ by permuting its rows. That is, there exists a permutation $\sigma \in S_n$ such that
+			A matrix $P \in \mathrm{Mat}(n, \mathbb{F})$ is called a \emph{permutation matrix} if it is obtained from the identity matrix $\mathbbm{1}$ by permuting its rows. That is, there exists a permutation $\sigma \in S_n$ such that
 			\[
 				P_{ij} = \begin{cases} 
 							1 & \text{if } j = \sigma(i) \\ 
@@ -422,7 +422,7 @@
 						5 \\ 11 
 					\end{bmatrix}
 			\]
-			Here $\Delta_1 = 2 \neq 0$ and $\Delta_2 = \det(A) = 14-12 = 2 \neq 0$, so by Theorem~\ref{thm:lu-existence} $A$ admits an LU decomposition directly, with $P = \mathbb{1}$ (no row swap needed).
+			Here $\Delta_1 = 2 \neq 0$ and $\Delta_2 = \det(A) = 14-12 = 2 \neq 0$, so by Theorem~\ref{thm:lu-existence} $A$ admits an LU decomposition directly, with $P = \mathbbm{1}$ (no row swap needed).
 			
 			\textbf{Factorisation.} Eliminate the $(2,1)$ entry using multiplier $m_{21} = A_{21}/A_{11} = 4/2 = 2$:
 			\[
@@ -542,7 +542,7 @@
 		\end{proof}
 	
 	
-\section{Inner Product Spaces and QR Decomposition}
+\section{Inner Product Spaces and QR Decompositions}
 \label{sec:inner-products}
 	
 	\subsection{Inner Product Spaces}
@@ -716,6 +716,14 @@
 			\end{enumerate}
 		\end{definition}
 		
+		\begin{definition}[Orthogonal Matrix]
+			\label{def:orthogonal-matrix}
+			A matrix $Q \in \mathrm{Mat}(n,\mathbb{R})$ is \emph{orthogonal} if its columns form an orthonormal set (Definition~\ref{def:orthogonal-orthonormal-set}), equivalently, if
+			\[
+			Q^\top Q = \mathbbm{1}.
+			\]
+		\end{definition}
+		
 		\begin{remark}
 			Both conditions in Definition~\ref{def:orthogonal-orthonormal-set} compress into a single statement using the Kronecker delta: $\{v_1,\dots,v_m\}$ is orthonormal if and only if
 			\[
@@ -805,7 +813,7 @@
 			Hence $\{e_1,\dots,e_n\}$ is orthonormal (Definition~\ref{def:orthogonal-orthonormal-set}). Since scaling each $u_k$ by the nonzero scalar $1/\|u_k\|$ changes neither the span nor linear independence of $\{u_1,\dots,u_n\}$, $\{e_1,\dots,e_n\}$ remains a basis of $V$. Thus $\{e_1,\dots,e_n\}$ is an orthonormal basis of $V$.
 		\end{proof}
 		
-	\subsection{QR Decomposition}
+	\subsection{QR Decompositions}
 		
 		\begin{definition}[QR Decomposition]
 			\label{def:qr-decomp}
@@ -887,8 +895,244 @@
 			\]
 			Existence and uniqueness of $c$ and then $x$ give existence and uniqueness of a solution to $Ax=b$.
 		\end{proof}
-		
-		
-
 	
+\section{Eigenvalues and the Spectral Theorem}
+\label{sec:eigenvalues-spectral-theorem}
 	
+	\subsection{Eigenvalues and Eigenvectors}
+	\label{sec:eigenvalues-and-eigenvectors}
+		
+		Let $A \in \mathrm{Mat}(n,\mathbb{R})$.
+		
+		\begin{definition}[Eigenvalue / Eigenvector]
+			\label{def:eigenvalue-eigenvector}
+			A scalar $\lambda \in \mathbb{F}$ is an eigenvalue of $A$ if there exists a nonzero $v \in \mathbb{F}^n$ with $Av = \lambda v$. Such a $v$ is an eigenvector.
+		\end{definition}
+		
+		Rewriting the above statement's equation, we obtain $Av = \lambda v \iff (A - \lambda \mathbbm{1})v = 0$. So $\lambda$ is an eigenvalue iff $A - \lambda\mathbbm{1}$ is singular, i.e.
+		\[
+			\det(A - \lambda\mathbbm{1}) = 0
+		\]
+		
+		\noindent This constitutes the following definition.
+		
+		\begin{definition}[Characteristic Polynomial]
+			\label{def:characteristic-polynomial}
+			The characteristic polynomial of a matrix $A$ is a degree-$n$ polynomial in $\lambda$ of the form
+			\[
+				p_A(\lambda) := \det(A - \lambda\mathbbm{1})
+			\]
+			Its roots are exactly the eigenvalues of $A$.
+		\end{definition}
+		
+		\begin{remark}
+			\label{rem:existence-eigenvalues-complex}
+			Over $\mathbb{C}$, the Fundamental Theorem of Algebra guarantees that $p_A$ has exactly $n$ roots counted with multiplicity, so every $A \in \mathrm{Mat}(n,\mathbb{C})$ has $n$ eigenvalues.
+		\end{remark}
+		
+		\begin{example}[A Matrix with No Real Eigenvalues]
+			\label{ex:no-real-eigenvalues}
+			Consider
+			\[
+				A = \begin{bmatrix} 0 & -1 \\ 1 & 0 \end{bmatrix}
+			\]
+			The characteristic polynomial is
+			\[
+				p_A(\lambda) = \det(A - \lambda \mathbbm{1}) = \det \begin{bmatrix} -\lambda & -1 \\ 1 & -\lambda \end{bmatrix} = (-\lambda)(-\lambda) - (-1)(1) = \lambda^2 + 1
+			\]
+			Setting $p_A(\lambda) = 0$ gives $\lambda^2 = -1$, which has no solution in $\mathbb{R}$; the roots are $\lambda = \pm i$. So $A$ has no real eigenvalues, and hence no real eigenvectors.
+			
+			Geometrically, $A$ is the matrix of a $90°$ rotation (anticlockwise) in $\mathbb{R}^2$. An eigenvector would be a nonzero vector whose direction is unchanged by $A$ but a $90°$ rotation fixes no direction at all: every nonzero vector in $\mathbb{R}^2$ is rotated onto a different line through the origin. This is the geometric content behind the absence of real eigenvalues here.
+		\end{example}
+		
+		This motivates restricting our attention to a class of matrices for which real eigenvalues are guaranteed: symmetric matrices.
+		
+		\begin{definition}[Symmetric Matrix]
+			\label{def:symmetric-matrix}
+			Let $A \in \mathrm{Mat}(n, \mathbb{R})$. A symmetric matrix is a matrix where $A^\top = A$.
+		\end{definition}
+		
+		\begin{definition}[Self Adjoint]
+			\label{def:self-adjoint}
+			Let $A \in \mathrm{Mat}(n,\mathbb{R})$, equipped with the standard inner product. When the following property is true for $A$,
+			\[
+				\langle Av,w\rangle = \langle v,Aw\rangle \quad \text{for all } v,w \in \mathbb{R}^n
+			\]
+			$A$ is called self-adjoint.
+		\end{definition}
+		
+		\begin{remark}
+			\label{rem:self-adjoint}
+			Some remarks to consider about self-adjointness are
+			\begin{enumerate}[label=\roman*.]
+				\item When $A$ is symmetric, the property holds.
+				\item The property in Definition~\ref{def:self-adjoint} can be generalised for any inner product, however for the scope of this paper we define this one case.
+			\end{enumerate}
+		\end{remark}
+		
+		\begin{theorem}[Real Eigenvalues of Symmetric Matrices]
+			\label{thm:symmetric-real-eigenvalues}
+			Let $A \in \mathrm{Mat}(n,\mathbb{R})$ be symmetric, i.e.\ $A = A^\top$. Then every eigenvalue of $A$ is real.
+		\end{theorem}
+		
+		\begin{proof}
+			Let $\lambda \in \mathbb{C}$ be a root of the characteristic polynomial $p_A$, with corresponding eigenvector $v \in \mathbb{C}^n \setminus \{0\}$, so $Av = \lambda v$; a priori $\lambda$ and $v$ may be complex, since we have not yet shown $\lambda$ is real. Let $v^* := \bar{v}^\top$ denote the conjugate transpose of $v$, and consider the scalar $v^*Av$.
+			
+			Using $Av = \lambda v$,
+			\[
+				v^*Av = v^*(\lambda v) = \lambda\, v^*v
+			\]
+			
+			We show $v^*Av$ is real, by showing it equals its own complex conjugate. Conjugating the product $v^*Av = \bar v^\top A v$ entrywise (conjugation of a product preserves the order of the factors, unlike transpose),
+			\[
+				\overline{v^*Av} = \overline{\bar v^\top A v} = \overline{\bar v}^{\,\top} \bar A\, \bar v = v^\top A \bar v
+			\]
+			using $\overline{\bar v} = v$ and, since $A$ is real, $\bar A = A$.
+			
+			Separately, since $v^*Av$ is a $1\times 1$ matrix (a scalar), it equals its own transpose, and transposing a product reverses the order of the factors:
+			\[
+				v^*Av = \bar v^\top A v = \left(\bar v^\top A v\right)^\top = v^\top A^\top \bar v = v^\top A \bar v
+			\]
+			using symmetry, $A^\top = A$, in the last step.
+			
+			Both computations give $v^\top A \bar v$, so $\overline{v^*Av} = v^*Av$, and hence $v^*Av$ is real.
+			
+			Writing $v = (v_1,\dots,v_n)^\top$,
+			\[
+				v^*v = \bar v^\top v = \sum_{i=1}^{n} \bar v_i v_i = \sum_{i=1}^{n} |v_i|^2
+			\]
+			which is real, and strictly positive since $v \neq 0$.
+			
+			From the first computation, $v^*Av = \lambda\, v^*v$. The left-hand side is real, and $v^*v$ is a positive real number; a real number divided by a positive real number is real, so
+			\[
+				\lambda = \frac{v^*Av}{v^*v}
+			\]
+			is real.
+		\end{proof}
+		
+		\begin{remark}[Standard Inner Product]
+			\label{rem:inner-product-as-matmul}
+			On $\mathbb{R}^n$, the standard inner product coincides with the dot product, $\langle x,y \rangle := x \cdot y = \sum_{i=1}^n x_iy_i$, which for column vectors $x,y \in \mathbb{R}^n$ can equivalently be written as the matrix product
+			\[
+				\langle x,y \rangle = x^\top y
+			\]
+			a $1\times 1$ matrix identified with its unique scalar entry. This identification is used throughout the results on symmetric matrices below.
+		\end{remark}
+		
+		\begin{proposition}[Orthogonal Eigenvectors]
+			\label{prop:symmetric-eigenvectors-orthogonal}
+			Let $A \in \mathrm{Mat}(n,\mathbb{R})$ be symmetric, and let $v_1, v_2$ be eigenvectors of $A$ with $Av_1 = \lambda_1 v_1$, $Av_2 = \lambda_2 v_2$, and $\lambda_1 \neq \lambda_2$. Then $\langle v_1, v_2 \rangle = 0$.
+		\end{proposition}
+		
+		\begin{proof}
+			Consider $\langle Av_1, v_2 \rangle$, computed two ways.
+			
+			Using $Av_1 = \lambda_1 v_1$ and linearity in the first argument (Remark~\ref{rem:bilinearity}),
+			\[
+				\langle Av_1, v_2 \rangle = \langle \lambda_1 v_1, v_2 \rangle = \lambda_1 \langle v_1, v_2 \rangle
+			\]
+			
+			Using the matrix-multiplication form of the inner product (Remark~\ref{rem:inner-product-as-matmul}), $\langle Av_1,v_2\rangle = (Av_1)^\top v_2 = v_1^\top A^\top v_2$, and symmetry, $A^\top = A$,
+			\[
+				\langle Av_1, v_2 \rangle = v_1^\top A^\top v_2 = v_1^\top A v_2 = \langle v_1, Av_2 \rangle = \langle v_1, \lambda_2 v_2 \rangle = \lambda_2 \langle v_1, v_2 \rangle
+			\]
+			where the last step uses linearity in the second argument (Remark~\ref{rem:bilinearity}).
+			
+			Equating the two computations,
+			\[
+				\lambda_1 \langle v_1, v_2 \rangle = \lambda_2 \langle v_1, v_2 \rangle \quad\Longrightarrow\quad (\lambda_1 - \lambda_2)\langle v_1, v_2 \rangle = 0
+			\]
+			Since $\lambda_1 \neq \lambda_2$, $\lambda_1 - \lambda_2 \neq 0$, so $\langle v_1, v_2 \rangle = 0$.
+		\end{proof}
+		
+	\subsection{The Spectral Theorem}
+	\label{sec:spectral-theorem}
+		
+		\begin{definition}[Invariant Subspace]
+			\label{def:invariant-subspace}
+			Let $A \in \mathrm{Mat}(n,\mathbb{R})$ and let $U \subseteq \mathbb{R}^n$ be a subspace. $U$ is invariant under $A$ if $Av \in U$ for every $v \in U$.
+		\end{definition}
+		
+		\begin{definition}[Orthogonal Complement]
+			\label{def:orthogonal-complement}
+			Let $U \subseteq \mathbb{R}^n$ be a subspace. The orthogonal complement of $U$ is
+			\[
+				U^\perp := \{ w \in \mathbb{R}^n \mid \langle u, w \rangle = 0 \text{ for all } u \in U \}
+			\]
+		\end{definition}
+		
+		\begin{lemma}[Invariance of the Orthogonal Complement]
+			\label{lem:invariance-complement}
+			Let $A \in \mathrm{Mat}(n,\mathbb{R})$ be symmetric, and let $U \subseteq \mathbb{R}^n$ be a subspace invariant under $A$ (Definition~\ref{def:invariant-subspace}). Then $U^\perp$ (Definition~\ref{def:orthogonal-complement}) is also invariant under $A$.
+		\end{lemma}
+		
+		\begin{proof}
+			Let $A \in \mathrm{Mat}(n,\mathbb{R})$ be symmetric, and let $U \subseteq \mathbb{R}^n$ be a subspace invariant under $A$ (Definition~\ref{def:invariant-subspace}). We wish to show that $U^\perp$ (Definition~\ref{def:orthogonal-complement}) is also invariant under $A$.
+			
+			Let $w \in U^\perp$ be arbitrary. By Definition~\ref{def:orthogonal-complement}, our goal is to show $Aw \in U^\perp$, i.e.\
+			\[
+				\langle u, Aw \rangle = 0 \qquad \text{for every } u \in U
+			\]
+			
+			Fix an arbitrary $u \in U$; we verify the equality above for this $u$.
+			
+			Since $A$ is symmetric, $\langle u, Av \rangle = \langle Au, v \rangle$ for all $u,v \in \mathbb{R}^n$, by Definition~\ref{def:self-adjoint} and Remark~\ref{rem:self-adjoint},
+			\[
+				\langle u, Aw \rangle = \langle Au, w \rangle
+			\]
+			
+			Since $U$ is invariant under $A$ (Definition~\ref{def:invariant-subspace}) and $u \in U$,
+			\[
+			Au \in U
+			\]
+			
+			We now have $\langle Au, w\rangle$ with $Au \in U$ and $w \in U^\perp$. By Definition~\ref{def:orthogonal-complement}, the inner product of any element of $U$ with any element of $U^\perp$ is zero:
+			\[
+				\langle Au, w \rangle = 0
+			\]
+			
+			Chaining these equalities,
+			\[
+				\langle u, Aw \rangle = \langle Au, w \rangle = 0
+			\]
+			Since $u \in U$ was arbitrary, $Aw \in U^\perp$ by Definition~\ref{def:orthogonal-complement}. Since $w \in U^\perp$ was arbitrary, $A$ maps every vector of $U^\perp$ back into $U^\perp$; that is, $U^\perp$ is invariant under $A$ (Definition~\ref{def:invariant-subspace}).
+		\end{proof}
+		
+		\begin{theorem}[Real Spectral Theorem]
+			\label{thm:spectral-theorem}
+			Let $A \in \mathrm{Mat}(n,\mathbb{R})$ be symmetric. Then there exists an orthonormal basis $\{q_1,\dots,q_n\}$ of $\mathbb{R}^n$ consisting of eigenvectors of $A$.
+			
+			Equivalently, there exists an orthogonal matrix $Q \in \mathrm{Mat}(n,\mathbb{R})$ (Definition~\ref{def:orthogonal-matrix}) with columns $q_1,\dots,q_n$, and a diagonal matrix $\Lambda \in \mathrm{Mat}(n,\mathbb{R})$ with the corresponding eigenvalues $\lambda_1,\dots,\lambda_n$ on the diagonal, such that
+			\[
+				A = Q\Lambda Q^\top
+			\]
+		\end{theorem}
+			
+		\begin{proof}
+			We proceed by induction on $n$.
+			
+			\textit{Base case ($n=1$).} Let $A = [\lambda] \in \mathrm{Mat}(1,\mathbb{R})$. Any nonzero $v \in \mathbb{R}$ satisfies $Av = \lambda v$, so $v$ is an eigenvector (Definition~\ref{def:eigenvalue-eigenvector}). Setting $q_1 := v/|v|$ gives an orthonormal basis $\{q_1\}$ of $\mathbb{R}^1$. \\
+			
+			\textit{Inductive step.} Assume every symmetric $(n-1)\times(n-1)$ matrix has an orthonormal eigenbasis. Let $A \in \mathrm{Mat}(n,\mathbb{R})$ be symmetric. \\
+			
+			By Definition~\ref{def:characteristic-polynomial}, $A$'s characteristic polynomial $p_A$ has degree $n$, so by Remark~\ref{rem:existence-eigenvalues-complex} (FTA) it has $n$ roots over $\mathbb{C}$, all real by Theorem~\ref{thm:symmetric-real-eigenvalues}. Let $\lambda_1 \in \mathbb{R}$ be one such root. Since $A - \lambda_1 \mathbbm{1}$ is a real matrix with $\det(A-\lambda_1\mathbbm{1})=0$, it is not invertible, so by the Rank-Nullity Theorem (Theorem~\ref{thm:rank-nullity}) it has nontrivial kernel: there exists nonzero $v \in \mathbb{R}^n$ with $(A-\lambda_1\mathbbm{1})v = 0$, i.e.\ $Av = \lambda_1 v$. Normalising, $q_1 := v/\|v\|$ satisfies $Aq_1 = \lambda_1 q_1$ and $\|q_1\|=1$. \\
+			
+			Let $U := \operatorname{span}_{\mathbb{R}}\{q_1\}$; since $Aq_1=\lambda_1q_1 \in U$, $U$ is invariant under $A$ (Definition~\ref{def:invariant-subspace}), and by Lemma~\ref{lem:invariance-complement}, so is $U^\perp$ (Definition~\ref{def:orthogonal-complement}), with $\dim U^\perp = n-1$. \\
+			
+			By Corollary~\ref{cor:orthonormal-basis-exists}, $U^\perp$ has an orthonormal basis $\{e_1,\dots,e_{n-1}\}$ (Definition~\ref{def:orthogonal-orthonormal-set}). Since $U^\perp$ is invariant, each $Ae_j \in U^\perp$ can be expanded in this basis, defining $A' \in \mathrm{Mat}(n-1,\mathbb{R})$ by
+			\[
+				A'_{ij} := \langle e_i, Ae_j \rangle
+			\]
+			via the same coefficient-extraction argument used to construct $R$ in Theorem~\ref{thm:existence-qr-decomp} (Remark~\ref{rem:inner-product-as-matmul}). Since $A$ is symmetric, $\langle u,Av\rangle=\langle Au,v\rangle$ for all $u,v\in\mathbb{R}^n$ (Definition~\ref{def:self-adjoint}/Remark~\ref{rem:self-adjoint}); restricting to $u=e_i,v=e_j$ gives $A'_{ij} = \langle e_i,Ae_j\rangle = \langle Ae_i,e_j\rangle = \langle e_j,Ae_i\rangle = A'_{ji}$, using symmetry of the inner product \ref{ax:IP1}. So $A'$ is symmetric. \\
+			
+			By the inductive hypothesis, $A'$ has an orthonormal eigenbasis $\{q_2',\dots,q_n'\} \subseteq \mathbb{R}^{n-1}$. The coordinate map $\phi: \mathbb{R}^{n-1} \to U^\perp$, $\phi(v') := \sum_{i=1}^{n-1} v'_i e_i$, is an isometry, since $\{e_1,\dots,e_{n-1}\}$ is itself orthonormal: for $v',w'\in\mathbb{R}^{n-1}$, $\langle \phi(v'),\phi(w')\rangle = \sum_{i,j} v'_iw'_j\langle e_i,e_j\rangle = \sum_i v'_iw'_i = \langle v',w'\rangle$. Hence $\phi$ carries the orthonormal basis $\{q_2',\dots,q_n'\}$ to an orthonormal set $q_2,\dots,q_n \in U^\perp$, with $Aq_k=\lambda_k q_k$, $\lambda_k\in\mathbb{R}$ real by Theorem~\ref{thm:symmetric-real-eigenvalues} applied to $A'$. \\
+			
+			Since $q_1 \in U$ and $q_2,\dots,q_n \in U^\perp$, Definition~\ref{def:orthogonal-complement} gives $\langle q_1,q_k\rangle=0$ for $k\ge2$; together with the orthonormality of $\{q_2,\dots,q_n\}$, $\{q_1,\dots,q_n\}$ is an orthonormal set (Definition~\ref{def:orthogonal-orthonormal-set}) of $n$ eigenvectors of $A$, hence an orthonormal basis of $\mathbb{R}^n$ by Proposition~\ref{prop:orthogonal-and-linearly-independent} and Proposition~\ref{prop:v-basis}. \\
+			
+			Let $Q$ have columns $q_1,\dots,q_n$ (orthogonal, Definition~\ref{def:orthogonal-matrix}) and let $\Lambda := \operatorname{diag}(\lambda_1,\dots,\lambda_n)$. Then $AQ = Q\Lambda$ column-by-column, so, using $Q^{-1}=Q^\top$,
+			\[
+				A = Q\Lambda Q^\top
+			\]
+			
+			This completes the induction.
+		\end{proof}
