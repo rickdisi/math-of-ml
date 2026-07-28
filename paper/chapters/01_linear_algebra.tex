@@ -1,10 +1,16 @@
 \chapter{Linear Algebra}
-
+\label{chap:linear-algebra}
 \section{Vector Spaces and Linear Operators}
 \label{sec:vector-spaces-and-linear-operators}
-
-	\subsection{Vector Spaces}
 	
+	This section introduces vector spaces, subspaces, linear independence and linear operators: the basic algebraic structures on which every subsequent chapter depends. \\
+	
+	Beyond their intrinsic role in linear algebra, these structures are the language in which the rest of this paper is written, as they are essential for the development of the mathematics of neural networks. \\
+	
+	These structures are represented computationally throughout the project by a C++ \texttt{Matrix} class implementing construction, basic operations and transposition, given in Appendix~\ref{app:matrix-class}. Using a header \texttt{.hpp} format this Matrix object will be imported and used as a structure to help implement the computational algorithms necessary to achieve this project's goal.
+	
+	\subsection{Vector Spaces}
+		
 		\indent \indent Let $V$ be a non-empty set with operation '+', called vector addition. Assume that the pair ($V,\, +$) forms an Abelian group i.e. it satisfies the following Axioms:
 		
 		\begin{enumerate}[label=($A_\arabic*$), leftmargin=3em]
@@ -24,7 +30,7 @@
 			\item \label{ax:M3} For all $\mu, \nu \in \mathbb{F}$ and $v \in V$, $\mu \cdot (\nu \cdot v) = (\mu\nu) \cdot v$, that is, scalar multiplication is associative.
 			\item \label{ax:M4} For $1 \in \mathbb{F}$, $1 \cdot v = v$ for all $v \in V$.
 		\end{enumerate}
-	
+		
 		\begin{definition}[Vector Space]
 			A vector space over a field $\mathbb{F}$ is a set $V$ along with addition and scalar multiplication on $V$, i.e. $\left(V, +, \cdot \right)$ that obeys all axioms above. Elements of $V$ are vectors and elements of $\mathbb{F}$ are scalars.
 		\end{definition}
@@ -34,26 +40,29 @@
 		\begin{proposition}
 			\label{prop:vspace-properties}
 			Let $V$ be a $\mathbb{F}$-vector space
+			
 			\begin{enumerate}[label=\roman*.]
 				\item For all $\mu \in \mathbb{F}, \, \mu \cdot 0_v = 0_v$ and for all $v \in V, \, 0 \cdot v = 0_v$
 				\item If $\mu \cdot v = 0_v$ and $\mathbb{F} \ni \mu \not= 0$, then $V \ni v = 0_v$.
 				\item For all $v \in V$, $(-1) \cdot v = -v$
 			\end{enumerate}
+			
 		\end{proposition}
 		
 		\begin{proof} This can be proven using the axioms ($A_0$)-($A_4$) and ($M_1$)-($M_4$).
+			
 			\begin{enumerate}[label=\roman*.]
 				\item From axioms ($A_3$) and ($M_1$), $\mu \cdot 0_V = \mu \cdot (0_V + 0_V) = \mu \cdot 0_V + \mu \cdot 0_V$, and hence, by ($A_3$), $\mu \cdot 0_V = 0_V$. Likewise, from ($M_2$), $0 \cdot v = (0 + 0) \cdot v = 0 \cdot v + 0 \cdot v$, and hence, by ($A_3$), $0 \cdot v = 0_V$.
 				\item As $\mathbb{F} \ni \mu \neq 0$, there exists $\mu^{-1} \in \mathbb{F}$ with $\mu^{-1}\mu = 1$. From axioms ($M_4$) and ($M_3$), $v = 1 \cdot v = (\mu^{-1}\mu) \cdot v = \mu^{-1} \cdot (\mu \cdot v)$. Thus, if $\mu \cdot v = 0_V$ we find that $v = \mu^{-1} \cdot 0_V$, and by (i), $v = 0_V$.
 				\item From (i) and axioms ($M_2$) and ($M_4$), $0_V = 0 \cdot v = (1 + (-1)) \cdot v = 1 \cdot v + (-1) \cdot v = v + (-1) \cdot v$, and hence $(-1) \cdot v = -v$.
 			\end{enumerate}
+			
 		\end{proof}
 		
 		\begin{example}[Matrices]
 			The set of all $\left(m \times n\right)$-matrices with entries in $\mathbb{F}$, Mat$(m,n,\mathbb{F})$, is a $\mathbb{F}$-vector space with the usual definitions of adding matrices and multiplying by constants. For $m = n$ we write Mat$(n, \mathbb{F})$.
 		\end{example}
 		
-	
 	\subsection{Vector Subspaces}
 		
 		\indent \indent A non-empty subset $U \subseteq V$ of a vector space need not be a vector space itself, since in general it is not closed under vector addition/scalar multiplication. For example, for any $u_1, u_2 \in U$ it is not necessarily true that $u_1 + u_2 \in U$.
@@ -81,14 +90,13 @@
 		\noindent Thus, to decide whether $U$ is a vector subspace we do not have to check all the axioms. It is enough to show that $U$ is closed under linear combinations and that it is non-empty. \newline
 		\indent Non-emptiness can be shown by demonstrating that the zero-vector is contained in $U$ (note also \ref{ax:A3}).
 		
-
 	\subsection{Linear Independence}
 		
 		\begin{definition}[Span]
 			\label{def:span}
 			Let $V$ be a $\mathbb{F}$-vector space and $v_1, \dots, v_m \in V$. The span of the set $\{v_1, \dots, v_m\}$ is the set of all possible linear combinations of $v_1, \dots, v_m$, that is,
 			\[
-				\operatorname{span}_{\mathbb{F}} \{ v_1, \dots, v_m \} := \left\{ \sum_{i=1}^{m} \mu_i v_i \; \middle| \; \mu_1, \dots, \mu_m \in \mathbb{F} \right\}.
+				\operatorname{span}_{\mathbb{F}} \{ v_1, \dots, v_m \} := \left\{ \sum_{i=1}^{m} \mu_i v_i \; \middle| \; \mu_1, \dots, \mu_m \in \mathbb{F} \right\}
 			\]
 			If $V = \operatorname{span}_{\mathbb{F}}\{v_1, \dots, v_m\}$, then $\{v_1, \dots, v_m\}$ is said to be a spanning set for the vector space $V$.
 		\end{definition}
@@ -98,11 +106,11 @@
 		\begin{example}[Span in $\mathbb{R}^3$]
 			In $\mathbb{R}^3$,
 			\[
-			\operatorname{span}_{\mathbb{R}}\left\{ (1,0,0)^T, (0,1,0)^T \right\} = \left\{ (x,y,0)^T \in \mathbb{R}^3 \;\middle|\; x, y \in \mathbb{R} \right\}
+				\operatorname{span}_{\mathbb{R}}\left\{ (1,0,0)^T, (0,1,0)^T \right\} = \left\{ (x,y,0)^T \in \mathbb{R}^3 \;\middle|\; x, y \in \mathbb{R} \right\}
 			\]
 			describes the $(x,y)$-plane, which is a special instance of a two-dimensional plane in $\mathbb{R}^3$ through the ``origin'' $0 \in \mathbb{R}^3$.
 		\end{example}
-	
+		
 		\noindent Now, let $V$ be a $\mathbb{F}$-vector space and let $v_1, \dots, v_m \in V$.
 		
 		\begin{definition}[Linear Dependence]
@@ -131,17 +139,16 @@
 			($\Leftarrow$) Suppose $\{v, v_1, \dots, v_m\}$ is linearly dependent.
 			
 			\textit{Case 1:} $v$ is a linear combination of $v_1, \dots, v_m$. Then by the definition of span, $v \in \operatorname{span}_{\mathbb{F}}\{v_1,\dots,v_m\}$.
-	
+			
 			\textit{Case 2:} some $v_i$ is a linear combination of the other vectors in $\{v, v_1, \dots, v_m\}$, i.e. $v_i = av + \sum_{j \neq i} b_j v_j$. If the coefficient on $v$ were zero, then $v_i$ becomes just a combination of the other $v_j$'s, contradicting linear independence. Hence that coefficient is non-zero, and solving for $v$ gives $v = a^{-1}v_i - \sum_{j\neq i} a^{-1}b_j v_j$, hence $v \in \operatorname{span}_{\mathbb{F}}\{v_1,\dots,v_m\}$.
 		\end{proof}
-			
+		
 		\noindent By contraposition, we now have that $V \ni v \notin \operatorname{span}_{\mathbb{F}}\{v_1, \dots, v_m\}$ if and only if $\{v, v_1, \dots, v_m\}$ forms a linearly independent set of vectors.
 		
 		\begin{definition}[Dimension]
 			A $\mathbb{F}$-vector space $V$ is said to be $n$-dimensional if and only if there is a linearly independent set of $n$ vectors and every set consisting of $n+1$ vectors is linearly dependent. $\dim_{\mathbb{F}}(V) = n$ expresses the dimension of $V$. Furthermore, a vector space is said to be of infinite dimension if and only if there is a linearly independent set of vectors of arbitrarily large order.
 		\end{definition}
 		
-	
 	\subsection{Bases of Vector Spaces}
 		
 		\indent \indent We now seek to represent any vector $v \in V$ as a linear combination of a "minimal" set of vectors, also called a basis.
@@ -174,7 +181,6 @@
 			Let $n = \dim_{\mathbb{F}}(V)$ and let $\{v_1, \dots, v_n\}$ be a basis of $V$. By virtue of Proposition~\ref{prop:v-basis}, $V = \operatorname{span}_{\mathbb{F}}\{v_1, \dots, v_n\}$, and thus any $v \in V$ can be written as $v = \sum_{i=1}^{n} \mu_i v_i$ for some $\mu_1, \dots, \mu_n \in \mathbb{F}$. To show uniqueness, let $v = \sum_{i=1}^{n} \mu_i v_i$ and $v = \sum_{i=1}^{n} \nu_i v_i$ be any two representations of $v \in V$ in terms of the basis vectors. Then, equating both expressions, we find that $\sum_{i=1}^{n} (\mu_i - \nu_i) v_i = 0$. Since the basis vectors are linearly independent, all the coefficients must vanish, that is, $\mu_i = \nu_i$ for all $i \in \{1, \dots, n\}$.
 		\end{proof}
 		
-	
 	\subsection{Linear Operators}
 		
 		\begin{definition}[Linear Operator]
@@ -210,7 +216,7 @@
 			\label{thm:rank-nullity}
 			For $T \in \operatorname{Hom}_{\mathbb{F}}(V,W)$, we have
 			\[
-				\dim_{\mathbb{F}}(\operatorname{im}(T)) + \dim_{\mathbb{F}}(\ker(T)) = \dim_{\mathbb{F}}(V).
+				\dim_{\mathbb{F}}(\operatorname{im}(T)) + \dim_{\mathbb{F}}(\ker(T)) = \dim_{\mathbb{F}}(V)
 			\]
 		\end{theorem}
 		
@@ -219,37 +225,43 @@
 			
 			We show that $\{T(u_{d+1}),\dots,T(u_n)\}$ is a basis of $\operatorname{im}(T)$. This suffices, since it gives
 			\[
-				\dim_{\mathbb{F}}(\operatorname{im}(T)) = n-d = \dim_{\mathbb{F}}(V) - \dim_{\mathbb{F}}(\ker(T)).
+				\dim_{\mathbb{F}}(\operatorname{im}(T)) = n-d = \dim_{\mathbb{F}}(V) - \dim_{\mathbb{F}}(\ker(T))
 			\]
 			
 			\textbf{Linear independence.} Suppose
 			\[
-				0 = \sum_{i=1}^{n-d}\mu_i\, T(u_{d+i}) = T\left(\sum_{i=1}^{n-d}\mu_i u_{d+i}\right).
+				0 = \sum_{i=1}^{n-d}\mu_i\, T(u_{d+i}) = T\left(\sum_{i=1}^{n-d}\mu_i u_{d+i}\right)
 			\]
 			Then $\sum_{i=1}^{n-d}\mu_i u_{d+i} \in \ker(T)$, so it can be written in terms of the basis $\{v_1,\dots,v_d\}$:
 			\[
 				\sum_{i=1}^{n-d}\mu_i u_{d+i} = \sum_{j=1}^{d}\nu_j v_j
 				\quad\Longleftrightarrow\quad
-				\sum_{i=1}^{n-d}\mu_i u_{d+i} - \sum_{j=1}^{d}\nu_j v_j = 0.
+				\sum_{i=1}^{n-d}\mu_i u_{d+i} - \sum_{j=1}^{d}\nu_j v_j = 0
 			\]
 			Since $\{v_1,\dots,v_d,u_{d+1},\dots,u_n\}$ is a basis of $V$, these vectors are linearly independent. Hence all coefficients $\mu_i$ and $\nu_j$ vanish. In particular $\mu_i=0$ for all $i$, so $\{T(u_{d+1}),\dots,T(u_n)\}$ is linearly independent.
 			
 			\textbf{Spanning.} Let $v\in V$. Write
 			\[
-				v = \sum_{j=1}^{d}\alpha_j v_j + \sum_{i=1}^{n-d}\beta_i u_{d+i}.
+				v = \sum_{j=1}^{d}\alpha_j v_j + \sum_{i=1}^{n-d}\beta_i u_{d+i}
 			\]
 			Applying $T$ and using $T(v_j)=0$ for all $j$ (since $v_j\in\ker(T)$):
 			\[
-				T(v) = \sum_{i=1}^{n-d}\beta_i\, T(u_{d+i}).
+				T(v) = \sum_{i=1}^{n-d}\beta_i\, T(u_{d+i})
 			\]
 			So every element of $\operatorname{im}(T)$ is a linear combination of $\{T(u_{d+1}),\dots,T(u_n)\}$; these vectors span $\operatorname{im}(T)$.
 			
 			Hence $\{T(u_{d+1}),\dots,T(u_n)\}$ is a basis of $\operatorname{im}(T)$, completing the proof.
 		\end{proof}
 	
-	
 \section{The LU Decomposition}
 \label{sec:lu-decomposition}
+	
+	This section develops the LU decomposition, a factorisation of a matrix into lower and upper-triangular components, used to solve linear systems $Ax = b$ efficiently once computed. \\
+	
+	Beyond its role in solving linear systems directly, this factorisation demonstrates a decompose once, then solve cheaply and repeatedly pattern. This is the same pattern that motivates the QR decomposition. \\
+	
+	The algorithm is implemented from scratch in C++ as \texttt{lu\_solver.cpp} (Appendix~\ref{app:lu-solver}), including partial pivoting for numerical stability.
+	
 	\subsection{Gaussian Elimination}
 		
 		\indent \indent Consider a system of $m$ linear equations in $n$ unknowns $x_1, x_2, \dots, x_n$, written in matrix form $Ax = b$, or explicitly, as:
@@ -293,19 +305,20 @@
 		\begin{definition}[Pivot]
 			The leading/first non-zero entry in a row.
 		\end{definition}
-	
+		
 	\subsection{The LU Factorisation}
-	
+		
 		\noindent It is often convenient to decompose a matrix $A$ into a product of two other matrices. This is called a $LU$ decomposition. We restrict our attention to square, invertible matrices $A \in \text{Mat}(n, \mathbb{F})$, since this is the setting in which the system $Ax = b$ has a unique solution.
-	
+		
 		\begin{definition}[LU Decomposition]
+			\label{def:lu-decomposition}
 			Let $A \in \text{Mat}(n, \mathbb{F})$. An LU decomposition of $A$ is a factorisation
 			\[
 				A = LU
 			\]
 			where $L \in \text{Mat}(n, \mathbb{F})$ is unit lower triangular (that is, lower triangular with $1$'s on the diagonal) and $U \in \text{Mat}(n, \mathbb{F})$ is upper triangular.
 		\end{definition}
-	
+		
 		\begin{definition}[Leading Principal Minor]
 			Let $A \in \text{Mat}(n, \mathbb{F})$. For $k = 1, \dots, n$, the $k$-th leading principal minor of $A$, denoted $\Delta_k$, is the determinant of the $k \times k$ submatrix formed by the first $k$ rows and first $k$ columns of $A$, that is,
 			\[
@@ -316,12 +329,12 @@
 					\end{bmatrix}
 			\]
 		\end{definition}
-	
+		
 		\begin{theorem}[Existence and Uniqueness of the LU Decomposition]
 			\label{thm:lu-existence}
 			Let $A \in \text{Mat}(n, \mathbb{F})$ be invertible. Then $A$ admits a unique LU decomposition if and only if every leading principal minor of $A$ is non-zero, that is, $\Delta_k \neq 0$ for all $k = 1, \dots, n$.
 		\end{theorem}
-	
+		
 		\begin{proof}
 			A full treatment of this proof is given in \cite{GolubVanLoan2013}.
 		\end{proof}
@@ -364,7 +377,7 @@
 		\begin{proof}
 			A full treatment of this proof is given in \cite{GolubVanLoan2013}.
 		\end{proof}
-	
+		
 	\subsection{Solving the Linear System}
 		We now seek to solve the system of linear equations $Ax=b$ via a $LU$ decomposition.
 		
@@ -380,23 +393,23 @@
 		\begin{proof}
 			$Ax=b$ is equivalent to
 			\[
-				PAx = Pb.
+				PAx = Pb
 			\]
 			Substituting $PA = LU$,
 			\[
-				LUx = Pb.
+				LUx = Pb
 			\]
 			Set $y := Ux$. Then the system splits into two triangular systems:
 			\[
-				Ly = Pb, \qquad Ux = y.
+				Ly = Pb \qquad Ux = y
 			\]
 			Since $L$ is unit lower triangular, $L_{kk}=1\neq 0$ for all $k$, so $Ly=Pb$ has a unique solution obtained by forward substitution:
 			\[
-				y_k = (Pb)_k - \sum_{j=1}^{k-1} L_{kj} y_j, \qquad k = 1,\dots,n.
+				y_k = (Pb)_k - \sum_{j=1}^{k-1} L_{kj} y_j \qquad k = 1,\dots,n
 			\]
 			Since $A$ is invertible and $P$ is invertible, $U = L^{-1}PA$ is invertible, hence $U_{kk} \neq 0$ for all $k$ (an upper triangular matrix is invertible if and only if all diagonal entries are non-zero). So $Ux=y$ has a unique solution obtained by back substitution:
 			\[
-				x_k = \frac{1}{U_{kk}}\left(y_k - \sum_{j=k+1}^{n} U_{kj}x_j\right), \qquad k = n,n-1,\dots,1.
+				x_k = \frac{1}{U_{kk}}\left(y_k - \sum_{j=k+1}^{n} U_{kj}x_j\right) \qquad k = n,n-1,\dots,1
 			\]
 			Existence and uniqueness of $y$ and then $x$ give existence and uniqueness of a solution to $Ax=b$.
 		\end{proof}
@@ -404,10 +417,12 @@
 		\begin{remark}[The $PA=LU$ Solution Method]
 			\label{rem:pa-lu-method}
 			Theorem~\ref{thm:pa-lu-existence} and Proposition~\ref{prop:solve-pa-lu} combine into a single procedure for solving $Ax=b$:
+			
 			\begin{enumerate}[label=\roman*.]
 				\item \textbf{Factor once:} compute $P$, $L$, $U$ such that $PA = LU$ (Theorem~\ref{thm:pa-lu-existence}). This step costs $O(n^3)$ operations.
 				\item \textbf{Solve twice:} for any $b \in \mathbb{F}^n$, solve $Ly = Pb$ by forward substitution, then $Ux = y$ by back substitution (Proposition~\ref{prop:solve-pa-lu}). Each substitution costs $O(n^2)$.
 			\end{enumerate}
+			
 			The point of separating factorisation from substitution is that the $O(n^3)$ cost is paid only once per matrix $A$, while each additional right-hand side $b$ costs only $O(n^2)$. This is the practical motivation for the $PA=LU$ approach over recomputing a full solve (e.g. via Cramer's rule or a fresh elimination) for every new $b$.
 		\end{remark}
 		
@@ -415,88 +430,50 @@
 			\label{ex:solve-pa-lu-nontrivial}
 			Let
 			\[
-				A = \begin{bmatrix} 
-						2 & 3 \\ 4 & 7 
-					\end{bmatrix}, 
-					\qquad b = \begin{bmatrix} 
-						5 \\ 11 
-					\end{bmatrix}
+				A = \begin{bmatrix} 1 & 1 \\ 2 & 3 \end{bmatrix} \qquad
+				b = \begin{bmatrix} 2 \\ 5 \end{bmatrix}
 			\]
-			Here $\Delta_1 = 2 \neq 0$ and $\Delta_2 = \det(A) = 14-12 = 2 \neq 0$, so by Theorem~\ref{thm:lu-existence} $A$ admits an LU decomposition directly, with $P = \mathbbm{1}$ (no row swap needed).
+			Here $\Delta_1 = 1 \neq 0$, so $A$ admits an LU decomposition directly by Theorem~\ref{thm:lu-existence}, with $P = \mathbbm{1}$. But applying partial pivoting (Definition~\ref{def:partial-pivoting}) at step $k=1$: the active column is $(A_{11},A_{21})=(1,2)$, and $|A_{21}|=2 > |A_{11}|=1$, so the pivot row is $r=2$, and rows $1$ and $2$ are swapped before elimination proceeds.
 			
-			\textbf{Factorisation.} Eliminate the $(2,1)$ entry using multiplier $m_{21} = A_{21}/A_{11} = 4/2 = 2$:
+			\textbf{Permutation.} Swapping rows $1$ and $2$ gives $\mathrm{perm} = [2,1]$ (in the $1$-indexed convention of \S1.2) and
 			\[
-				R_2 \leftarrow R_2 - 2R_1 = 
-				\begin{bmatrix} 
-					4 & 7 
-				\end{bmatrix} 
-				- 2\begin{bmatrix}
-					2 & 3 
-				\end{bmatrix}
-				= \begin{bmatrix} 
-					0 & 1 
-				\end{bmatrix}
+				P = \begin{bmatrix} 0 & 1 \\ 1 & 0 \end{bmatrix} \qquad 
+				PA = \begin{bmatrix} 2 & 3 \\ 1 & 1 \end{bmatrix}
+			\]
+			
+			\textbf{Factorisation.} Eliminate the $(2,1)$ entry of $PA$ using multiplier $m_{21} = 1/2$:
+			\[
+				R_2 \leftarrow R_2 - \tfrac12 R_1 = 
+				\begin{bmatrix} 1 & 1 \end{bmatrix} - \tfrac12 \begin{bmatrix} 2 & 3 \end{bmatrix} = 
+				\begin{bmatrix} 0 & -\tfrac12 \end{bmatrix}
 			\]
 			This gives
 			\[
-				L = \begin{bmatrix}
-						1 & 0 \\ 2 & 1 
-					\end{bmatrix}, \qquad 
-					U = 
-					\begin{bmatrix}
-						2 & 3 \\ 0 & 1
-					\end{bmatrix}
+				L = 
+				\begin{bmatrix} 1 & 0 \\ \tfrac12 & 1 \end{bmatrix} \qquad U = 
+				\begin{bmatrix} 2 & 3 \\ 0 & -\tfrac12 \end{bmatrix}
 			\]
-			Check: $LU = \begin{bmatrix}
-							1 & 0 \\ 2 & 1
-						\end{bmatrix}
-						\begin{bmatrix}
-							2 & 3 \\ 0 & 1
-						\end{bmatrix} 
-						= \begin{bmatrix}
-							2 & 3 \\ 4 & 7
-						\end{bmatrix} = A$.
-			Correct, and since $P=I$, $PA=LU$ holds trivially.
+			Check: $LU = \begin{bmatrix} 1 & 0 \\ \tfrac 12 & 1 \end{bmatrix}
+			\begin{bmatrix} 2 & 3 \\ 0 & -\tfrac12 \end{bmatrix} = \begin{bmatrix} 2 & 3 \\ 1 & 1 \end{bmatrix} = PA$. Correct.
 			
-			\textbf{Step 1 (forward substitution):} solve $Ly = Pb = b$.
+			\textbf{Step 1 (forward substitution):} solve $Ly=Pb$. Since $\mathrm{perm}=[2,1]$, $Pb = 
+			\begin{bmatrix} 5 \\ 2 \end{bmatrix}$.
 			\[
-				y_1 = b_1 = 5 \qquad y_2 = b_2 - L_{21}y_1 = 11 - 2(5) = 1
+				y_1 = 5, \qquad y_2 = 2 - \tfrac12(5) = -\tfrac12
 			\]
-			\begin{center}
-			So $y = \begin{bmatrix} 
-						5 \\ 1 
-					\end{bmatrix}$
-			\end{center}
-	
-			\textbf{Step 2 (back substitution):} solve $Ux = y$.
-			\[
-				x_2 = \frac{y_2}{U_{22}} = \frac{1}{1} = 1, \qquad 	x_1 = \frac{1}{U_{11}}\left(y_1 - U_{12}x_2\right) = \frac{1}{2}(5 - 3(1)) = 1
-			\]
-			\begin{center}
-				So $x = \begin{bmatrix}
-					1 \\ 1
-				\end{bmatrix}$
-			\end{center}
+			So $y = \begin{bmatrix}5\\-\tfrac12\end{bmatrix}$.
 			
-			\textbf{Check:} 
-			$Ax = 
-				\begin{bmatrix}
-					2 & 3 \\ 
-					4 & 7 
-				\end{bmatrix}
-				\begin{bmatrix}
-					1 \\
-					1
-				\end{bmatrix} 
-				= 
-				\begin{bmatrix}
-					5 \\ 
-					11
-				\end{bmatrix} 
-				= b$.
-			Correct.
+			\textbf{Step 2 (back substitution):} solve $Ux=y$.
+			\[
+				x_2 = \frac{-\tfrac12}{-\tfrac12} = 1, \qquad x_1 = \frac{1}{2}\left(5 - 3(1)\right) = 1
+			\]
+			So $x = \begin{bmatrix}1\\1\end{bmatrix}$.
+			
+			\textbf{Check:} $Ax = 
+			\begin{bmatrix} 1 & 1 \\ 2 & 3 \end{bmatrix}
+			\begin{bmatrix} 1 \\ 1 \end{bmatrix} = 
+			\begin{bmatrix} 2 \\ 5 \end{bmatrix} = b$. Correct.
 		\end{example}
-		
 		
 	\subsection{Partial Pivoting}
 		
@@ -540,10 +517,26 @@
 				|m_{ik}| = 	\left|\frac{A^{(k)}_{ik}}{A^{(k)}_{kk}}\right| \le 1
 			\]
 		\end{proof}
-	
+		
+	\begin{compremark}
+		\texttt{factorise()} (\texttt{lu\_solver.cpp}) makes two representational choices worth justifying against the mathematics of this section.
+		
+		\begin{enumerate}[label=\roman*.]
+			\item \textbf{In-place storage of the multipliers.} After eliminating column $k$, every entry below the diagonal in that column is exactly zero. Since this value is already known, it carries no information worth keeping, so the position is free to reuse. The code writes the multiplier $m_{ik}$ there instead: $L$'s diagonal is always $1$ (Definition~\ref{def:lu-decomposition}), so nothing about $L$ is lost by leaving it implicit, and the strictly-lower entries of $L$ are exactly these multipliers. So $A$ is overwritten in place to hold both $U$ and the non-trivial part of $L$, with no extra storage needed.
+			\item \textbf{The permutation as a vector, not a matrix.} The code applies $P$ to $b$ via \texttt{bPrime(i) = b(perm[i], 0)}, a direct reindexing. This matches how $P$ is actually used in the proof of Proposition~\ref{prop:solve-pa-lu}: the argument never needs more from $P$ than reordering $b$'s rows. So representing $P$ as the vector \texttt{perm}, rather than an $n\times n$ matrix, is a faithful, more efficient match for what the proof uses.
+		\end{enumerate}
+		
+		Both choices can be checked directly against the worked example (Example~\ref{ex:solve-pa-lu-nontrivial}): running \texttt{lu\_solver.cpp} on that example's $A$ and $b$ reproduces $x = (1,1)^\top$.
+	\end{compremark}
 	
 \section{Inner Product Spaces and QR Decompositions}
 \label{sec:inner-products}
+	
+	This section develops inner product spaces, orthogonality and the QR decomposition, providing the tools to construct orthonormal bases and to solve $Ax = b$ via orthogonal factorisation. \\
+	
+	Beyond providing a second, more numerically stable route to solving linear systems, orthogonality is the structural idea that the spectral theorem in the next section depends on directly. \\
+	
+	The algorithm is implemented from scratch in C++ as \texttt{qr\_gram\_schmidt.cpp} (Appendix~\ref{app:qr-solver}), computing the QR decomposition via the Gram-Schmidt process.
 	
 	\subsection{Inner Product Spaces}
 		
@@ -551,7 +544,7 @@
 		
 		Recall the dot product for $\mathbb{R}^n$:
 		\[
-			x \cdot y = \sum_{i=1}^{n} x_i y_i.
+			x \cdot y = \sum_{i=1}^{n} x_i y_i
 		\]
 		
 		This immediately gives a notion of length via $\|x\| := \sqrt{x \cdot x}$.
@@ -559,7 +552,6 @@
 		The dot product on $\mathbb{R}^n$ has three properties worth isolating: it is symmetric in $x$ and $y$, linear in each argument and positive-definite ($x \cdot x \ge 0$, with equality iff $x=0$). Abstracting exactly these properties to an arbitrary vector space yields the definition of an inner product.
 		
 		Throughout this section, $V$ will denote a real vector space, i.e.\ $\mathbb{F} = \mathbb{R}$.
-		
 		
 		\begin{definition}[Inner Product / Inner Product Space]
 			\label{def:inner-product}
@@ -582,7 +574,6 @@
 		\begin{remark}
 			In a real vector space, the properties of symmetry \ref{ax:IP1} and linearity in the first argument \ref{ax:IP2} together imply linearity in the second argument, meaning the inner product is fully bilinear.
 		\end{remark} 
-		
 		
 		\begin{definition}[Induced Norm] 
 			\label{def:induced-norm}
@@ -720,7 +711,7 @@
 			\label{def:orthogonal-matrix}
 			A matrix $Q \in \mathrm{Mat}(n,\mathbb{R})$ is \emph{orthogonal} if its columns form an orthonormal set (Definition~\ref{def:orthogonal-orthonormal-set}), equivalently, if
 			\[
-			Q^\top Q = \mathbbm{1}.
+			Q^\top Q = \mathbbm{1}
 			\]
 		\end{definition}
 		
@@ -895,9 +886,23 @@
 			\]
 			Existence and uniqueness of $c$ and then $x$ give existence and uniqueness of a solution to $Ax=b$.
 		\end{proof}
+		
+	\begin{compremark}
+		\texttt{gramSchmidtQR()} (Appendix~\ref{app:qr-solver}) projects each $R_{jk}$ against the running vector $u_k$ and not the original column $a_k$ as Theorem~\ref{thm:gram-schmidt}'s formula suggests. This is fine mathematically: once earlier projections are removed from $u_k$, $\langle u_k,q_j\rangle = \langle a_k,q_j\rangle$ anyway, so the theorem's guarantees still hold. This is the modified Gram-Schmidt Process.
+		
+		It matters numerically because projecting against $a_k$ every time (classical Gram-Schmidt) lets rounding error compound independently in each coefficient; projecting against the already-partially-cleaned $u_k$ (modified Gram-Schmidt) stops that error from carrying forward as badly. Refer to \cite[\S 5.2.7--5.2.9]{GolubVanLoan2013} for a more detailed explanation.
+		
+		This is verified directly in \texttt{main()}: $Q^\top Q \approx \mathbbm{1}$ to machine precision ($10^{-16}$--$10^{-17}$ off the diagonal), and $QR \approx A$, an exact reconstruction of the input.
+	\end{compremark}
 	
 \section{Eigenvalues and the Spectral Theorem}
 \label{sec:eigenvalues-spectral-theorem}
+	
+	This section develops eigenvalues, eigenvectors and the spectral theorem for symmetric matrices, culminating in the existence of an orthonormal eigenbasis. \\
+	
+	Beyond its role in diagonalising symmetric matrices, this result is the algebraic foundation for the Singular Value Decomposition (or SVD), which this paper uses later in the chapter to analyse and decompose general $m\times n$ matrices. \\
+	
+	The algorithm is implemented from scratch in C++ as \texttt{jacobi\_eigensolver.cpp} (Appendix~\ref{app:jacobi-solver}), computing the eigendecomposition of a symmetric matrix via the classical Jacobi method.
 	
 	\subsection{Eigenvalues and Eigenvectors}
 	\label{sec:eigenvalues-and-eigenvectors}
@@ -1107,7 +1112,7 @@
 				A = Q\Lambda Q^\top
 			\]
 		\end{theorem}
-			
+		
 		\begin{proof}
 			We proceed by induction on $n$.
 			
@@ -1136,3 +1141,19 @@
 			
 			This completes the induction.
 		\end{proof}
+		
+	\begin{compremark}
+		\texttt{jacobi\_eigensolver.cpp} (Appendix~\ref{app:jacobi-solver}) makes two algorithmic choices worth justifying. These are choices about how quickly and reliably the method converges in floating point, not consequences of Theorem~\ref{thm:spectral-theorem} itself. The theorem guarantees that an orthonormal eigenbasis exists, but doesn't tell us how to compute one.
+		
+		\begin{enumerate}[label=\roman*.]
+			\item \textbf{Iteration cap scaled with $n$.} The loop stops once the largest off-diagonal entry is below tolerance, or after $50n^2$ iterations. Since each sweep scans $O(n^2)$ pairs, scaling the cap with $n^2$ keeps it proportional to the actual problem size, instead of a fixed constant that's too small for large matrices or too big for small ones.
+			
+			\item \textbf{Choosing the root of the same sign as $\tau$.} \texttt{computeRotationAngle()} solves for $t=\tan\theta$ using $\tau = (A_{qq}-A_{pp})/(2A_{pq})$, and picks the root with the same sign as $\tau$ (check lines 40-44). Both roots zero out $A_{pq}$ equally well algebraically, so this is a purely numerical choice: the two roots involve $\tau\pm\sqrt{1+\tau^2}$, and for large $|\tau|$, $\sqrt{1+\tau^2}\approx|\tau|$, so subtracting same-signed terms would cancel almost entirely and lose precision. Adding instead avoids this, and also picks the smaller rotation angle, which converges faster too.
+		\end{enumerate}
+		
+		This is verified on the $5\times 5$ tridiagonal test case in \texttt{main()} by cross-checking the recovered eigenvalues printed against an independently computed trace and determinant of $A$.
+	\end{compremark}
+	
+\section{The Singular Value Decomposition}
+	
+	
