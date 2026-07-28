@@ -31,20 +31,31 @@
 
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
 \definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{codegreen}{rgb}{0,0.5,0}
+\definecolor{codebg}{rgb}{0.97,0.97,0.97}
 
 \lstdefinestyle{cpp}{
-    language        = C++,
-    basicstyle      = \ttfamily\small,
-    keywordstyle    = \color{blue},
-    commentstyle    = \color{codegray}\itshape,
-    stringstyle     = \color{codepurple},
-    numberstyle     = \tiny\color{codegray},
-    numbers         = left,
-    stepnumber      = 1,
-    breaklines      = true,
-    frame           = single,
-    showstringspaces= false,
-    tabsize         = 4
+	language        = C++,
+	basicstyle      = \ttfamily\small,
+	keywordstyle    = \color{blue}\bfseries,
+	commentstyle    = \color{codegreen}\itshape,
+	stringstyle     = \color{codepurple},
+	numberstyle     = \tiny\color{codegray},
+	backgroundcolor = \color{codebg},
+	numbers         = left,
+	numbersep       = 8pt,
+	stepnumber      = 1,
+	breaklines      = true,
+	breakatwhitespace = false,
+	frame           = single,
+	rulecolor       = \color{black!30},
+	xleftmargin     = 12pt,
+	framexleftmargin = 12pt,
+	showstringspaces= false,
+	showtabs        = false,
+	keepspaces      = true,
+	tabsize         = 4,
+	captionpos      = b
 }
 \lstset{style=cpp}
 
@@ -61,4 +72,6 @@
 
 \theoremstyle{remark}
 \newtheorem{remark}{Remark}[chapter]
+\theoremstyle{remark}
+\newtheorem{compremark}{Computational Remark}[chapter]
 
