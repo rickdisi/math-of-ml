@@ -81,12 +81,12 @@ Matrix solve(const Matrix& LU, const std::vector<int>& perm, const Matrix& b) {
 int main() {
 
     Matrix A(2, 2);
-    A(0, 0) = 2; A(0, 1) = 3;
-    A(1, 0) = 4; A(1, 1) = 7;
+    A(0, 0) = 1; A(0, 1) = 1;
+    A(1, 0) = 2; A(1, 1) = 3;
 
     Matrix b(2, 1);
-    b(0, 0) = 5;
-    b(1, 0) = 11;
+    b(0, 0) = 2;
+    b(1, 0) = 5;
 
     std::vector<int> perm = factorise(A); // A is overwritten in place with LU
     Matrix x = solve(A, perm, b);
