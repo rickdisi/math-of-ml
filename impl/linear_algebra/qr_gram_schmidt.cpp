@@ -64,7 +64,7 @@ void gramSchmidtQR(const Matrix& A, Matrix& Q, Matrix& R) {
 
         for (int j = 0; j < k; ++j) {
             Matrix qj = getColumn(Q, j);
-            double Rjk = dot(getColumn(A, k), qj); // R_{jk} := <a_k, q_j>
+            double Rjk = dot(uk, qj); // R_{jk} := <u_k, q_j> , MGS algorithm
             R(j, k) = Rjk;
             Matrix proj = scale(qj, Rjk);
             subtractInPlace(uk, proj);
