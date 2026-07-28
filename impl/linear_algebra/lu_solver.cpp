@@ -3,6 +3,8 @@
 #include <utility>
 #include "matrix.hpp"
 
+// Factorises A=LU and then solves a linear system via forward and back substitution
+
 std::vector<int> factorise(Matrix& A) {
     int n = A.rows();
     std::vector<int> perm(n);

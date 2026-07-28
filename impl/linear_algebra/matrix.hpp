@@ -4,6 +4,8 @@
 #include <stdexcept>
 #include <vector>
 
+// complete Matrix object
+
 class Matrix {
     private:
         int rows_, cols_;

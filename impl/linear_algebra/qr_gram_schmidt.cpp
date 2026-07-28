@@ -2,6 +2,8 @@
 #include <cmath>
 #include "matrix.hpp"
 
+// Implements a A=QR Decomposition via the Gram Schmidt Process
+
 // Helpers
 
 // dot(u, v): dot product of two n x 1 column vectors, stored as Matrix(n,1)
@@ -54,7 +56,6 @@ void subtractInPlace(Matrix& u, const Matrix& w) {
 }
 
 // Loop
-
 void gramSchmidtQR(const Matrix& A, Matrix& Q, Matrix& R) {
     int n = A.rows(); // assumption: A is square, n x n; not checked
 
