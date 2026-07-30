@@ -146,6 +146,7 @@
 		\noindent By contraposition, we now have that $V \ni v \notin \operatorname{span}_{\mathbb{F}}\{v_1, \dots, v_m\}$ if and only if $\{v, v_1, \dots, v_m\}$ forms a linearly independent set of vectors.
 		
 		\begin{definition}[Dimension]
+			\label{def:dimension}
 			A $\mathbb{F}$-vector space $V$ is said to be $n$-dimensional if and only if there is a linearly independent set of $n$ vectors and every set consisting of $n+1$ vectors is linearly dependent. $\dim_{\mathbb{F}}(V) = n$ expresses the dimension of $V$. Furthermore, a vector space is said to be of infinite dimension if and only if there is a linearly independent set of vectors of arbitrarily large order.
 		\end{definition}
 		
@@ -154,8 +155,24 @@
 		\indent \indent We now seek to represent any vector $v \in V$ as a linear combination of a "minimal" set of vectors, also called a basis.
 		
 		\begin{definition}[Basis]
+			\label{def:basis}
 			Let $V$ be an n-dimensional $\mathbb{F}$-vector space. Any linear independent set of n vectors in $V$ is called a \textit{basis} of $V$.
 		\end{definition}
+		
+		\begin{corollary}[Basis Extension]
+			\label{cor:basis-extension}
+			Let $V$ be an $n$-dimensional $\mathbb{F}$-vector space, and let $\{v_1,\dots,v_k\}$ be a linearly independent set in $V$ with $k \le n$. Then there exist vectors $v_{k+1},\dots,v_n \in V$ such that $\{v_1,\dots,v_k,v_{k+1},\dots,v_n\}$ is a basis of $V$.
+		\end{corollary}
+		
+		\begin{proof}
+			We proceed by induction on $j$, for $j=k,k+1,\dots,n$, constructing at each stage a linearly independent set $\{v_1,\dots,v_j\}$.
+			
+			\textit{Base case ($j=k$).} The set $\{v_1,\dots,v_k\}$ is linearly independent by hypothesis.
+			
+			\textit{Inductive step.} Suppose $\{v_1,\dots,v_j\}$ is linearly independent for some $k \le j < n$. If $\{v_1,\dots,v_j\}$ spans $V$, then by Proposition~\ref{prop:v-basis} it is a basis, and since $\dim_{\mathbb{F}}(V)=n$, this forces $j=n$ — contradicting $j<n$. So $\{v_1,\dots,v_j\}$ does not span $V$, and there exists $v_{j+1} \in V \setminus \operatorname{span}_{\mathbb{F}}\{v_1,\dots,v_j\}$. By the contrapositive of Proposition~\ref{prop:extension-lemma}, $\{v_1,\dots,v_j,v_{j+1}\}$ is linearly independent, completing the inductive step.
+			
+			By induction, $\{v_1,\dots,v_n\}$ is linearly independent. Since $\dim_{\mathbb{F}}(V)=n$, this set of $n$ linearly independent vectors is a basis of $V$ by Definition~\ref{def:basis}. This completes the induction.
+		\end{proof}
 		
 		\begin{proposition}
 			\label{prop:v-basis}
@@ -221,7 +238,7 @@
 		\end{theorem}
 		
 		\begin{proof}
-			Set $n := \dim_{\mathbb{F}}(V)$ and $d := \dim_{\mathbb{F}}(\ker(T))$. Let $\{v_1,\dots,v_d\}$ be a basis of $\ker(T)$. Extend this to a basis $\{v_1,\dots,v_d,u_{d+1},\dots,u_n\}$ of $V$.
+			Set $n := \dim_{\mathbb{F}}(V)$ and $d := \dim_{\mathbb{F}}(\ker(T))$. Let $\{v_1,\dots,v_d\}$ be a basis of $\ker(T)$. Extend this to a basis (Corollary~\ref{cor:basis-extension}) $\{v_1,\dots,v_d,u_{d+1},\dots,u_n\}$ of $V$.
 			
 			We show that $\{T(u_{d+1}),\dots,T(u_n)\}$ is a basis of $\operatorname{im}(T)$. This suffices, since it gives
 			\[
@@ -568,7 +585,9 @@
 		\end{definition}
 		
 		\begin{example}[Trace Inner Product]
-			Consider $\mathrm{Mat}(n, \mathbb{R})$. Equipped with the trace inner product $\langle x | y \rangle := \operatorname{tr}(A^\top B)$ for all $x, y \in \mathrm{Mat}(n, \mathbb{R})$ the pair $(\mathrm{Mat}(n, \mathbb{R}), \langle \cdot, \cdot \rangle)$ is an inner product space.
+			\label{ex:trace-inner-product}
+			Consider $\mathrm{Mat}(m, n, \mathbb{R})$. Equipped with the trace inner product $\langle A | B \rangle := \operatorname{tr}(A^\top B)$ for all $A, B \in \mathrm{Mat}(m, n, \mathbb{R})$ the pair $(\mathrm{Mat}(m, n, \mathbb{R}), \langle \cdot, \cdot \rangle)$ is an inner product space. \\
+			\indent Further, by Definition~\ref{def:induced-norm}, this inner product's induced norm is $\|A\|_F := \sqrt{\langle A,A\rangle} = \sqrt{\operatorname{tr}(A^\top A)}$, called the Frobenius norm.
 		\end{example}
 		
 		\begin{remark}
@@ -803,6 +822,15 @@
 			
 			Hence $\{e_1,\dots,e_n\}$ is orthonormal (Definition~\ref{def:orthogonal-orthonormal-set}). Since scaling each $u_k$ by the nonzero scalar $1/\|u_k\|$ changes neither the span nor linear independence of $\{u_1,\dots,u_n\}$, $\{e_1,\dots,e_n\}$ remains a basis of $V$. Thus $\{e_1,\dots,e_n\}$ is an orthonormal basis of $V$.
 		\end{proof}
+		
+		\begin{remark}[Gram-Schmidt Fixes an Already-Orthonormal Set]
+			\label{rem:gram-schmidt-fixes-orthonormal}
+			If $u_1,\dots,u_r$ are already orthonormal, feeding them as the first $r$ inputs to Gram-Schmidt (Theorem~\ref{thm:gram-schmidt}) changes nothing: at step $k \le r$, the formula
+			\[
+				u_k - \sum_{j=1}^{k-1} \frac{\langle u_k, u_j \rangle}{\langle u_j, u_j \rangle} u_j
+			\]
+			subtracts off projections onto $u_1,\dots,u_{k-1}$, but these are all zero since the $u_j$ are already mutually orthogonal — so the sum vanishes and $u_k$ passes through unchanged. Since each $u_k$ is already a unit vector, the normalisation $e_k := u_k/\|u_k\|$ (as in Corollary~\ref{cor:orthonormal-basis-exists}) leaves it unchanged too. So Gram-Schmidt only starts doing real work from step $r+1$ onward.
+		\end{remark}
 		
 	\subsection{QR Decompositions}
 		
@@ -1155,5 +1183,184 @@
 	\end{compremark}
 	
 \section{The Singular Value Decomposition}
+	
+	This section develops the singular value decomposition (SVD), derived from the eigendecomposition of $A^\top A$, together with the Moore-Penrose pseudoinverse and the low-rank approximation guaranteed by the Eckart-Young theorem. \\
+	
+	Beyond its use elsewhere in this chapter for solving least-squares problems and characterising a matrix's best low-rank approximations, the SVD is one of the central tools of applied linear algebra: it reveals a matrix's rank, range and null space directly from its singular values and underlies dimensionality reduction techniques such as principal component analysis. \\
+	
+	The algorithm is implemented from scratch in C++ as \texttt{svd\_jacobi.cpp} (Appendix~\ref{app:svd-jacobi}), computing the SVD via Jacobi diagonalisation of $A^\top A$.
+	
+	\begin{theorem}[Singular Value Decomposition]
+		\label{thm:svd}
+		Let $A \in \mathrm{Mat}(m, n, \mathbb{R})$. Then there exists a singular value decomposition (SVD) i.e. an orthogonal matrix $U \in \mathrm{Mat}(m,\mathbb{R})$, an orthogonal matrix $V \in \mathrm{Mat}(n,\mathbb{R})$ and a matrix $\Sigma \in \mathrm{Mat}(m,n,\mathbb{R})$ that is diagonal with ordered entries $\sigma_1 \ge \sigma_2 \ge \cdots \ge \sigma_{\min(m,n)} \ge 0$, such that
+		\[
+			A = U\Sigma V^\top
+		\]
+		Moreover, the columns $v_1,\dots,v_n$ of $V$ are an orthonormal eigenbasis of $A^\top A$ (Theorem~\ref{thm:spectral-theorem}), the columns $u_1,\dots,u_m$ of $U$ are an orthonormal basis of $\mathbb{R}^m$, and the two are paired rather than chosen independently: for each $i$ with $\sigma_i \neq 0$,
+		\[
+			u_i = \frac{1}{\sigma_i} Av_i
+		\]
+		where $\sigma_i := \sqrt{\lambda_i}$ and $\lambda_i$ is the eigenvalue of $A^\top A$ corresponding to $v_i$.
+	\end{theorem}
+	
+	\begin{proof}
+		Consider $A^\top A \in \mathrm{Mat}(n,\mathbb{R})$. It is symmetric and $\langle A^\top A v, v\rangle = \|Av\|^2 \ge 0$ for all $v$, so all its eigenvalues are non-negative. By the Spectral Theorem (Theorem~\ref{thm:spectral-theorem}), $A^\top A$ has an orthonormal eigenbasis $v_1,\dots,v_n$ with eigenvalues $\lambda_1 \ge \cdots \ge \lambda_n \ge 0$. \\
+		
+		Define $\sigma_i := \sqrt{\lambda_i}$, and let $r$ be the number of strictly positive $\sigma_i$ (so $\sigma_1\ge\cdots\ge\sigma_r>0$ and $\sigma_{r+1}=\cdots=\sigma_n=0$).
+		
+		For $i \le r$, set $u_i := Av_i/\sigma_i$. These are orthonormal: for $j,k\le r$,
+		\[
+			\langle u_j,u_k\rangle = \frac{1}{\sigma_j\sigma_k}\langle Av_j,Av_k\rangle = \frac{1}{\sigma_j\sigma_k}\langle A^\top Av_j,v_k\rangle = \frac{\lambda_j}{\sigma_j\sigma_k}\langle v_j,v_k\rangle = \frac{\sigma_j}{\sigma_k}\delta_{jk}
+		\]
+		which is $1$ if $j=k$ and $0$ otherwise. Extend $\{u_1,\dots,u_r\}$ to a full orthonormal basis $\{u_1,\dots,u_m\}$ of $\mathbb{R}^m$. Since $\{u_1,\dots,u_r\}$ is orthonormal, it is linearly independent (Proposition~\ref{prop:orthogonal-and-linearly-independent}), so Corollary~\ref{cor:basis-extension} extends it to a basis of $\mathbb{R}^m$; applying Gram-Schmidt (Theorem~\ref{thm:gram-schmidt}) and normalising (Corollary~\ref{cor:orthonormal-basis-exists}) then gives an orthonormal basis $\{u_1,\dots,u_m\}$, with $u_1,\dots,u_r$ unchanged by Remark~\ref{rem:gram-schmidt-fixes-orthonormal}. Let $U,V$ be the matrices with these columns; both are orthogonal by construction. \\
+		
+		It suffices to check $AV=U\Sigma$, i.e.\ $Av_k = \sigma_k u_k$ for every $k$. For $k\le r$ this is immediate from how $u_k$ was defined. For $k>r$, $\sigma_k=0$ and $\lambda_k=0$, so $\|Av_k\|^2 = \langle A^\top Av_k,v_k\rangle = 0$, forcing $Av_k=0=\sigma_k u_k$ too. So $Av_k=\sigma_k u_k$ holds for every $k$, giving $AV=U\Sigma$. Multiplying by $V^\top=V^{-1}$ on the right gives $A=U\Sigma V^\top$.
+	\end{proof}
+	
+	\begin{compremark}
+		\texttt{svd\_jacobi.cpp}'s \texttt{computeSigmaAndU()} (Appendix~\ref{app:svd-jacobi}) uses a thin $U$ with zero columns, not the full orthonormal extension Theorem~\ref{thm:svd}'s proof builds. That proof works to extend $\{u_1,\dots,u_r\}$ into a full $m\times m$ orthogonal matrix (Corollary~\ref{cor:basis-extension}, Gram-Schmidt, Remark~\ref{rem:gram-schmidt-fixes-orthonormal}). The code skips this: \texttt{U} is $m\times n$, and columns past $r$ stay zero by default. This is safe because those columns get multiplied by zero entries of $\Sigma$ anyway, so they never affect $U\Sigma V^\top$. The full extension makes $U$ mathematically complete, but isn't needed for reconstruction.
+		
+		This is exercised directly in \texttt{main()}: the test matrix has rank $3$, so at least three columns of $U$ are necessarily zero, and reconstruction still matches $A$ to machine precision ($2.66\times10^{-15}$ max error).
+	\end{compremark}
+	
+	\begin{definition}[Moore-Penrose Pseudoinverse]
+		\label{def:pseudoinverse}
+		Let $A \in \mathrm{Mat}(m,n,\mathbb{R})$ with SVD $A = U \Sigma V^\top$ (Theorem~\ref{thm:svd}), where $\Sigma$ has non-zero entries $\sigma_1, \dots, \sigma_r$ and zeros elsewhere. We define $\Sigma^\dagger \in \mathrm{Mat}(n, m, \mathbb{R})$ by replacing each non-zero $\sigma_i$ with the reciprocal $1/\sigma_i$ and transposing the shape. The pseudoinverse of $A$ is
+		\[
+			A^\dagger := V \Sigma^\dagger U^\top
+		\]
+	\end{definition}
+	
+	\begin{remark}
+		If $A$ is square and invertible, then $A^\dagger = A^{-1}$. $r=n=m$, so $\Sigma^\dagger = \Sigma^{-1}$ exactly.
+	\end{remark}
+	
+	\begin{proposition}[Least Squares Property of the Pseudoinverse]
+		\label{prop:least-squares-pseudoinverse}
+		Let $A \in \mathrm{Mat}(m, n, \mathbb{R})$ and $b \in \mathbb{R}^m$, and let $x^\dagger := A^\dagger b$ (Definition~\ref{def:pseudoinverse}). Then:
+		\begin{enumerate}[label=\roman*.]
+			\item For all $x \in \mathbb{R}^n$,
+			\[
+				\|Ax^\dagger - b\| \le \|Ax - b\|
+			\]
+			so $x^\dagger$ minimises the residual $\|Ax-b\|$ over all $x\in\mathbb{R}^n$. Equality holds if and only if $x \in x^\dagger + \ker(A)$ ($\operatorname{rank}(B)\le k$).
+			\item Among all minimisers of the residual, $x^\dagger$ has the smallest norm: if $x\in\mathbb{R}^n$ satisfies $\|Ax-b\| = \|Ax^\dagger - b\|$, then
+			\[
+				\|x^\dagger\| \le \|x\|
+			\]
+			with equality if and only if $x = x^\dagger$.
+		\end{enumerate}
+	\end{proposition}
+	
+	\begin{proof}
+		By Theorem~\ref{thm:svd}, $A = U\Sigma V^\top$ with $U,V$ orthogonal and $\Sigma$ having singular values $\sigma_1\ge\cdots\ge\sigma_r>0$ on the diagonal, zeros elsewhere.
+		
+		Let $y := V^\top x$ (so $x=Vy$, $\|x\|=\|y\|$, since $V$ is orthogonal) and $c := U^\top b$. Since $U$ is orthogonal, $\|Uz-b\|=\|z-U^\top b\|$ for any $z$; applying this with $z=\Sigma y$,
+		\[
+			\|Ax-b\| = \|U\Sigma V^\top x - b\| = \|\Sigma y - c\|
+		\]
+		Since $(\Sigma y)_i=\sigma_i y_i$ for $i\le r$ and $0$ for $i>r$,
+		\[
+			\|\Sigma y-c\|^2 = \sum_{i=1}^{r}(\sigma_i y_i-c_i)^2 + \sum_{i=r+1}^{m}c_i^2
+		\]
+		The second sum is fixed; the first depends only on $y_1,\dots,y_r$, and is minimised (to zero) exactly when $y_i=c_i/\sigma_i$ for $i\le r$. The remaining coordinates $y_{r+1},\dots,y_n$ don't affect the residual at all, so any choice of them gives a minimiser.
+		
+		By Definition~\ref{def:pseudoinverse}, $x^\dagger := A^\dagger b = V\Sigma^\dagger c$, so $V^\top x^\dagger = (c_1/\sigma_1,\dots,c_r/\sigma_r,0,\dots,0)$ — exactly the minimiser above, with the free coordinates set to $0$. So $x^\dagger$ minimises the residual, giving the inequality in (i).
+		
+		\textit{Equality condition.} $x=Vy$ achieves equality iff $y_i=c_i/\sigma_i$ for $i\le r$ and $y_{r+1},\dots,y_n$ arbitrary, i.e.\ $x = x^\dagger + \sum_{i>r}t_iv_i$ for arbitrary $t_i$.
+		
+		We identify this set as exactly $\ker(A)$. Since $Av_i=\sigma_iu_i=0$ for $i>r$ (shown in the proof of Theorem~\ref{thm:svd}), $\operatorname{span}_{\mathbb{R}}\{v_{r+1},\dots,v_n\}\subseteq\ker(A)$. Conversely, take any $x\in\ker(A)$ and write $x=Vy$; then
+		\[
+			0 = Ax = U\Sigma V^\top(Vy) = U\Sigma y
+		\]
+		Since $U$ is orthogonal, hence injective, this forces $\Sigma y=0$, i.e.\ $\sigma_iy_i=0$ for each $i\le r$; since $\sigma_i\neq0$ for $i\le r$, this gives $y_i=0$ for $i\le r$, with $y_{r+1},\dots,y_n$ unconstrained. So $x=Vy=\sum_{i>r}y_iv_i \in \operatorname{span}_{\mathbb{R}}\{v_{r+1},\dots,v_n\}$. Combined with the other inclusion, $\ker(A)=\operatorname{span}_{\mathbb{R}}\{v_{r+1},\dots,v_n\}$.
+		
+		So equality holds iff $x\in x^\dagger+\ker(A)$.
+		
+		\textit{Minimum norm.} If $x=x^\dagger+z$ with $z\in\ker(A)$ also minimises the residual, then $z\in\operatorname{span}_{\mathbb{R}}\{v_{r+1},\dots,v_n\}$ while $x^\dagger\in\operatorname{span}_{\mathbb{R}}\{v_1,\dots,v_r\}$, so $\langle x^\dagger,z\rangle=0$ by orthonormality of $\{v_i\}$. Then
+		\[
+			\|x\|^2 = \|x^\dagger+z\|^2 = \|x^\dagger\|^2+\|z\|^2 \ge \|x^\dagger\|^2,
+		\]
+		using bilinearity (Remark~\ref{rem:bilinearity}), with equality iff $z=0$, i.e.\ $x=x^\dagger$.
+	\end{proof}
+	
+	\begin{lemma}[Unitary invariance of the Frobenius norm]
+		\label{lem:invariance-of-frobenius}
+		For any $M \in \mathrm{Mat}(m, n, \mathbb{R})$ and orthogonal matrices $U \in \mathrm{Mat}(m, \mathbb{R})$ and $V \in \mathrm{Mat}(n, \mathbb{R})$ we have:
+		\[
+			\|UMV^\top\|_F = \|M\|_F
+		\]
+		Hence multiplying $M$ by orthogonal matrices doesn't change its Frobenius norm.
+	\end{lemma}
+	
+	\begin{proof}
+		First, the trace identity $\operatorname{tr}(AB)=\operatorname{tr}(BA)$ for any $A\in\mathrm{Mat}(m,n,\mathbb{R})$, $B\in\mathrm{Mat}(n,m,\mathbb{R})$: writing out entries,
+		\[
+			\operatorname{tr}(AB) = \sum_i (AB)_{ii} = \sum_i\sum_j A_{ij}B_{ji} = \sum_j\sum_i B_{ji}A_{ij} = \sum_j (BA)_{jj} = \operatorname{tr}(BA)
+		\]
+		simply swapping the order of summation.
+		
+		By Definition~\ref{def:induced-norm} and Example~\ref{ex:trace-inner-product},
+		\[
+			\|UMV^\top\|_F^2 = \operatorname{tr}\left((UMV^\top)^\top(UMV^\top)\right)
+		\]
+		Since transposing a product reverses the order of factors, $(UMV^\top)^\top = VM^\top U^\top$, so
+		\[
+			(UMV^\top)^\top(UMV^\top) = VM^\top U^\top UMV^\top = VM^\top MV^\top
+		\]
+		using $U^\top U = \mathbbm{1}$, since $U$ is orthogonal (Definition~\ref{def:orthogonal-matrix}). Hence
+		\[
+			\|UMV^\top\|_F^2 = \operatorname{tr}(VM^\top MV^\top)
+		\]
+		Applying the trace identity with $X:=V$, $Y:=M^\top MV^\top$,
+		\[
+			\operatorname{tr}(VM^\top MV^\top) = \operatorname{tr}(XY) = \operatorname{tr}(YX) = \operatorname{tr}(M^\top MV^\top V) = \operatorname{tr}(M^\top M)
+		\]
+		using $V^\top V=\mathbbm{1}$, since $V$ is orthogonal, in the last step. So
+		\[
+			\|UMV^\top\|_F^2 = \operatorname{tr}(M^\top M) = \|M\|_F^2
+		\]
+		and, as both sides are non-negative, taking square roots gives $\|UMV^\top\|_F = \|M\|_F$.
+	\end{proof}
+	
+	\begin{theorem}[Eckart-Young]
+		\label{thm:eckart-young}
+		Let $A \in \mathrm{Mat}(m,n,\mathbb{R})$ with SVD $A=U\Sigma V^\top$ (Theorem~\ref{thm:svd}) and singular values $\sigma_1\ge\cdots\ge\sigma_r>0$. For $0\le k<r$, we define
+		\[
+			A_k := \sum_{i=1}^{k} \sigma_i u_i v_i^\top
+		\]
+		Then for every $B \in \mathrm{Mat}(m,n,\mathbb{R})$ whose image has dimension at most $k$,
+		\[
+			\|A-B\|_F \ge \|A-A_k\|_F
+		\]
+		so $A_k$ is a best rank-$k$ approximation of $A$ in the Frobenius norm (Example~\ref{ex:trace-inner-product}). Moreover,
+		\[
+			\|A-A_k\|_F = \sqrt{\sigma_{k+1}^2+\cdots+\sigma_r^2}
+		\]
+	\end{theorem}
+	
+	\begin{proof}
+		For any $M\in\mathrm{Mat}(m,n,\mathbb{R})$, writing its own SVD $M=U_M\Sigma_MV_M^\top$ and applying Lemma~\ref{lem:invariance-of-frobenius} gives $\|M\|_F = \|\Sigma_M\|_F = \sqrt{\sum_i\sigma_i(M)^2}$. We use this fact twice.
+		
+		First, $A-A_k = \sum_{i=k+1}^r\sigma_iu_iv_i^\top$ is itself an SVD, with singular values $\sigma_{k+1},\dots,\sigma_r$, so
+		\[
+			\|A-A_k\|_F = \sqrt{\sigma_{k+1}^2+\cdots+\sigma_r^2}
+		\]
+		which is also the "moreover" clause of the theorem.
+		
+		Now let $B$ have $\operatorname{rank}(B)\le k$. By Weyl's inequality for singular values \citep{GolubVanLoan2013}, $\sigma_{i+k}(A) \le \sigma_i(A-B) + \sigma_{k+1}(B)$ for every $i\ge1$; since $B$ has at most $k$ nonzero singular values, $\sigma_{k+1}(B)=0$, so
+		\[
+			\sigma_{i+k}(A) \le \sigma_i(A-B).
+		\]
+		Squaring and summing over $i=1,\dots,r-k$,
+		\[
+			\sum_{i=1}^{r-k}\sigma_{i+k}(A)^2 \le \sum_{i=1}^{r-k}\sigma_i(A-B)^2 \le \|A-B\|_F^2
+		\]
+		the second inequality since the right sum is only part of the full non-negative sum defining $\|A-B\|_F^2$. Reindexing $j:=i+k$, the left side is $\sum_{j=k+1}^r\sigma_j(A)^2 = \|A-A_k\|_F^2$. So
+		\[
+			\|A-A_k\|_F^2 \le \|A-B\|_F^2
+		\]
+		and taking square roots gives $\|A-A_k\|_F \le \|A-B\|_F$.
+	\end{proof}
 	
 	
