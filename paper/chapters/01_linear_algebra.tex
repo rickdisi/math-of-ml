@@ -217,6 +217,25 @@
 			so $T$ is a linear operator.
 		\end{example}
 		
+		\begin{proposition}[Matrix Representation of Linear Maps]
+			\label{prop:matrix-representation}
+			Let $T: \mathbb{F}^n \to \mathbb{F}^m$ be a linear map. Then there exists a unique matrix $A \in \mathrm{Mat}(m, n, \mathbb{F})$ such that $T(x) = Ax$ for all $x \in \mathbb{F}^n$, where the $j$-th column of $A$ is $T(e_j)$ and $\{e_1, \dots, e_n\}$ is the standard basis of $\mathbb{F}^n$.
+		\end{proposition}
+		
+		\begin{proof}
+			For any $x \in \mathbb{F}^n$, we write $x = \sum_{j=1}^n x_j e_j$. By the linearity of $T$, we have $T(x) = T(\sum_{j=1}^n x_j e_j) = \sum_{j=1}^n x_j T(e_j)$. Since matrix-vector multiplication $Ax$ is defined as the linear combination of the columns of $A$ weighted by the components of $x$, and the $j$-th column of $A$ is defined as $T(e_j)$, it follows that $T(x) = Ax$. \newline
+			\indent For uniqueness, suppose $A'\in\mathrm{Mat}(m,n,\mathbb{F})$ also satisfies $T(x)=A'x$ for all $x\in\mathbb{F}^n$. For each $j$, taking $x=e_j$ gives $Ae_j = T(e_j) = A'e_j$; since $Me_j$ is the $j$-th column of $M$, $A$ and $A'$ have the same columns, so $A=A'$.
+		\end{proof}
+		
+		\begin{corollary}[Composition and Matrix Multiplication]
+			\label{cor:composition-multiplication}
+			Let $T: \mathbb{F}^n \to \mathbb{F}^m$ have matrix representation $A$ and $S: \mathbb{F}^m \to \mathbb{F}^k$ have matrix representation $B$. Then the composition $S \circ T: \mathbb{F}^n \to \mathbb{F}^k$ has the matrix representation $BA$.
+		\end{corollary}
+		
+		\begin{proof}
+			For any $x \in \mathbb{F}^n$, applying Proposition~\ref{prop:matrix-representation} directly yields $(S \circ T)(x) = S(T(x)) = S(Ax)$. Applying the proposition a second time to the action of $S$ on the vector $Ax \in \mathbb{F}^m$ gives $S(Ax) = B(Ax)$. By the associativity of matrix multiplication, $B(Ax) = (BA)x$. Thus, the composition $(S \circ T)$ is represented by the matrix product $BA$.
+		\end{proof}
+		
 		\begin{definition}[Kernel and Image]
 			Let $T \in \operatorname{Hom}_{F}(V,W)$. The \textbf{kernel} of $T$ is the set $\ker(T) := \left\{ v \in V | T(v) = 0 \right\} \subseteq V$. The \textbf{image} of T is the set $\operatorname{im}(T) := \left\{ T(v) \in W | v \in V \right\} \subseteq W$.
 		\end{definition}

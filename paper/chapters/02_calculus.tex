@@ -1,4 +1,199 @@
 \chapter{Calculus and Optimisation}
 \label{chap:calculus}
 
-
+\section{Multivariable Calculus}
+\label{sec:multivariable-calculus}
+	
+	This section develops differentiation in several variables: the partial, directional and total derivative, the Jacobian and Hessian, the chain rule and the gradient's geometric meaning as the direction of steepest ascent. \\
+	
+	The chain rule proved here is the mathematical content of backpropagation in the Neural Networks Chapter: computing gradients through a composition of layers is precisely repeated application of Theorem~\ref{thm:chain-rule}. Steepest ascent and the Hessian are used more immediately, in this same chapter, to justify the gradient descent update direction and to state its convergence conditions. \\
+	
+	The gradient computations developed here are checked in C++ as \texttt{gradient\_checker.cpp} (Appendix~\ref{app:gradient-checker}), which compares an analytically computed gradient against a numerical finite-difference approximation.
+	
+	\subsection{Differentiability and the Jacobian}
+	\label{subsec:differentiability-and-jacobian}
+		
+		\begin{definition}[Partial Derivative]
+			\label{def:partial-derivative}
+			Let $f:\mathbb{R}^n\to\mathbb{R}$ and $a\in\mathbb{R}^n$. The \emph{partial derivative} of $f$ at $a$ with respect to $x_i$ is
+			\[
+				\frac{\partial f}{\partial x_i}(a) := \lim_{h\to0} \frac{f(a+he_i)-f(a)}{h}
+			\]
+			when this limit exists, where $e_i$ is the $i$-th standard basis vector.
+		\end{definition}
+		
+		\begin{remark}[Partial Derivatives Are Weak]
+			\label{rem:partials-are-weak}
+			Existence of all partial derivatives at one point does not imply continuity there.
+		\end{remark}
+		
+		\begin{example}[Discontinuity]
+			Consider
+			\[
+				f(x,y) := \begin{cases} \dfrac{xy}{x^2+y^2} & (x,y)\neq(0,0) \\ 0 & (x,y)=(0,0) \end{cases}
+			\]
+			with $\frac{\partial f}{\partial x}(0,0) = \frac{\partial f}{\partial y}(0,0) = 0$, yet $f$ is not continuous at $(0,0)$ (approaching along $y=x$ gives $f(x,x)=1/2$ for all $x\neq0$, not $0$).
+		\end{example}
+		
+		\begin{definition}[Differentiability and the Total Derivative]
+			\label{def:total-derivative}
+			Let $f:\mathbb{R}^n\to\mathbb{R}^m$ and $a\in\mathbb{R}^n$. $f$ is \emph{differentiable} at $a$ if there exists a linear map $L:\mathbb{R}^n\to\mathbb{R}^m$ such that
+			\[
+				\lim_{h\to0} \frac{\|f(a+h)-f(a)-L(h)\|}{\|h\|} = 0
+			\]
+			If such $L$ exists, it is unique and is called the (total) derivative of $f$ at $a$, denoted $f'(a)$.
+		\end{definition}
+		
+		\begin{proposition}[Jacobian Matrix]
+			\label{prop:jacobian}
+			If $f:\mathbb{R}^n\to\mathbb{R}^m$ is differentiable at $a$ (Definition~\ref{def:total-derivative}), then every partial derivative $\frac{\partial f_i}{\partial x_j}(a)$ exists, and $f'(a)$, expressed as a matrix in the standard bases, is given by
+			\[
+				J_f(a) := f'(a) \qquad (J_f(a))_{ij} = \frac{\partial f_i}{\partial x_j}(a)
+			\]
+			The converse does not hold: by Remark~\ref{rem:partials-are-weak}, existence of all partial derivatives at $a$ does not by itself imply $f$ is differentiable at $a$.
+		\end{proposition}
+		
+		\begin{proof}
+			Let $L=f'(a)$, so
+			\[
+				\lim_{h\to0} \frac{\|f(a+h)-f(a)-L(h)\|}{\|h\|} = 0
+			\]
+			Fix $i\in\{1,\dots,n\}$. Since this limit holds for all $h\to0$, it holds in particular along the path $h=te_i$, $t\to0$; as $\|te_i\|=|t|$,
+			\[
+				\lim_{t\to0} \frac{\|f(a+te_i)-f(a)-tL(e_i)\|}{|t|} = 0
+				\quad\Longleftrightarrow\quad
+				\lim_{t\to0} \frac{f(a+te_i)-f(a)}{t} = L(e_i)
+			\]
+			using linearity, $L(te_i)=tL(e_i)$. Applying Definition~\ref{def:partial-derivative} componentwise to each $f_j$, the left side is the vector of partials $\frac{\partial f}{\partial x_i}(a) := (\frac{\partial f_1}{\partial x_i}(a),\dots,\frac{\partial f_m}{\partial x_i}(a))$; so this limit existing shows each $\frac{\partial f_j}{\partial x_i}(a)$ exists, with
+			\[
+				L(e_i) = \frac{\partial f}{\partial x_i}(a)
+			\]
+			Since $J_f(a)$'s $i$-th column is $L(e_i)$, this gives $(J_f(a))_{ji} = \frac{\partial f_j}{\partial x_i}(a)$ for every $j$. Since $i\in\{1,\dots,n\}$ was arbitrary, this holds for every column, giving the full matrix identity. This is exactly Proposition~\ref{prop:jacobian}'s formula, with the roles of $i,j$ swapped since $i$ here indexes the input coordinate and $j$ the output coordinate.
+		\end{proof}
+		
+		\begin{definition}[Gradient]
+			\label{def:gradient}
+			Let $f:\mathbb{R}^n\to\mathbb{R}$ be differentiable at $a$, so $f'(a):\mathbb{R}^n\to\mathbb{R}$ is linear. Define $v \in \mathbb{R}^n$ by $v_i := f'(a)(e_i)$ for each standard basis vector $e_i$. For any $h = \sum_i h_ie_i \in \mathbb{R}^n$, linearity of $f'(a)$ gives
+			\[
+				f'(a)(h) = \sum_{i=1}^n h_i\, f'(a)(e_i) = \sum_{i=1}^n h_iv_i = \langle v,h\rangle
+			\]
+			This $v$ is the unique vector with $f'(a)(h) = \langle v,h\rangle$ for all $h$: if $v'$ also satisfied this, then $\langle v-v',h\rangle=0$ for all $h$, and taking $h=v-v'$ gives $\|v-v'\|^2=0$, so $v=v'$. This $v$ is the \emph{gradient} of $f$ at $a$, written $\nabla f(a)$, and coincides with the column vector of partial derivatives, $\nabla f(a) = J_f(a)^\top$.
+		\end{definition}
+		
+		\begin{compremark}
+			The gradient computed by Definition~\ref{def:gradient} is checked in C++ as \texttt{gradient\_checker.cpp} (Appendix~\ref{app:gradient-checker}).
+			
+			The checker uses the central difference, $\partial f/\partial x_i(a) \approx \big(f(a+he_i)-f(a-he_i)\big)/(2h)$, rather than the forward difference $\big(f(a+he_i)-f(a)\big)/h$. By Taylor's theorem, the forward difference's leading error is $O(h)$, while the central difference's second-order terms cancel between the $+h$ and $-h$ expansions, leaving $O(h^2)$, which is a strictly better approximation for the same $h$, at the cost of one extra evaluation per coordinate.
+			
+			On the test function in \texttt{main()}, the maximum error was $5.42\times10^{-10}$, smaller than the naive $O(h^2)\approx10^{-8}$ estimate would suggest. This is because the test function is an exact quadratic: its third derivative vanishes identically, so the $O(h^2)$ truncation term vanishes too, leaving only floating-point round-off.
+		\end{compremark}
+		
+		\begin{definition}[Hessian Matrix]
+			\label{def:hessian}
+			Let $f:\mathbb{R}^n\to\mathbb{R}$ be such that $\nabla f:\mathbb{R}^n\to\mathbb{R}^n$ is itself differentiable at $a$. The \emph{Hessian} of $f$ at $a$ is the Jacobian of $\nabla f$ at $a$
+			\[
+				H_f(a) := J_{\nabla f}(a) \in \mathrm{Mat}(n,\mathbb{R}) \qquad (H_f(a))_{ij} = \frac{\partial^2 f}{\partial x_i \partial x_j}(a)
+			\]
+		\end{definition}
+		
+		\begin{theorem}[Symmetry of the Hessian Matrix]
+			\label{thm:hessian-symmetric}
+			Let $f:\mathbb{R}^n\to\mathbb{R}$ be twice differentiable at $a$ with continuous second partial derivatives in a neighbourhood of $a$. Then $H_f(a)$ is symmetric, i.e.\
+			\[
+				\frac{\partial^2 f}{\partial x_i\partial x_j}(a) = \frac{\partial^2 f}{\partial x_j\partial x_i}(a) \qquad \text{for all } i,j
+			\]
+		\end{theorem}
+		
+		\begin{proof}
+			See \cite[Chapter 9]{Rudin1976}
+		\end{proof}
+		
+	\subsection{The Chain Rule}
+	\label{subsec:chain-rule}
+		
+		\begin{theorem}[Chain Rule]
+			\label{thm:chain-rule}
+			Let $f:\mathbb{R}^n\to\mathbb{R}^m$ be differentiable at $a\in\mathbb{R}^n$, and let $g:\mathbb{R}^m\to\mathbb{R}^k$ be differentiable at $f(a)$. Then $g\circ f:\mathbb{R}^n\to\mathbb{R}^k$ is differentiable at $a$, and
+			\[
+				(g\circ f)'(a) = g'(f(a)) \circ f'(a)
+			\]
+		\end{theorem}
+		
+		\begin{proof}
+			Let $L:=f'(a)$ and $M:=g'(f(a))$. By differentiability, write
+			\[
+				f(a+h) = f(a) + Lh + r(h) \qquad g(f(a)+k) = g(f(a)) + Mk + s(k)
+			\]
+			where $\|r(h)\|/\|h\|\to0$ as $h\to0$ and $\|s(k)\|/\|k\|\to0$ as $k\to0$ (with $r(0)=s(0)=0$).
+			
+			Set $k(h) := f(a+h)-f(a) = Lh+r(h)$. Then
+			\[
+				g(f(a+h)) = g(f(a)) + Mk(h) + s(k(h)) = g(f(a)) + M(Lh) + \big(Mr(h)+s(k(h))\big)
+			\]
+			So $(g\circ f)(a+h) = (g\circ f)(a) + (M\circ L)h + e(h)$, where $e(h):=Mr(h)+s(k(h))$. It remains to show $\|e(h)\|/\|h\|\to0$.
+			
+			Since $M$ is linear (on $\mathbb{R}^m$, finite-dimensional), $\|Mr(h)\|\le C\|r(h)\|$ for some constant $C$, so $\|Mr(h)\|/\|h\|\to0$.
+			
+			As $h\to0$, $k(h)=Lh+r(h)\to0$, and $\|k(h)\|\le\|L\|\|h\|+\|r(h)\|\le C'\|h\|$ for small $h$ (some constant $C'$, since $r(h)/\|h\|\to0$ is eventually bounded). If $k(h)\neq0$,
+			\[
+				\frac{\|s(k(h))\|}{\|h\|} = \frac{\|s(k(h))\|}{\|k(h)\|}\frac{\|k(h)\|}{\|h\|} \le \frac{\|s(k(h))\|}{\|k(h)\|} C'
+			\]
+			As $h\to0$, $k(h)\to0$, so $\|s(k(h))\|/\|k(h)\|\to0$; hence this term $\to0$ too. (If $k(h)=0$, $s(k(h))=0$ and the bound holds trivially.)
+			
+			So $\|e(h)\|/\|h\|\to0$, meaning $g\circ f$ is differentiable at $a$ with derivative $M\circ L = g'(f(a))\circ f'(a)$.
+		\end{proof}
+		
+		\begin{corollary}[Matrix Form of the Chain Rule]
+			\label{cor:chain-rule-matrix}
+			Under the hypotheses of Theorem~\ref{thm:chain-rule}, the Jacobians satisfy
+			\[
+				J_{g\circ f}(a) = J_g(f(a))\, J_f(a)
+			\]
+			where the right-hand side is ordinary matrix multiplication.
+		\end{corollary}
+		
+		\begin{proof}
+			By Theorem~\ref{thm:chain-rule}, $(g\circ f)'(a) = g'(f(a))\circ f'(a)$, a composition of linear maps. By Corollary~\ref{cor:composition-multiplication}, expressing both sides in the standard bases gives $J_{g\circ f}(a) = J_g(f(a))J_f(a)$ directly.
+		\end{proof}
+		
+	\subsection{Gradient as Steepest Ascent}
+		
+		\begin{definition}[Directional Derivative]
+			\label{def:directional-derivative}
+			Let $f:\mathbb{R}^n\to\mathbb{R}$ and $a\in\mathbb{R}^n$, and let $u\in\mathbb{R}^n$ be a unit vector ($\|u\|=1$). The \emph{directional derivative} of $f$ at $a$ in direction $u$ is
+			\[
+				D_uf(a) := \lim_{t\to0} \frac{f(a+tu)-f(a)}{t}
+			\]
+			when this limit exists. Taking $u=e_i$ recovers the partial derivative, $D_{e_i}f(a) = \frac{\partial f}{\partial x_i}(a)$ (Definition~\ref{def:partial-derivative}), so the directional derivative generalises the partial derivative to an arbitrary direction.
+		\end{definition}
+		
+		\begin{remark}[Directional Derivative via the Gradient]
+			\label{rem:directional-derivative-gradient}
+			If $f$ is differentiable at $a$, then $D_uf(a) = f'(a)(u)$ for any unit vector $u$: this is exactly the limit defining $f'(a)(h)$ (Definition~\ref{def:total-derivative}) restricted to $h=tu$, $t\to0$, the same specialisation used in the proof of Proposition~\ref{prop:jacobian}. By Definition~\ref{def:gradient}, $f'(a)(h) = \langle \nabla f(a), h\rangle$ for all $h$, so in particular
+			\[
+				D_uf(a) = \langle \nabla f(a), u \rangle
+			\]
+		\end{remark}
+		
+		\begin{theorem}[Gradient as Direction of Steepest Ascent]
+			\label{thm:steepest-ascent}
+			Let $f:\mathbb{R}^n\to\mathbb{R}$ be differentiable at $a$ with $\nabla f(a)\neq0$. Among all unit vectors $u$, $D_uf(a)$ is maximised uniquely at
+			\[
+				u = \frac{\nabla f(a)}{\|\nabla f(a)\|}
+			\]
+			with maximum value $D_uf(a) = \|\nabla f(a)\|$.
+		\end{theorem}
+		
+		\begin{proof}
+			By Remark~\ref{rem:directional-derivative-gradient}, $D_uf(a) = \langle \nabla f(a), u\rangle$. By Cauchy-Schwarz (Theorem~\ref{thm:cauchy-schwarz}),
+			\[
+				D_uf(a) = \langle \nabla f(a), u \rangle \le |\langle \nabla f(a), u\rangle| \le \|\nabla f(a)\|\|u\| = \|\nabla f(a)\|
+			\]
+			using $\|u\|=1$. So $D_uf(a) \le \|\nabla f(a)\|$ for every unit vector $u$, with $u=\nabla f(a)/\|\nabla f(a)\|$ achieving $D_uf(a) = \langle \nabla f(a), \nabla f(a)/\|\nabla f(a)\|\rangle = \|\nabla f(a)\|^2/\|\nabla f(a)\| = \|\nabla f(a)\|$, so the bound is attained and this is the maximum.
+			
+			For uniqueness, suppose $u$ is any unit vector achieving the maximum, $D_uf(a) = \|\nabla f(a)\|$. From the chain of inequalities above,
+			\[
+				\|\nabla f(a)\| = D_uf(a) = \langle\nabla f(a),u\rangle \le |\langle\nabla f(a),u\rangle| \le \|\nabla f(a)\|
+			\]
+			both inequalities must be equalities. The second is exactly the equality condition of Cauchy-Schwarz (Theorem~\ref{thm:cauchy-schwarz}), so $\nabla f(a)$ and $u$ are linearly dependent: $u = t\,\nabla f(a)$ for some $t\in\mathbb{R}$. Since $\|u\|=1$, $|t|=1/\|\nabla f(a)\|$. The first equality, $\langle\nabla f(a),u\rangle = |\langle\nabla f(a),u\rangle|$, forces $\langle\nabla f(a),u\rangle\ge0$; substituting $u=t\nabla f(a)$ gives $t\|\nabla f(a)\|^2\ge0$, so $t\ge0$, hence $t=1/\|\nabla f(a)\|$ (not its negative). So $u=\nabla f(a)/\|\nabla f(a)\|$ is the unique maximiser.
+		\end{proof}
