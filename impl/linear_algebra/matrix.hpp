@@ -3,6 +3,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <vector>
+#include <cmath> 
 
 // complete Matrix object
 
@@ -81,3 +82,36 @@ class Matrix {
             return result;
         }
 };
+
+// Other Operators
+
+// dot(u, v): dot product of two n x 1 column vectors, stored as Matrix(n,1)
+double dot(const Matrix& u, const Matrix& v) {
+    double sum = 0.0;
+    for (int i = 0; i < u.rows(); ++i) {
+        sum += u(i, 0) * v(i, 0);
+    }
+    return sum;
+}
+
+// norm(v): sqrt(dot(v,v))
+double norm(const Matrix& v) {
+    return std::sqrt(dot(v, v));
+}
+
+// scale(v, c): returns c * v for an n x 1 vector v
+Matrix scale(const Matrix& v, double c) {
+    int n = v.rows();
+    Matrix result(n, 1);
+    for (int i = 0; i < n; ++i) {
+        result(i, 0) = c * v(i, 0);
+    }
+    return result;
+}
+
+// subtractInPlace(u, w): u -= w, for n x 1 vectors
+void subtractInPlace(Matrix& u, const Matrix& w) {
+    for (int i = 0; i < u.rows(); ++i) {
+        u(i, 0) -= w(i, 0);
+    }
+}

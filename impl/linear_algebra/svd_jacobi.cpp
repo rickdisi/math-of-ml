@@ -70,9 +70,7 @@ void computeSigmaAndU(const Matrix& A, const Matrix& sortedEigenvalues, const Ma
         if (s > tol) {
             Matrix vi = getColumn(sortedV, i);
             Matrix Avi = A * vi; // m x 1
-            for (int row = 0; row < m; ++row) {
-                Avi(row, 0) /= s;
-            }
+            Avi = scale(Avi, 1.0 / s); 
             setColumn(U, i, Avi);
         }
         // else: leave column i of U as zero, which is already true by construction
