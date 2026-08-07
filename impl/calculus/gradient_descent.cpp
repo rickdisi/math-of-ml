@@ -3,6 +3,8 @@
 #include "../linear_algebra/matrix.hpp"
 #include "../linear_algebra/jacobi_eigensolver.hpp"
 
+// Implements the Gradient Descent algorithm
+
 int dim = 6;
 Matrix A(dim, dim);
 
@@ -18,7 +20,7 @@ Matrix analyticGradient(const Matrix& x) { // Same gradient function in 'gradien
     return sumx;
 }
 
-double computeL(const Matrix& A) {
+double computeL(const Matrix& A) { // Computes Lipschitz Constant
     int n = A.rows();
     Matrix Q(n, n);
     Matrix eigenvalues(n, 1);
@@ -36,7 +38,7 @@ double computeL(const Matrix& A) {
     return L;
 }
 
-Matrix gradientDescent(const Matrix& x0, double eta, double epsilon, int& iterations) {
+Matrix gradientDescent(const Matrix& x0, double eta, double epsilon, int& iterations) { // Main algorithm: gradient descent sequence
     Matrix x = x0;
     iterations = 0;
 
@@ -52,7 +54,7 @@ Matrix gradientDescent(const Matrix& x0, double eta, double epsilon, int& iterat
 }
 
 
-int main() {
+int main() { // Test case
 
     Matrix M(5, 6);
     M(0,0) = 4;  M(0,1) = -3; M(0,2) = 2;  M(0,3) = 1;  M(0,4) = -5; M(0,5) = 0;
@@ -86,6 +88,6 @@ int main() {
     std::cout << "f(x_K): " << fxk << std::endl;
     std::cout << "ratio: " << ratio << std::endl;
     std::cout << "iterations: " << iterations << std::endl;
-    
+
     return 0;
 }
