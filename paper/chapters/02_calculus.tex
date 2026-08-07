@@ -197,3 +197,195 @@
 			\]
 			both inequalities must be equalities. The second is exactly the equality condition of Cauchy-Schwarz (Theorem~\ref{thm:cauchy-schwarz}), so $\nabla f(a)$ and $u$ are linearly dependent: $u = t\,\nabla f(a)$ for some $t\in\mathbb{R}$. Since $\|u\|=1$, $|t|=1/\|\nabla f(a)\|$. The first equality, $\langle\nabla f(a),u\rangle = |\langle\nabla f(a),u\rangle|$, forces $\langle\nabla f(a),u\rangle\ge0$; substituting $u=t\nabla f(a)$ gives $t\|\nabla f(a)\|^2\ge0$, so $t\ge0$, hence $t=1/\|\nabla f(a)\|$ (not its negative). So $u=\nabla f(a)/\|\nabla f(a)\|$ is the unique maximiser.
 		\end{proof}
+	
+\section{Gradient Descent}
+	
+	This section covers convexity and $L$-smoothness, the two hypothesis classes gradient descent's guarantees rest on; the Descent Lemma, built from the multivariate Taylor theorem and a Hessian bound derived via the spectral theorem; and the convergence theorem itself, which combines the Descent Lemma with convexity in a telescoping argument to bound how quickly gradient descent approaches a minimiser. \\
+	
+	This is where Chapter~\ref{chap:calculus}'s calculus machinery (the gradient and the spectral theorem via the Descent Lemma) becomes a working algorithm. Gradient descent is defined and proven to converge. This is the training algorithm Chapter~\ref{chap:neural-networks} uses. \\
+	
+	The algorithm is implemented from scratch in C++ as \texttt{gradient\_descent.cpp} (Appendix~\ref{app:gradient-descent}).
+	
+	\subsection{Convexity and $L$-Smoothness}
+		
+		\begin{definition}[Convex Function]
+			\label{def:convex-function}
+			Let $f:\mathbb{R}^n\to\mathbb{R}$ be differentiable. $f$ is convex if
+			\[
+				f(y) \ge f(x) + \langle \nabla f(x), y-x \rangle \qquad \text{for all } x,y\in\mathbb{R}^n
+			\]
+		\end{definition}
+		
+		\begin{remark}
+			\label{rem:convex-first-order-characterisation}
+			Definition~\ref{def:convex-function} is the first-order characterisation of convexity. For differentiable $f$, it is equivalent to the more general line-segment definition of convexity, $f(\lambda x+(1-\lambda)y)\le\lambda f(x)+(1-\lambda)f(y)$ for all $x,y$ and $\lambda\in[0,1]$. See \cite[\S3.1]{BoydVandenberghe2004}.
+		\end{remark}
+		
+		\begin{definition}[Lipschitz Continuity and Gradient]
+			\label{def:l-smooth}
+			A differentiable function $f: \mathbb{R}^n \to \mathbb{R}$ is Lipschitz continuous ($L$-continuous) if
+			\[
+				|f(x) - f(y)| \le L\|x - y\| \quad \text{for all } x, y \in \mathbb{R}^n
+			\]
+			And, the function's Lipschitz gradient ($L$-smoothness) is
+			\[
+				\|\nabla f(x) - \nabla f(y)\| \le L\|x - y\| \quad \text{for all } x,y \in \mathbb{R}^n
+			\]
+		\end{definition}
+		
+		\begin{example}[$\sin(x)$ is $1$-Lipschitz continuous]
+			\label{ex:sin-lipschitz}
+			Let $f(x) = \sin(x)$ on $\mathbb{R}$. Since $f'(x) = \cos(x)$ and $|\cos(x)| \le 1$ for all $x$, $f$ is Lipschitz with constant $L=1$: for any $x,y\in\mathbb{R}$, by the Mean Value Theorem \citep{Rudin1976} there exists $c$ between $x$ and $y$ with
+			\[
+				|f(x)-f(y)| = |f'(c)||x-y| = |\cos(c)||x-y| \le |x-y|
+			\]
+		\end{example}
+		
+	\subsection{The Descent Lemma}
+		
+		\begin{theorem}[Taylor's Theorem, second-order multivariate form]
+			\label{thm:taylor-multivariate}
+			Let $f:\mathbb{R}^n\to\mathbb{R}$ have continuous second partial derivatives on an open set containing the line segment between $a$ and $a+h$. Then
+			\[
+				f(a+h) = f(a) + \langle \nabla f(a), h \rangle + \frac{1}{2} h^\top H_f(\xi)\, h
+			\]
+			for some $\xi$ on the segment between $a$ and $a+h$, where $H_f$ is the Hessian (Definition~\ref{def:hessian}).
+		\end{theorem}
+		
+		\begin{proof}
+			See \cite[\S9.8]{Rudin1976}.
+		\end{proof}
+		
+		\begin{proposition}[Hessian Bound Given a Spectral Bound]
+			\label{prop:hessian-bound}
+			Let $H \in \mathrm{Mat}(n,\mathbb{R})$ be symmetric with all eigenvalues $\lambda \le L$. Then for every $h\in\mathbb{R}^n$,
+			\[
+				h^\top H h \le L\|h\|^2.
+			\]
+		\end{proposition}
+		
+		\begin{proof}
+			By the Spectral Theorem (Theorem~\ref{thm:spectral-theorem}), $H$ has an orthonormal eigenbasis $q_1,\dots,q_n$ with real eigenvalues $\lambda_1,\dots,\lambda_n$, each $\lambda_i \le L$. Write $h = \sum_i c_iq_i$; then
+			\[
+				h^\top H h = \sum_i \lambda_ic_i^2 \le L\sum_i c_i^2 = L\|h\|^2
+			\]
+			using orthonormality of $\{q_i\}$ for both equalities, and $\lambda_i \le L$ together with $c_i^2\ge0$ for the inequality.
+		\end{proof}
+		
+		\begin{remark}[$L$-Smoothness and the Hessian]
+			\label{rem:l-smooth-hessian-equivalence}
+			For $f:\mathbb{R}^n\to\mathbb{R}$ with continuous second partial derivatives, $f$ is $L$-smooth (Definition~\ref{def:l-smooth}) iff every eigenvalue of $H_f(x)$ is at most $L$. See \cite[\S9.1]{BoydVandenberghe2004}.
+		\end{remark}
+		
+		\begin{lemma}[Descent Lemma]
+			\label{lem:descent}
+			Let $f:\mathbb{R}^n\to\mathbb{R}$ be $L$-smooth (Definition~\ref{def:l-smooth}) with continuous second partial derivatives on $\mathbb{R}^n$. Then for all $x,h\in\mathbb{R}^n$,
+			\[
+				f(x+h) \le f(x) + \langle \nabla f(x), h \rangle + \frac{L}{2}\|h\|^2
+			\]
+		\end{lemma}
+		
+		\begin{proof}
+			By Taylor's theorem (Theorem~\ref{thm:taylor-multivariate}), there exists $\xi$ on the segment between $x$ and $x+h$ with
+			\[
+				f(x+h) = f(x) + \langle \nabla f(x), h \rangle + \frac{1}{2} h^\top H_f(\xi)\, h
+			\]
+			Since $f$ has continuous second partial derivatives, $H_f(\xi)$ is symmetric by Theorem~\ref{thm:hessian-symmetric}. Since $f$ is $L$-smooth, Remark~\ref{rem:l-smooth-hessian-equivalence} gives that every eigenvalue of $H_f(\xi)$ is at most $L$. So $H_f(\xi)$ satisfies the hypotheses of Proposition~\ref{prop:hessian-bound} (symmetric, eigenvalues $\le L$), giving
+			\[
+				h^\top H_f(\xi)\, h \le L\|h\|^2
+			\]
+			Substituting, we obtain
+			\[
+				f(x+h) = f(x) + \langle \nabla f(x), h \rangle + \frac{1}{2} h^\top H_f(\xi)\, h \le f(x) + \langle \nabla f(x), h \rangle + \frac{L}{2}\|h\|^2
+			\]
+		\end{proof}
+		
+	\subsection{Convergence of Gradient Descent}
+		
+		\begin{definition}[Gradient Descent]
+			\label{def:gradient-descent}
+			Let $f:\mathbb{R}^n\to\mathbb{R}$ be differentiable and let $x_0\in\mathbb{R}^n$. For a fixed step size $\eta>0$, the gradient descent sequence $(x_k)_{k\ge0}$ is defined by
+			\[
+				x_{k+1} := x_k - \eta\, \nabla f(x_k) \qquad \text{for } k=0,1,2,\dots
+			\]
+			At each step, $x_{k+1}$ moves from $x_k$ in the direction $-\nabla f(x_k)$, the direction of steepest descent (Theorem~\ref{thm:steepest-ascent}), scaled by $\eta$.
+		\end{definition}
+		
+		\begin{compremark}
+			Theorem~\ref{thm:gd-convergence}'s bound is checked with \texttt{gradient\_descent.cpp} (Appendix~\ref{app:gradient-descent}). Two choices are worth justifying.
+			
+			\begin{enumerate}[label=\roman*.]
+				\item \textbf{Step size $\eta=1/L$.} This is the boundary value the theorem allows, giving the fastest guaranteed rate within its hypothesis.
+				\item \textbf{$L$ computed numerically.} \texttt{computeL()} uses the Jacobi eigensolver to find $A$'s largest eigenvalue, straightforward only because the test function $f(x)=x^\top Ax$ has constant Hessian $2A$, so $L$ is exactly twice that eigenvalue (Remark~\ref{rem:l-smooth-hessian-equivalence}). A general $f$'s Hessian varies with $x$, and finding a global Lipschitz constant for $\nabla f$ isn't normally this direct.
+			\end{enumerate}
+			
+			On this test case, gradient descent converged in $261$ iterations to $f(x_K)\approx4.25\times10^{-14}$, against the theorem's bound of $\approx68.7$. The theorem holds, but the bound isn't tight: it's a worst-case guarantee over all convex, $L$-smooth functions, while this well-conditioned quadratic converges far faster than that guarantee requires.
+		\end{compremark}
+		
+		\begin{theorem}[Convergence of Gradient Descent]
+			\label{thm:gd-convergence}
+			Let $f:\mathbb{R}^n \to \mathbb{R}$ be convex (Definition~\ref{def:convex-function}), $L$-smooth (Definition~\ref{def:l-smooth}) and have continuous second partial derivatives on $\mathbb{R}^n$; and let $(x_k)_{k\ge0}$ be the gradient descent sequence (Definition~\ref{def:gradient-descent}) with step size $\eta \le \frac{1}{L}$. Assume a minimiser $x^\star$ exists with $f(x^\star)\le f(x)$ for all $x\in\mathbb{R}^n$. Then, for every natural number $K \ge 1$
+			\[
+				f(x_K) - f(x^\star) \le \frac{\|x_0-x^\star\|^2}{2\eta K}
+			\]
+		\end{theorem}
+		
+		\begin{proof}
+			The following argument adapts a standard technique for gradient descent under convexity and $L$-smoothness; see \cite[\S3.2]{Bubeck2015} for the original.
+			
+			By the Descent Lemma (Lemma~\ref{lem:descent}) applied at $x=x_k$, $h=x_{k+1}-x_k=-\eta\nabla f(x_k)$ (Definition~\ref{def:gradient-descent}),
+			\[
+				f(x_{k+1}) \le f(x_k) + \langle \nabla f(x_k), -\eta\nabla f(x_k)\rangle + \frac{L}{2}\|\eta\nabla f(x_k)\|^2 = f(x_k) - \eta\left(1-\frac{L\eta}{2}\right)\|\nabla f(x_k)\|^2
+			\]
+			Since $\eta\le1/L$, $1-L\eta/2\ge1/2$, so
+			\[
+				f(x_{k+1}) \le f(x_k) - \frac{\eta}{2}\|\nabla f(x_k)\|^2 \tag{A}
+			\]
+			
+			By Definition~\ref{def:gradient-descent}, $x_{k+1}-x^\star = (x_k-x^\star) - \eta\nabla f(x_k)$, so
+			\[
+				\|x_{k+1}-x^\star\|^2 = \|x_k-x^\star\|^2 - 2\eta\langle\nabla f(x_k), x_k-x^\star\rangle + \eta^2\|\nabla f(x_k)\|^2 \tag{B}
+			\]
+			
+			By Definition~\ref{def:convex-function} applied at $x=x_k$, $y=x^\star$,
+			\[
+				f(x^\star) \ge f(x_k) + \langle\nabla f(x_k), x^\star-x_k\rangle \quad\Longrightarrow\quad \langle\nabla f(x_k), x_k-x^\star\rangle \ge f(x_k)-f(x^\star) \tag{C}
+			\]
+			
+			Substituting (C) into (B),
+			\[
+				\|x_{k+1}-x^\star\|^2 \le \|x_k-x^\star\|^2 - 2\eta\big(f(x_k)-f(x^\star)\big) + \eta^2\|\nabla f(x_k)\|^2 \tag{D}
+			\]
+			
+			From (A), $\eta\|\nabla f(x_k)\|^2 \le 2\big(f(x_k)-f(x_{k+1})\big)$, so $\eta^2\|\nabla f(x_k)\|^2 \le 2\eta\big(f(x_k)-f(x_{k+1})\big)$. Substituting into (D),
+			\[
+				\|x_{k+1}-x^\star\|^2 \le \|x_k-x^\star\|^2 - 2\eta\big(f(x_k)-f(x^\star)\big) + 2\eta\big(f(x_k)-f(x_{k+1})\big) \tag{E}
+			\]
+			
+			The two $f(x_k)$ terms in (E) cancel:
+			\[
+				\|x_{k+1}-x^\star\|^2 \le \|x_k-x^\star\|^2 - 2\eta\big(f(x_{k+1})-f(x^\star)\big)
+			\]
+			reordering,
+			\[
+				2\eta\big(f(x_{k+1})-f(x^\star)\big) \le \|x_k-x^\star\|^2 - \|x_{k+1}-x^\star\|^2 \tag{F}
+			\]
+			
+			Summing (F) over $k=0,\dots,K-1$, the right-hand side telescopes:
+			\[
+				2\eta\sum_{k=0}^{K-1}\big(f(x_{k+1})-f(x^\star)\big) \le \|x_0-x^\star\|^2 - \|x_K-x^\star\|^2 \le \|x_0-x^\star\|^2
+			\]
+			
+			By (A), $f(x_{k+1})\le f(x_k)$ for every $k$, so $f(x_k)$ is non-increasing; in particular $f(x_K)\le f(x_{k+1})$ for every $k\le K-1$.
+			
+			Since $f(x_k)$ is non-increasing (shown above), every term in the preceding sum satisfies $f(x_{k+1})-f(x^\star) \ge f(x_K)-f(x^\star)$, so
+			\[
+				2\eta K\big(f(x_K)-f(x^\star)\big) \le 2\eta\sum_{k=0}^{K-1}\big(f(x_{k+1})-f(x^\star)\big) \le \|x_0-x^\star\|^2
+			\]
+			Dividing by $2\eta K$,
+			\[
+				f(x_K)-f(x^\star) \le \frac{\|x_0-x^\star\|^2}{2\eta K}
+			\]
+			This concludes the proof.
+		\end{proof}
+		
