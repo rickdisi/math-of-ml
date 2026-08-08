@@ -23,8 +23,10 @@ The paper stands on its own; the C++ implementations are a companion that demons
 - [X] **M2** — LU decomposition with partial pivoting — LU solver
 - [X] **M3** — Inner product spaces, Gram-Schmidt, QR decomposition — QR solver
 - [X] **M4** — Eigenvalues, spectral theorem for symmetric matrices — Jacobi eigensolver
-- [ ] **M5** — SVD derived from the eigendecomposition of $A^\top A$
-- [ ] **M6–M8** — Multivariate calculus, gradient descent, Lagrange multipliers
+- [X] **M5** — SVD derived from the eigendecomposition of $A^\top A$ — SVD via Jacobi on $A^\top A$
+- [X] **M6** — Multivariate calculus, chain rule, gradient as steepest ascent — numerical gradient checker
+- [X] **M7** — Gradient descent convergence under L-smoothness and convexity — gradient descent
+- [ ] **M8** — Lagrange multipliers — KKT solver reusing the M2 LU solver
 - [ ] **M9–M10** — Probability foundations, MLE and cross-entropy
 - [ ] **M11–M13** — Network architecture, backpropagation, Universal Approximation Theorem
 - [ ] **M14–M15** — MNIST data pipeline and training, from scratch
