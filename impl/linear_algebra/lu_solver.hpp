@@ -6,7 +6,7 @@
 
 // Factorises A=LU and then solves a linear system via forward and back substitution
 
-std::vector<int> factorise(Matrix& A) {
+std::vector<int> factoriseLU(Matrix& A) {
     int n = A.rows();
     std::vector<int> perm(n);
 
@@ -47,7 +47,7 @@ std::vector<int> factorise(Matrix& A) {
 };
 
 
-Matrix solve(const Matrix& LU, const std::vector<int>& perm, const Matrix& b) {
+Matrix solveLU(const Matrix& LU, const std::vector<int>& perm, const Matrix& b) {
     int n = LU.rows(); 
 
     // Construct bPrime

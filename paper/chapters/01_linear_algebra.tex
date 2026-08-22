@@ -555,8 +555,8 @@
 		\end{proof}
 		
 	\begin{compremark}
-		\texttt{factorise()} (\texttt{lu\_solver.cpp}) makes two representational choices worth justifying against the mathematics of this section.
-		
+		\texttt{factoriseLU()} (\texttt{lu\_solver.cpp}) makes two representational choices worth justifying against the mathematics of this section.
+
 		\begin{enumerate}[label=\roman*.]
 			\item \textbf{In-place storage of the multipliers.} After eliminating column $k$, every entry below the diagonal in that column is exactly zero. Since this value is already known, it carries no information worth keeping, so the position is free to reuse. The code writes the multiplier $m_{ik}$ there instead: $L$'s diagonal is always $1$ (Definition~\ref{def:lu-decomposition}), so nothing about $L$ is lost by leaving it implicit, and the strictly-lower entries of $L$ are exactly these multipliers. So $A$ is overwritten in place to hold both $U$ and the non-trivial part of $L$, with no extra storage needed.
 			\item \textbf{The permutation as a vector, not a matrix.} The code applies $P$ to $b$ via \texttt{bPrime(i) = b(perm[i], 0)}, a direct reindexing. This matches how $P$ is actually used in the proof of Proposition~\ref{prop:solve-pa-lu}: the argument never needs more from $P$ than reordering $b$'s rows. So representing $P$ as the vector \texttt{perm}, rather than an $n\times n$ matrix, is a faithful, more efficient match for what the proof uses.
@@ -1114,7 +1114,7 @@
 		\end{definition}
 		
 		\begin{lemma}[Invariance of the Orthogonal Complement]
-			\label{lem:invariance-complement}
+riance-complement}
 			Let $A \in \mathrm{Mat}(n,\mathbb{R})$ be symmetric, and let $U \subseteq \mathbb{R}^n$ be a subspace invariant under $A$ (Definition~\ref{def:invariant-subspace}). Then $U^\perp$ (Definition~\ref{def:orthogonal-complement}) is also invariant under $A$.
 		\end{lemma}
 		
@@ -1148,6 +1148,26 @@
 				\langle u, Aw \rangle = \langle Au, w \rangle = 0
 			\]
 			Since $u \in U$ was arbitrary, $Aw \in U^\perp$ by Definition~\ref{def:orthogonal-complement}. Since $w \in U^\perp$ was arbitrary, $A$ maps every vector of $U^\perp$ back into $U^\perp$; that is, $U^\perp$ is invariant under $A$ (Definition~\ref{def:invariant-subspace}).
+		\end{proof}
+		
+		\begin{corollary}[Orthogonal Complement of the Kernel]
+			\label{cor:kernel-image-orthogonal-complement}
+			Let $A\in\mathrm{Mat}(m,n,\mathbb{R})$. Then
+			\[
+				\ker(A)^\perp = \operatorname{im}(A^\top)
+			\]
+		\end{corollary}
+		
+		\begin{proof}
+			For any $w=A^\top y\in\operatorname{im}(A^\top)$ and $v\in\ker(A)$,
+			\[
+				\langle w,v\rangle = (A^\top y)^\top v = y^\top(Av) = y^\top 0 = 0
+			\]
+			so $w\in\ker(A)^\perp$. Hence $\operatorname{im}(A^\top)\subseteq\ker(A)^\perp$.
+			
+			By Rank-Nullity (Theorem~\ref{thm:rank-nullity}), $\dim\ker(A)=n-\operatorname{rank}(A)$. For any subspace $U\subseteq\mathbb{R}^n$, $\dim U^\perp = n-\dim U$ \citep{GolubVanLoan2013}, so $\dim\ker(A)^\perp = \operatorname{rank}(A)$. Also, row rank equals column rank, $\operatorname{rank}(A^\top) = \operatorname{rank}(A)$ by \cite{GolubVanLoan2013}, so $\dim\operatorname{im}(A^\top)=\operatorname{rank}(A)$ too. So $\ker(A)^\perp$ and $\operatorname{im}(A^\top)$ have equal dimension.
+			
+			Equal dimension plus containment gives equality: $\ker(A)^\perp = \operatorname{im}(A^\top)$.
 		\end{proof}
 		
 		\begin{theorem}[Real Spectral Theorem]

@@ -389,3 +389,74 @@
 			This concludes the proof.
 		\end{proof}
 		
+\section{Lagrange Multipliers}
+	
+	This section covers the constrained optimisation problem of minimising $f$ subject to $g(x)=0$, then develops the Implicit Function Theorem, the Lagrange multiplier theorem itself and the Lagrangian, closing with a short geometric interpretation. \\
+	
+	This section reuses Chapter~\ref{chap:linear-algebra}'s Rank-Nullity Theorem and orthogonal complements. Its machinery is reused again in Chapter~\ref{chap:probability} to derive the categorical maximum likelihood estimator, where maximising a likelihood subject to probabilities summing to one is a direct application of the Lagrange multiplier theorem proved here. \\
+	
+	The theorem is applied to a quadratic objective with linear equality constraints, reducing the problem to solving a single linear system, known as the Karush-Kuhn-Tucker (KKT) system. This system is solved in C++ as \texttt{kkt\_solver.cpp} (Appendix~\ref{app:kkt-solver}).
+	
+	\begin{theorem}[Implicit Function Theorem]
+		\label{thm:implicit-function}
+		Let $F:\mathbb{R}^n \to \mathbb{R}^m$ (with $m<n$) be differentiable with continuous partial derivatives and let $x^\star\in\mathbb{R}^n$ satisfy $F(x^\star)=0$. Suppose the $m\times n$ Jacobian $DF(x^\star)$ has full row rank $m$.
+		
+		Then, after reordering coordinates so that $x=(y,z)$ with $y\in\mathbb{R}^{n-m}$, $z\in\mathbb{R}^m$ and the $m\times m$ block $\frac{\partial F}{\partial z}(x^\star)$ is invertible, write $x^\star=(y_0,z_0)$. There exists an open set $U\subseteq\mathbb{R}^{n-m}$ containing $y_0$, an open set $V\subseteq\mathbb{R}^n$ containing $x^\star$ and a continuously differentiable function $h:U\to\mathbb{R}^m$ with $h(y_0)=z_0$, such that for all $(y,z)\in V$,
+		\[
+			F(y,z) = 0 \quad\Longleftrightarrow\quad z = h(y)
+		\]
+		In particular, defining $\varphi(y) := (y,h(y))$ for $y\in U$ gives a local parametrisation of $\{x\in V : F(x)=0\}$ near $x^\star$, with $\varphi(y_0) = x^\star$.
+	\end{theorem}
+	
+	\begin{proof}
+		See \cite[\S9.28]{Rudin1976}.
+	\end{proof}
+	
+	\begin{theorem}[Lagrange Multipliers]
+		\label{thm:lagrange-multipliers}
+		Let $f:\mathbb{R}^n \to \mathbb{R}$ and $g:\mathbb{R}^n \to \mathbb{R}^m$ (with $m<n$) be differentiable with continuous partial derivatives. Suppose $x^\star$ is a local minimiser of $f$ subject to $g(x)=0$ and that $Dg(x^\star)$ has full row rank $m$. Then there exists $\lambda \in \mathbb{R}^m$ such that
+		\[
+			\nabla f(x^\star) = Dg(x^\star)^\top \lambda
+		\]
+		This is a necessary condition for a constrained local minimum and does not assert the converse. Satisfying it does not by itself imply $x^\star$ is a minimiser.
+	\end{theorem}
+	
+	\begin{proof}
+		Since $g(x^\star)=0$ and $Dg(x^\star)$ has full row rank $m$, Theorem~\ref{thm:implicit-function} gives a local parametrisation $\varphi(y)=(y,h(y))$ of $\{x:g(x)=0\}$ near $x^\star$, with $\varphi(y_0)=x^\star$. \\
+		
+		Differentiating $g(\varphi(y))=0$ at $y_0$ (Chain Rule, Theorem~\ref{thm:chain-rule}) gives $Dg(x^\star)D\varphi(y_0)=0$, so $\operatorname{im}(D\varphi(y_0))\subseteq\ker(Dg(x^\star))$. By Rank-Nullity (Theorem~\ref{thm:rank-nullity}), $\dim\ker(Dg(x^\star))=n-m$; by its block form, $D\varphi(y_0)$ has rank $n-m$ too. Equal dimensions plus containment gives equality. \\
+		
+		Let $v\in\ker(Dg(x^\star))$ be arbitrary. Since $\operatorname{im}(D\varphi(y_0))=\ker(Dg(x^\star))$, there exists $u$ with $D\varphi(y_0)u=v$. Set $\gamma(t):=\varphi(y_0+tu)$. Then $\gamma(0)=x^\star$, $\gamma$ stays feasible, and $\gamma'(0)=v$. \\
+		
+		Since $x^\star$ locally minimises $f$ subject to $g=0$ and $\gamma$ stays feasible, $t=0$ locally minimises $f(\gamma(t))$, so its derivative vanishes there:
+		\[
+			0 = \frac{d}{dt}\Big|_{t=0}f(\gamma(t)) = \langle\nabla f(x^\star),\gamma'(0)\rangle = \langle\nabla f(x^\star),v\rangle
+		\]
+		
+		This holds for every $v\in\ker(Dg(x^\star))$, so $\nabla f(x^\star)\in\ker(Dg(x^\star))^\perp$. By Corollary~\ref{cor:kernel-image-orthogonal-complement}, $\ker(Dg(x^\star))^\perp = \operatorname{im}(Dg(x^\star)^\top)$, so $\nabla f(x^\star)=Dg(x^\star)^\top\lambda$ for some $\lambda\in\mathbb{R}^m$.
+	\end{proof}
+	
+	\begin{compremark}
+		Applied to a quadratic objective with linear equality constraints, Theorem~\ref{thm:lagrange-multipliers} reduces to solving a KKT linear system, computed here in \texttt{kkt\_solver.cpp} (Appendix~\ref{app:kkt-solver}).
+		
+		\begin{enumerate}[label=\roman*.]
+			\item \textbf{LU solver.} With the problem reduced to $Kz=d$, it is an ordinary linear system, so the LU solver from Section~\ref{sec:lu-decomposition} is reused directly.
+			\item \textbf{Scoped loops.} \texttt{assembleKKT()} fills the $K$ matrix's four blocks with four separate loops rather than one loop with branching, matching the block structure directly and avoiding a branch check on every entry of the already-zero block.
+		\end{enumerate}
+		
+		Geometrically, $Q=I_2$, $A=(1\ 1)$, $b=1$, $c=0$ asks for the point on the line $x_1+x_2=1$ closest to the origin, which is exactly what minimising $\tfrac12\|x\|^2$ subject to $x_1 + x_2=1$ means. By symmetry, that point should be $(0.5, 0.5)$: this is also the image that Remark~\ref{rem:lagrange-geometric} describes, a circle around the origin growing until it's tangent to the line. \texttt{solveKKT()} returns exactly that, $x = (0.5, 0.5)$, $\lambda = 0.5$, with both residuals vanishing exactly, since every value here is exactly representable in floating point.
+	\end{compremark}
+
+	\begin{remark}[The Lagrangian]
+		\label{rem:lagrangian}
+		The conclusion of Theorem~\ref{thm:lagrange-multipliers} is often restated by defining the \textit{Lagrangian} $\mathcal{L}: \mathbb{R}^n \times \mathbb{R}^m \to \mathbb{R}$,
+		\[
+			\mathcal{L}(x,\lambda) := f(x) - \langle \lambda, g(x)\rangle
+		\]
+		so that $\nabla_x\mathcal{L}(x^\star,\lambda) = \nabla f(x^\star) - Dg(x^\star)^\top\lambda = 0$ is exactly the theorem's conclusion and $\nabla_\lambda\mathcal{L}(x^\star,\lambda) = -g(x^\star) = 0$ recovers feasibility. So $x^\star$ (together with the $\lambda$ given by the theorem) is a stationary point of $\mathcal{L}$.
+	\end{remark}
+	
+	\begin{remark}[Geometric Interpretation]
+		\label{rem:lagrange-geometric}
+		The proof above shows $\ker(Dg(x^\star))\subseteq\{v:\langle\nabla f(x^\star),v\rangle=0\}$ (Remark~\ref{rem:directional-derivative-gradient}): every tangent direction of the constraint surface $\{g=0\}$ is also tangent to $f$'s level set through $x^\star$. So the contours of $f$ touch the constraint surface at $x^\star$ rather than crossing it. The tangent spaces don't coincide in general, however: since $\ker(Dg(x^\star))$ has dimension $n-m$ while the level set's tangent hyperplane has dimension $n-1$, they coincide only when $m=1$.
+	\end{remark}
