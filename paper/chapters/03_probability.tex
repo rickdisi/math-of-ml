@@ -1,4 +1,283 @@
 \chapter{Probability and Statistics}
 \label{chap:probability}
 
-
+\section{Probability Foundations}
+\label{sec:probability-foundations}
+	
+	This section develops probability spaces, conditional probability and independence, the Bernoulli and categorical distributions, random variables and expectation, and closes with Jensen's inequality and KL divergence. \\
+	
+	The categorical distribution developed here is the object Chapter~\ref{chap:probability} builds its maximum likelihood estimator toward and the parameter that estimator fits is precisely what Chapter~\ref{chap:neural-networks}'s softmax output layer models. \\
+	
+	\subsection{Probability Spaces and Kolmogorov's Axioms}
+		
+		\begin{definition}[Probability Space]
+			\label{def:probability-space}
+			A probability space is a pair $(\Omega, P)$, where $\Omega$ is a finite (or countable) set (known as the sample space) and $P:\Omega \to [0,1]$ (known as the probability mass function) satisfies
+			\[
+				\sum_{\omega\in\Omega} P(\omega) = 1
+			\]
+			A subset $A \subseteq \Omega$ is called an event and its probability is defined by
+			\[
+				P(A) := \sum_{\omega\in A} P(\omega)
+			\]
+		\end{definition}
+		
+		\begin{proposition}[Kolmogorov's Axioms]
+			\label{prop:kolmogorov-axioms}
+			Let $(\Omega, P)$ be a probability space (Definition~\ref{def:probability-space}). Then
+			\begin{enumerate}[label=($K_\arabic*$)]
+				\item \label{ax:K1} $P(A) \ge 0$ for every event $A\subseteq\Omega$.
+				\item \label{ax:K2} $P(\Omega) = 1$.
+				\item \label{ax:K3} For any finite (or countable) collection of pairwise, disjoint events $A_1, A_2, \dots\subseteq\Omega$,
+				\[
+					P\left(\bigcup_i A_i\right) = \sum_i P(A_i)
+				\]
+			\end{enumerate}
+		\end{proposition}
+		
+		\begin{proof}
+			\ref{ax:K1} Immediate from Definition~\ref{def:probability-space}: $P(A)=\sum_{\omega\in A}P(\omega)$ is a sum of non-negative terms, since $P(\omega)\in[0,1]$ for each $\omega$.
+			
+			\ref{ax:K2} By Definition~\ref{def:probability-space}, $P(\Omega) = \sum_{\omega\in\Omega}P(\omega) = 1$.
+			
+			\ref{ax:K3} Since the $A_i$ are pairwise disjoint, every $\omega\in\bigcup_iA_i$ belongs to exactly one $A_i$, so
+			\[
+				P\left(\bigcup_i A_i\right) = \sum_{\omega\in\bigcup_iA_i} P(\omega) = \sum_i \sum_{\omega\in A_i} P(\omega) = \sum_i P(A_i)
+			\]
+			rearranging the (at most countable) sum, valid since every term is non-negative.
+		\end{proof}
+		
+		\begin{corollary}[Finite Additivity for Disjoint Events]
+			\label{cor:finite-additivity}
+			If $A,B\subseteq\Omega$ are disjoint events, then $P(A\cup B) = P(A)+P(B)$.
+		\end{corollary}
+		
+		\begin{proof}
+			First, $P(\emptyset) = \sum_{\omega\in\emptyset} P(\omega) = 0$, an empty sum, by Definition~\ref{def:probability-space}. The result then follows from \ref{ax:K3}, taking the collection $A_1=A$, $A_2=B$, $A_i=\emptyset$ for $i>2$: these are pairwise disjoint, and
+			\[
+				P(A\cup B) = P\left(\bigcup_i A_i\right) = \sum_i P(A_i) = P(A)+P(B) + \sum_{i>2} P(\emptyset) = P(A)+P(B)
+			\]
+		\end{proof}
+		
+		\begin{corollary}[Complement Rule]
+			\label{cor:complement-rule}
+			For any event $A\subseteq\Omega$, $P(A^c) = 1-P(A)$, where $A^c := \Omega\setminus A$.
+		\end{corollary}
+		
+		\begin{proof}
+			$A$ and $A^c$ are disjoint with $A\cup A^c=\Omega$. By Corollary~\ref{cor:finite-additivity} and \ref{ax:K2},
+			\[
+				1 = P(\Omega) = P(A\cup A^c) = P(A) + P(A^c)
+			\]
+			so $P(A^c) = 1-P(A)$.
+		\end{proof}
+		
+	\subsection{Conditional Probability and Independence}
+		
+		\begin{definition}[Conditional Probability]
+			\label{def:conditional-probability}
+			Let $(\Omega,P)$ be a probability space and $A, B \subseteq \Omega$ events with $P(B)>0$. The conditional probability of $A$ given $B$ is
+			\[
+				P(A\mid B) := \frac{P(A\cap B)}{P(B)}
+			\]
+			This is undefined when $P(B)=0$.
+		\end{definition}
+		
+		\begin{corollary}[Multiplication Rule]
+			\label{cor:multiplication-rule}
+			If $P(B)>0$, then $P(A\cap B) = P(A\mid B)P(B)$.
+		\end{corollary}
+		
+		\begin{proof}
+			This is an immediate rearrangement of Definition~\ref{def:conditional-probability}.
+		\end{proof}
+		
+		\begin{definition}[Independence of Events]
+			\label{def:independence-events}
+			Events $A,B\subseteq\Omega$ are independent if
+			\[
+				P(A\cap B) = P(A)P(B)
+			\]
+		\end{definition}
+		
+		\begin{remark}
+			\label{rem:independence-conditional}
+			If $P(B)>0$, Definition~\ref{def:independence-events} is equivalent to $P(A\mid B) = P(A)$: dividing $P(A\cap B)=P(A)P(B)$ by $P(B)$ (Definition~\ref{def:conditional-probability}) gives $P(A\mid B)=P(A)$ directly, and conversely multiplying $P(A\mid B)=P(A)$ by $P(B)$ recovers $P(A\cap B)=P(A)P(B)$ via Corollary~\ref{cor:multiplication-rule}.
+		\end{remark}
+		
+		\begin{definition}[Random Variable]
+			\label{def:random-variable}
+			Let $(\Omega,P)$ be a probability space. A random variable is a function $X:\Omega\to\mathbb{R}$. For $x\in\mathbb{R}$, write
+			\[
+				P(X=x) := P(\{\omega\in\Omega : X(\omega)=x\})
+			\]
+		\end{definition}
+		
+		\begin{definition}[Independence of Random Variables]
+			\label{def:independence-random-variables}
+			Random variables $X,Y$ on $(\Omega,P)$ are independent if
+			\[
+				P(X=x,\, Y=y) = P(X=x)\,P(Y=y) \qquad \text{for all } x,y
+			\]
+			where $P(X=x,Y=y) := P(\{\omega : X(\omega)=x\}\cap\{\omega:Y(\omega)=y\})$. \\
+			More generally, random variables $X_1,\dots,X_n$ are independent if
+			\[
+				P(X_1=x_1,\dots,X_n=x_n) = \prod_{i=1}^n P(X_i=x_i) \qquad \text{for all } x_1,\dots,x_n
+			\]
+			$X_1,\dots,X_n$ are independent and identically distributed (i.i.d.) if they are independent and $P(X_i=x)=P(X_j=x)$ for all $i,j$ and all $x$ (they share a common probability mass function).
+		\end{definition}
+		
+	\subsection{Bernoulli and Categorical Distributions}
+		
+		\begin{definition}[Categorical Distribution]
+			\label{def:categorical-distribution}
+			Let $(\Omega, P)$ be a probability space and $X:\Omega\to\{1,\dots,K\}$ a random variable. $X$ is categorical with parameter $p=(p_1,\dots,p_K)$, where $p_k\ge0$ and $\sum_{k=1}^K p_k=1$, if
+			\[
+				P(X=k) = p_k \qquad \text{for each } k=1,\dots,K
+			\]
+		\end{definition}
+		
+		\begin{remark}
+			\label{rem:categorical-mle-softmax}
+			This is the distribution the rest of the chapter is aimed at: its parameter $p$ is what the maximum likelihood estimator to come will fit, and what Chapter~\ref{chap:neural-networks}'s softmax layer produces as its output.
+		\end{remark}
+		
+		\begin{remark}[Bernoulli Distribution]
+			\label{rem:bernoulli-distribution}
+			$X$ is Bernoulli$(p)$ if it is categorical (Definition~\ref{def:categorical-distribution}) with $K=2$, $p_1=p$, $p_2=1-p$; relabelling the outcomes $\{1,2\}\to\{0,1\}$ recovers the familiar $\{0,1\}$-valued convention, $P(X=1)=p$, $P(X=0)=1-p$.
+		\end{remark}
+		
+		\begin{remark}[I.I.D.\ Sample Counts]
+			\label{rem:iid-sample-counts}
+			If $X_1,\dots,X_n$ are i.i.d.\ categorical $(p)$ (Definition~\ref{def:independence-random-variables}, Definition~\ref{def:categorical-distribution}), write
+			\[
+				n_k := |\{i : X_i=k\}|
+			\]
+			for the number of samples taking value $k$, so that $n_1+\cdots+n_K=n$.
+		\end{remark}
+		
+	\subsection{Random Variables and Expectation}
+		
+		\begin{definition}[Expectation]
+			\label{def:expectation}
+			Let $(\Omega, P)$ be a probability space and $X:\Omega\to\mathbb{R}$ a random variable with finite range. The expectation of $X$ is
+			\[
+				\mathbb{E}[X] := \sum_{\omega\in\Omega} X(\omega)P(\omega)
+			\]
+		\end{definition}
+		
+		\begin{lemma}[Expectation via the Distribution]
+			\label{lem:expectation-via-distribution}
+			Let $X:\Omega\to\mathbb{R}$ have finite range $\{x_1,\dots,x_r\}$, and let $g:\{x_1,\dots,x_r\}\to\mathbb{R}$. Then
+			\[
+				\mathbb{E}[g(X)] = \sum_{i=1}^r g(x_i)\,P(X=x_i)
+			\]
+		\end{lemma}
+		
+		\begin{proof}
+			The preimages $\{\omega : X(\omega)=x_i\}$ for $i=1,\dots,r$ partition $\Omega$, since $X$ has finite range $\{x_1,\dots,x_r\}$ and every $\omega\in\Omega$ satisfies $X(\omega)=x_i$ for exactly one $i$. Grouping the sum in Definition~\ref{def:expectation} by which part of the partition each $\omega$ falls into,
+			\begin{align*}
+				\mathbb{E}[g(X)] &= \sum_{\omega\in\Omega} g(X(\omega))P(\omega) \\
+				&= \sum_{i=1}^r \sum_{\omega : X(\omega)=x_i} g(x_i)P(\omega) \\
+				&= \sum_{i=1}^r g(x_i) \sum_{\omega:X(\omega)=x_i} P(\omega) \\
+				&= \sum_{i=1}^r g(x_i)P(X=x_i)
+			\end{align*}
+			using $P(X=x_i) = \sum_{\omega:X(\omega)=x_i}P(\omega)$ (Definition~\ref{def:random-variable}) in the last step.
+		\end{proof}
+		
+		\begin{corollary}[Linearity of Expectation]
+			\label{cor:linearity-expectation}
+			For random variables $X,Y$ with finite range and $a,b\in\mathbb{R}$,
+			\[
+				\mathbb{E}[aX+bY] = a\mathbb{E}[X] + b\mathbb{E}[Y]
+			\]
+		\end{corollary}
+		
+		\begin{proof}
+			This is immediate from Definition~\ref{def:expectation} and linearity of summation:
+			\[
+				\mathbb{E}[aX+bY] = \sum_{\omega\in\Omega}(aX(\omega)+bY(\omega))P(\omega) = a\sum_{\omega\in\Omega}X(\omega)P(\omega) + b\sum_{\omega\in\Omega}Y(\omega)P(\omega) = a\mathbb{E}[X]+b\mathbb{E}[Y]
+			\]
+		\end{proof}
+		
+	\subsection{Jensen's Inequality and Kullback-Leibler Divergence}
+		
+		\begin{theorem}[Jensen's Inequality]
+			\label{thm:jensen}
+			Let $X:\Omega\to\mathbb{R}$ have finite range and let $\varphi:\mathbb{R}\to\mathbb{R}$ be convex and differentiable (Remark~\ref{rem:convex-first-order-characterisation}). Then
+			\[
+				\varphi(\mathbb{E}[X]) \le \mathbb{E}[\varphi(X)]
+			\]
+			This is the finite discrete form of Jensen's inequality.
+		\end{theorem}
+		
+		\begin{proof}
+			Let $\{x_1,\dots,x_r\}$ be the range of $X$, with $p_i:=P(X=x_i)$. By Lemma~\ref{lem:expectation-via-distribution}, $\mathbb{E}[X]=\sum_ip_ix_i$ and $\mathbb{E}[\varphi(X)]=\sum_ip_i\varphi(x_i)$, so it suffices to show, for any $x_1,\dots,x_r\in\mathbb{R}$ and $p_i\ge0$ with $\sum_ip_i=1$,
+			\[
+				\varphi\left(\sum_i p_ix_i\right) \le \sum_i p_i\varphi(x_i)
+			\]
+			by induction on $r$.
+			
+			Base case: $p_1=1$, so both sides equal $\varphi(x_1)$.
+			
+			Inductive step: assume the claim for $r-1$ points, and take $x_1,\dots,x_r$, $p_1,\dots,p_r$ as above. If $p_r=1$ the claim is immediate as in the base case, so assume $p_r<1$ and set $\lambda:=1-p_r\in(0,1]$, $q_i:=p_i/\lambda$ for $i<r$; then $q_i\ge0$, $\sum_{i<r}q_i=1$, and writing $z:=\sum_{i<r}q_ix_i$,
+			\[
+				\sum_i p_ix_i = \lambda z+(1-\lambda)x_r
+			\]
+			By convexity (Remark~\ref{rem:convex-first-order-characterisation}) then the inductive hypothesis,
+			\[
+				\varphi\left(\sum_i p_ix_i\right) = \varphi(\lambda z+(1-\lambda)x_r) \le \lambda\varphi(z)+(1-\lambda)\varphi(x_r) \le \lambda\sum_{i<r}q_i\varphi(x_i)+p_r\varphi(x_r) = \sum_i p_i\varphi(x_i)
+			\]
+			using $\lambda q_i=p_i$.
+		\end{proof}
+		
+		\begin{corollary}[Jensen's Inequality on an Interval]
+			\label{cor:jensen-interval}
+			Let $I\subseteq\mathbb{R}$ be an interval, let $X:\Omega\to\mathbb{R}$ have finite range contained in $I$, and let $\varphi:I\to\mathbb{R}$ be convex on $I$ (i.e.\ satisfy Remark~\ref{rem:convex-first-order-characterisation}'s inequality for all $x,y\in I$, $\lambda\in[0,1]$). Then
+			\[
+				\varphi(\mathbb{E}[X]) \le \mathbb{E}[\varphi(X)]
+			\]
+		\end{corollary}
+		
+		\begin{proof}
+			The induction in the proof of Theorem~\ref{thm:jensen} only ever evaluates $\varphi$ at convex combinations of points in the range of $X$, all of which lie in $I$ (since $I$ is an interval and the range of $X$ is a finite subset of $I$), so the same argument applies verbatim with $\varphi$ restricted to $I$.
+		\end{proof}
+		
+		\begin{definition}[Kullback-Leibler Divergence]
+			\label{def:kl-divergence}
+			Let $P, Q$ be probability distributions on the same finite set, with $Q(x)>0$ whenever $P(x)>0$. The Kullback-Leibler (KL) divergence of $Q$ from $P$ is
+			\[
+				D_{KL}(P\|Q) := \sum_x P(x)\log\frac{P(x)}{Q(x)}
+			\]
+			where the sum is over $x$ with $P(x)>0$.
+		\end{definition}
+		
+		\begin{proposition}[Non-negativity of KL Divergence]
+			\label{prop:kl-nonneg}
+			For any two probability distributions $P,Q$ as in Definition~\ref{def:kl-divergence},
+			\[
+				D_{KL}(P\|Q) \ge 0
+			\]
+		\end{proposition}
+		
+		\begin{proof}
+			Let $X\sim P$ and $Y := Q(X)/P(X)$, a random variable with finite range contained in $(0,\infty)$. By Lemma~\ref{lem:expectation-via-distribution},
+			\[
+				\mathbb{E}_P[Y] = \sum_x P(x)\cdot\frac{Q(x)}{P(x)} = \sum_x Q(x) \le 1
+			\]
+			the sum being a sub-sum, over $x$ with $P(x)>0$, of $Q$'s total mass, which is at most $1$.
+			
+			The function $\varphi(t)=-\log t$ is convex on $(0,\infty)$ \cite[\S3.1.5]{BoydVandenberghe2004}. Since $Y$'s range is a finite subset of $(0,\infty)$, Corollary~\ref{cor:jensen-interval} applies:
+			\[
+				-\log(\mathbb{E}_P[Y]) \le \mathbb{E}_P[-\log Y]
+			\]
+			Since $-\log$ is decreasing and $\mathbb{E}_P[Y]\le1$, $-\log(\mathbb{E}_P[Y]) \ge -\log(1) = 0$. Combined with the previous line,
+			\[
+				\mathbb{E}_P[-\log Y] \ge -\log(\mathbb{E}_P[Y]) \ge 0
+			\]
+			By Lemma~\ref{lem:expectation-via-distribution},
+			\[
+				\mathbb{E}_P[-\log Y] = \sum_x P(x)\left(-\log\frac{Q(x)}{P(x)}\right) = \sum_x P(x)\log\frac{P(x)}{Q(x)} = D_{KL}(P\|Q)
+			\]
+			So $D_{KL}(P\|Q) \ge 0$.
+		\end{proof}
