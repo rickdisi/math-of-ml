@@ -281,3 +281,161 @@
 			\]
 			So $D_{KL}(P\|Q) \ge 0$.
 		\end{proof}
+	
+\section{Maximum Likelihood Estimation and Cross-Entropy}
+\label{sec:mle-cross-entropy}
+	
+	This section develops the general maximum likelihood framework, specialises it to i.i.d.\ categorical data and bridges the resulting log-likelihood to cross-entropy and KL divergence. \\
+	
+	This is the result Chapter~\ref{chap:neural-networks}'s loss function is built on: cross-entropy loss is what maximising likelihood on categorical data reduces to. \\
+	
+	The algorithm is implemented from scratch in C++ as \texttt{categorical\_mle.cpp} (Appendix~\ref{app:categorical-mle}).
+	
+	\subsection{Maximum Likelihood Estimation}
+		
+		\begin{definition}[Likelihood Function]
+			\label{def:likelihood}
+			Let $\{P_\theta\}_{\theta\in\Theta}$ be a family of distributions on the same finite set, indexed by a parameter $\theta$ ranging over some set $\Theta$, and let $X_1,\dots,X_n$ be i.i.d.\ (Definition~\ref{def:independence-random-variables}) with common distribution $P_\theta$ for some $\theta\in\Theta$. Given realised values $x_1,\dots,x_n$ of $X_1,\dots,X_n$, the likelihood function is
+			\[
+				L(\theta) := \prod_{i=1}^n P(X_i=x_i)
+			\]
+			viewed as a function of $\theta$ (which determines the distribution against which each $P(X_i=x_i)$ is computed), with the realised values $x_1,\dots,x_n$ fixed.
+		\end{definition}
+		
+		\begin{definition}[Log-Likelihood]
+			\label{def:log-likelihood}
+			The log-likelihood is
+			\[
+				\ell(\theta) := \log L(\theta) = \sum_{i=1}^n \log P(X_i=x_i)
+			\]
+		\end{definition}
+		
+		\begin{remark}
+			\label{rem:log-preserves-argmax}
+			On any domain where $L(\theta) > 0$ for every $\theta$ under consideration, $\log$ is strictly increasing on the range of $L$, so $\arg\max_\theta L(\theta) = \arg\max_\theta \log L(\theta) = \arg\max_\theta \ell(\theta)$: maximising $L$ and maximising $\ell$ give the same maximisers. This is why it suffices to work with $\ell(\theta)$ which is typically more convenient since it turns the product in Definition~\ref{def:likelihood} into a sum.
+		\end{remark}
+		
+		\begin{definition}[Maximum Likelihood Estimator]
+			\label{def:mle}
+			The maximum likelihood estimator (MLE) of $\theta$, given realised values $x_1,\dots,x_n$ of $X_1,\dots,X_n$, is
+			\[
+				\hat\theta := \arg\max_{\theta\in\Theta} L(\theta) = \arg\max_{\theta\in\Theta} \ell(\theta)
+			\]
+			where the equality is justified by Remark~\ref{rem:log-preserves-argmax}.
+		\end{definition}
+		
+		\begin{proposition}[Likelihood of an I.I.D.\ Categorical Sample]
+			\label{prop:categorical-likelihood}
+			Let $X_1,\dots,X_n$ be i.i.d.\ $\mathrm{Categorical}(p)$ (Definition~\ref{def:categorical-distribution}, Definition~\ref{def:independence-random-variables}), with realised values $x_1,\dots,x_n\in\{1,\dots,K\}$, and $n_k$ as in Remark~\ref{rem:iid-sample-counts}. Then
+			\[
+				L(p) = \prod_{k=1}^K p_k^{n_k}, \qquad \ell(p) = \sum_{k=1}^K n_k\log p_k
+			\]
+		\end{proposition}
+		
+		\begin{proof}
+			By Definition~\ref{def:likelihood} and Definition~\ref{def:categorical-distribution} ($P(X_i=x_i)=p_{x_i}$ for each $i$),
+			\[
+				L(p) = \prod_{i=1}^n P(X_i=x_i) = \prod_{i=1}^n p_{x_i}
+			\]
+			Group the factors by the value $x_i$ takes: since exactly $n_k$ of the indices $i$ satisfy $x_i=k$, for each $k=1,\dots,K$,
+			\[
+				\prod_{i=1}^n p_{x_i} = \prod_{k=1}^K \prod_{i:x_i=k} p_{x_i} = \prod_{k=1}^K \prod_{i:x_i=k} p_k = \prod_{k=1}^K p_k^{n_k}
+			\]
+			using that $p_{x_i}=p_k$ for every $i$ with $x_i=k$, and there are $n_k$ such factors. So $L(p) = \prod_{k=1}^K p_k^{n_k}$.
+			
+			Taking logs (Definition~\ref{def:log-likelihood}),
+			\[
+				\ell(p) = \log L(p) = \log\prod_{k=1}^K p_k^{n_k} = \sum_{k=1}^K \log(p_k^{n_k}) = \sum_{k=1}^K n_k\log p_k
+			\]
+		\end{proof}
+		
+		We solve this via Lagrange multipliers, converting the maximisation of $\ell(p) = \sum_{k=1}^K n_k\log p_k$ subject to $g(p):=\sum_kp_k-1=0$ into a minimisation, as required by Theorem~\ref{thm:lagrange-multipliers}'s hypotheses.
+		
+		\begin{proposition}[MLE for the Categorical Distribution]
+			\label{prop:categorical-mle}
+			Let $X_1,\dots,X_n$ be i.i.d.\ $\mathrm{Categorical}(p)$ (Definition~\ref{def:categorical-distribution}), with realised counts $n_k$ (Remark~\ref{rem:iid-sample-counts}) satisfying $n_k>0$ for every $k=1,\dots,K$. Then the maximum likelihood estimator (Definition~\ref{def:mle}) of $p$ is
+			\[
+				\hat p_k = \frac{n_k}{n} \qquad \text{for each } k=1,\dots,K
+			\]
+		\end{proposition}
+		
+		\begin{proof}
+			By Proposition~\ref{prop:categorical-likelihood}, $\ell(p)=\sum_kn_k\log p_k$, defined on $\{p:p_k>0\ \forall k\}$. Set $f:=-\ell$; maximising $\ell$ subject to $g=0$ is minimising $f$ subject to $g=0$. Theorem~\ref{thm:lagrange-multipliers} applies on this open domain, since its proof only needs differentiability locally, not on all of $\mathbb{R}^K$. Since $Dg(p)=(1,\dots,1)$ has rank $1=m$ (using $K\ge2$), the rank hypothesis holds. \\
+			
+			At a local maximiser $p^\star$, $\nabla f(p^\star)=Dg(p^\star)^\top\lambda$ for some $\lambda\in\mathbb{R}$, i.e.\ $-n_k/p_k^\star=\lambda$ for each $k$, so $p_k^\star=-n_k/\lambda$. The constraint $\sum_kp_k^\star=1$ gives $-n/\lambda=1$, so $\lambda=-n$ (using $n=\sum_kn_k\ge1$), hence $p_k^\star=n_k/n=\hat p_k$. \\
+			
+			$-\log t$ is convex on $(0,\infty)$, so $p\mapsto n_k(-\log p_k)$ (each coordinate function composed with a projection, hence convex on $\mathbb{R}^K$) is convex, and $f(p)=\sum_kn_k(-\log p_k)$ is convex as a non-negative-weighted sum of such terms. Since $g$ is affine, a point satisfying the Lagrange stationarity condition for a convex objective over an affine constraint set is automatically a global minimiser \citep{BoydVandenberghe2004}. As $\hat p$ satisfies stationarity, it globally minimises $f$ and so globally maximises $\ell$: $\hat p_k=n_k/n$ is the MLE.
+		\end{proof}
+		
+		\begin{compremark}
+			\texttt{categorical\_mle.cpp} (Appendix~\ref{app:categorical-mle}) implements sampling, counting and MLE fitting for the categorical distribution.
+			
+			\begin{enumerate}[label=\roman*.]
+				\item \textbf{Cumulative-sum sampling.} \texttt{sampleCategorical()} partitions $[0,1)$ into intervals of length $p_1,\dots,p_K$ and returns the index whose interval contains a draw $u\sim\mathrm{Uniform}(0,1)$. This is a direct computational reading of $P(X=k)=p_k$ (Definition~\ref{def:categorical-distribution}), not an approximation of it.
+				\item \textbf{$K{-}1$ fallback.} \texttt{samples[i]} defaults to $K{-}1$ before the scan. Since $\mathrm{cdf}[K{-}1]=\sum_kp_k=1$ always covers $u$, the scan can only miss due to floating-point rounding. Any $u$ that triggers this genuinely belongs to the last interval anyway, so the fallback is correct, not arbitrary.
+			\end{enumerate}
+			
+			Verified in \texttt{main()} by perturbing away from $\hat p$ in three directions: $\ell(\hat p)=-1031.78$, against $-1032.04$, $-1032.19$, $-1032.14$ perturbed, which is consistent with $\hat p$ being the maximiser (Proposition~\ref{prop:categorical-mle}).
+		\end{compremark}
+		
+	\subsection{Cross-Entropy}
+		
+		\begin{definition}[Cross-Entropy]
+			\label{def:cross-entropy}
+			Let $P,Q$ be probability distributions on the same finite set, with $Q(x)>0$ whenever $P(x)>0$. The cross-entropy of $Q$ relative to $P$ is
+			\[
+				H(P,Q) := -\sum_x P(x)\log Q(x)
+			\]
+			where the sum is over $x$ with $P(x)>0$.
+		\end{definition}
+		
+		\begin{remark}[The Empirical Distribution]
+			\label{rem:empirical-distribution}
+			The MLE $\hat p_k=n_k/n$ from Proposition~\ref{prop:categorical-mle} is also the empirical distribution of the sample: the categorical distribution (Definition~\ref{def:categorical-distribution}) placing mass $n_k/n$ on outcome $k$, i.e.\ the proportion of the sample actually observed to equal $k$. The same object $\hat p$ therefore plays two roles: it is the parameter estimate produced by maximum likelihood, and separately, it is the frequency distribution of the observed data itself.
+		\end{remark}
+		
+		\begin{proposition}[Log-Likelihood as Cross-Entropy]
+			\label{prop:likelihood-cross-entropy}
+			Let $X_1,\dots,X_n$ be i.i.d.\ $\mathrm{Categorical}(p)$ with realised counts $n_k$ (Remark~\ref{rem:iid-sample-counts}), $n_k>0$ for every $k$, and let $\hat p$ be the empirical distribution (Remark~\ref{rem:empirical-distribution}). Then, for $p$ in the domain $\{p:p_k>0\ \forall k\}$,
+			\[
+				-\frac{1}{n}\ell(p) = H(\hat p, p)
+			\]
+		\end{proposition}
+		
+		\begin{proof}
+			By Proposition~\ref{prop:categorical-likelihood}, $\ell(p)=\sum_kn_k\log p_k$. Substituting $n_k=n\hat p_k$,
+			\[
+				-\frac{1}{n}\ell(p) = -\frac{1}{n}\sum_k n\hat p_k\log p_k = -\sum_k\hat p_k\log p_k = H(\hat p,p)
+			\]
+			by Definition~\ref{def:cross-entropy}, noting the support condition there ($p_k>0$ whenever $\hat p_k>0$) holds automatically on this domain.
+		\end{proof}
+		
+		\begin{corollary}[Maximum Likelihood is Minimum Cross-Entropy]
+			\label{cor:mle-min-cross-entropy}
+			With notation as in Proposition~\ref{prop:likelihood-cross-entropy},
+			\[
+				\arg\max_p \ell(p) = \arg\min_p H(\hat p,p)
+			\]
+		\end{corollary}
+		
+		\begin{proof}
+			By Proposition~\ref{prop:likelihood-cross-entropy}, $H(\hat p,p) = -\ell(p)/n$. Since $n>0$, dividing by $n$ and negating are each strictly monotonic (order-reversing, in the case of negation), so they do not change which $p$ attains an extremum, only whether it is a maximum or minimum: maximising $\ell(p)$ is exactly minimising $-\ell(p)/n=H(\hat p,p)$.
+		\end{proof}
+		
+		\begin{remark}[Cross-Entropy and KL Divergence]
+			\label{rem:cross-entropy-kl}
+			Expanding Definition~\ref{def:kl-divergence},
+			\[
+				D_{KL}(\hat p\|p) = \sum_k\hat p_k\log\hat p_k - \sum_k\hat p_k\log p_k
+			\]
+			so, by Definition~\ref{def:cross-entropy},
+			\[
+				H(\hat p,p) = -\sum_k\hat p_k\log\hat p_k + D_{KL}(\hat p\|p)
+			\]
+			The first term does not depend on $p$, so minimising $H(\hat p,p)$ over $p$ is the same problem as minimising $D_{KL}(\hat p\|p)$ over $p$. By Proposition~\ref{prop:kl-nonneg}, $D_{KL}(\hat p\|p)\ge0$ for every such $p$, giving a lower bound $H(\hat p,p)\ge-\sum_k\hat p_k\log\hat p_k$; this states the inequality only, with no claim about when equality holds.
+		\end{remark}
+		
+		\begin{remark}[Single Distribution to a Model per Example]
+			\label{rem:categorical-mle-to-network}
+			Proposition~\ref{prop:categorical-mle} fits one distribution $\hat p$ to an entire sample, in closed form. Chapter~\ref{chap:neural-networks} instead fits a distribution $Q_\theta(x)=\mathrm{softmax}(z(\theta,x))$ per input $x$, sharing parameters $\theta$ across examples. No closed form exists for this, so $\theta$ is instead fit by gradient descent (Section~\ref{sec:gradient-descent}), minimising the same cross-entropy objective derived here, one step at a time.
+		\end{remark}
