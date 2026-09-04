@@ -1,4 +1,235 @@
 \chapter{Neural Networks}
 \label{chap:neural-networks}
 
-
+\section{Network Architecture}
+\label{sec:network-architecture}
+	
+	This section defines affine maps and shows why composing them alone never gives more expressive power than a single affine map, introduces componentwise activation functions and the resulting feedforward network architecture, and closes with the softmax output layer that turns a network's raw output into a categorical distribution. \\
+	
+	This is where the pieces built across the previous three chapters assemble into a single object: a network whose expressive power comes specifically from nonlinearity, not depth alone (Remark~\ref{rem:why-nonlinearity}), and whose output is provably a categorical distribution rather than merely something shaped like one (Proposition~\ref{prop:softmax-simplex}), which is what licenses training it by minimising cross-entropy as derived in Chapter~\ref{chap:probability} and previewed in Remark~\ref{rem:network-loss-preview}. \\
+	
+	The forward pass, which is the system that evaluates the network layer by layer from input to output (Remark~\ref{rem:forward-pass}), is implemented from scratch in C++ as \texttt{forward\_pass.cpp} (Appendix~\ref{app:forward-pass}).
+	
+	\subsection{Affine Maps}
+		
+		\begin{definition}[Affine Map]
+			\label{def:affine-map}
+			Let $T:\mathbb{R}^n\to\mathbb{R}^m$ be a linear operator (Definition~\ref{def:linear-operator}), represented in the standard bases by a matrix $A\in\mathrm{Mat}(m,n,\mathbb{R})$ (Proposition~\ref{prop:matrix-representation}), and let $b\in\mathbb{R}^m$ be a fixed vector. The map $F:\mathbb{R}^n\to\mathbb{R}^m$ defined by
+			\[
+				F(x) := Ax + b
+			\]
+			is called an affine map. $A$ is the linear part of $F$ and $b$ is its translation (or bias).
+		\end{definition}
+		
+		\begin{remark}
+			\label{rem:affine-not-linear}
+			An affine map $F(x)=Ax+b$ (Definition~\ref{def:affine-map}) is a linear operator (Definition~\ref{def:linear-operator}) only when $b=0$: for $b\neq0$, $F(0)=b\neq0$, violating linearity, which forces $T(0)=0$ (take $\mu=\nu=0$ in Definition~\ref{def:linear-operator}).
+		\end{remark}
+		
+		\begin{proposition}[Composition of Affine Maps is Affine]
+			\label{prop:affine-composition}
+			Let $F_1:\mathbb{R}^n\to\mathbb{R}^m$ and $F_2:\mathbb{R}^m\to\mathbb{R}^k$ be affine maps (Definition~\ref{def:affine-map}), with $F_1(x)=A_1x+b_1$ and $F_2(y)=A_2y+b_2$. Then $F_2\circ F_1:\mathbb{R}^n\to\mathbb{R}^k$ is affine, with
+			\[
+				(F_2\circ F_1)(x) = (A_2A_1)x + (A_2b_1+b_2)
+			\]
+		\end{proposition}
+		
+		\begin{proof}
+			By direct computation:
+			\begin{align*}
+				(F_2\circ F_1)(x) &= F_2(F_1(x)) \\
+				&= F_2(A_1x+b_1) \\
+				&= A_2(A_1x+b_1)+b_2 \\
+				&= A_2A_1x + A_2b_1 + b_2 \\
+				&= (A_2A_1)x + (A_2b_1+b_2)
+			\end{align*}
+			Here $A_2A_1$ is ordinary matrix multiplication, which by Corollary~\ref{cor:composition-multiplication} represents the composition of the linear operators $A_1,A_2$ correctly in the standard bases. 
+			Setting $A:=A_2A_1$ and $b:=A_2b_1+b_2$ is exactly the form $F(x)=Ax+b$ of Definition~\ref{def:affine-map}, so $F_2\circ F_1$ is also affine with linear part $A_2A_1$ and translation $A_2b_1+b_2$.
+		\end{proof}
+		
+		\begin{corollary}[Depth Collapse of Affine Compositions]
+			\label{cor:affine-depth-collapse}
+			Let $F_1,\dots,F_L$ be affine maps, with $F_\ell:\mathbb{R}^{n_{\ell-1}}\to\mathbb{R}^{n_\ell}$, $F_\ell(x)=A_\ell x+b_\ell$, for $\ell=1,\dots,L$. Then the composition
+			\[
+				F := F_L\circ\cdots\circ F_1 : \mathbb{R}^{n_0}\to\mathbb{R}^{n_L}
+			\]
+			is affine: there exist $A\in\mathrm{Mat}(n_L,n_0,\mathbb{R})$ and $b\in\mathbb{R}^{n_L}$ such that $F(x)=Ax+b$ for all $x$.
+		\end{corollary}
+		
+		\begin{proof}
+			We proceed by induction on $L$.
+			
+			Base Case:
+			$F=F_1$ is affine by hypothesis.
+			
+			Inductive Step:
+			Suppose $G:=F_{L-1}\circ\cdots\circ F_1$ is affine, say $G(x)=A'x+b'$ for some $A',b'$. Then
+			\[
+				F = F_L\circ G
+			\]
+			a composition of the two affine maps $G$ and $F_L$. By Proposition~\ref{prop:affine-composition}, $F_L\circ G$ is affine, with linear part $A_LA'$ and translation $A_Lb'+b_L$. So $F$ is affine, with $A:=A_LA'$, $b:=A_Lb'+b_L$.
+			
+			By induction, $F=F_L\circ\cdots\circ F_1$ is affine for every $L\ge1$.
+		\end{proof}
+		
+		\begin{compremark}
+			\texttt{forward\_pass.cpp} implements \texttt{Network::forward()} in Appendix~\ref{app:forward-pass} as a loop over layers, applying each layer's affine map and activation in sequence. \\
+			
+			This is worth justifying against Corollary~\ref{cor:affine-depth-collapse}: layer 0 uses \texttt{identityScalar} and the output layer applies no activation (Definition~\ref{def:feedforward-network}), so no non-affine function appears anywhere, and by that corollary this two-layer network is guaranteed to collapse to a single affine map. \texttt{forward()} could skip the loop entirely here. It doesn't, because the collapse only holds when every activation is the identity: a nonlinearity like ReLU breaks it (Remark~\ref{rem:why-nonlinearity}), so the layer-by-layer structure is what has to generalise. This identity-activation case just gives a hand-computable answer to check that structure against, not a reason to shortcut it. \\
+			
+			Verified in \texttt{main()}: \texttt{net.forward(x0)} and the independently-computed $A_2(A_1x_0+b_1)+b_2$ both give $(32,-23)$, an exact match.
+		\end{compremark}
+		
+	\subsection{Activation Functions}
+		
+		\begin{remark}[Nonlinearity is Necessary]
+			\label{rem:why-nonlinearity}
+			Corollary~\ref{cor:affine-depth-collapse} has a direct consequence for network architecture: if every layer of an $L$-layer network were purely affine, with no nonlinearity applied between layers, the entire network would collapse to a single affine map $F(x)=Ax+b$, which would be exactly as expressive as one layer. \\
+			
+			Depth alone, without nonlinearity interleaved between the affine maps, buys nothing no matter how many layers are stacked, the composition is indistinguishable from a single affine transformation of the input. This is why every layer of a network is followed by a nonlinear activation function, which is the subject of this next subsection.
+		\end{remark}
+		
+		\begin{definition}[Activation Function]
+			\label{def:activation}
+			Let $\sigma:\mathbb{R}\to\mathbb{R}$ be a function. The activation of $\sigma$ on $\mathbb{R}^n$ is the map $\sigma:\mathbb{R}^n\to\mathbb{R}^n$ defined componentwise, i.e.\
+			\[
+				\sigma(x) := \big(\sigma(x_1),\dots,\sigma(x_n)\big) \qquad \text{for } x=(x_1,\dots,x_n)\in\mathbb{R}^n
+			\]
+			applying $\sigma$ independently to each coordinate of $x$, with no interaction between coordinates.
+		\end{definition}
+		
+		\begin{example}[ReLU and Sigmoid]
+			\label{ex:relu-sigmoid}
+			Two activation functions (Definition~\ref{def:activation}) used throughout this chapter are:
+			\begin{enumerate}[label=\roman*.]
+				\item \label{ex:relu} The \emph{Rectified Linear Unit} (ReLU):
+				\[
+					\mathrm{ReLU}(t) := \max(t,0) = \begin{cases} t & t\ge0 \\ 0 & t<0 \end{cases}
+				\]
+				\item \label{ex:sigmoid} The \emph{Sigmoid} function:
+				\[
+					\varsigma(t)  := \frac{1}{1+e^{-t}}
+				\]
+			\end{enumerate}
+			Both are applied componentwise on $\mathbb{R}^n$ per Definition~\ref{def:activation}: for $x=(x_1,\dots,x_n)\in\mathbb{R}^n$, $\mathrm{ReLU}(x) = (\mathrm{ReLU}(x_1),\dots,\mathrm{ReLU}(x_n))$, and likewise for $\varsigma$.
+		\end{example}
+		
+		\begin{remark}[Non-Differentiability of ReLU at $0$]
+			\label{rem:relu-nondifferentiable}
+			$\mathrm{ReLU}(t)=\max(t,0)$ (Example~\ref{ex:relu-sigmoid}, \ref{ex:relu}) is not differentiable at $t=0$: the one-sided derivatives are $0$ (approaching from below) and $1$ (approaching from above), which disagree. So the Chain Rule (Theorem~\ref{thm:chain-rule}) does not literally apply at any point where an intermediate quantity equals exactly $0$ after a ReLU is applied. \\
+			
+			In practice, this is resolved by adopting the convention:
+			\[
+				\mathrm{ReLU}'(0) := 0
+			\]
+			and treating $\mathrm{ReLU}$ as differentiable everywhere else, with $\mathrm{ReLU}'(t)=1$ for $t>0$ and $\mathrm{ReLU}'(t)=0$ for $t<0$. This is a convention, not a mathematical fact derived from Theorem~\ref{thm:chain-rule} or any other result in this paper: the single point $t=0$ has measure zero and is reached only for specific inputs, so the convention has no practical effect on computation, but it is not rigorously justified by the calculus developed in Chapter~\ref{chap:calculus}.
+		\end{remark}
+		
+	\subsection{Feedforward Networks}
+		
+		\begin{definition}[Feedforward Network]
+			\label{def:feedforward-network}
+			Let $L\ge1$ be an integer (the depth), and let $n_0,n_1,\dots,n_L$ be positive integers (the widths of each layer). For each $\ell=1,\dots,L$, let $A_\ell\in\mathrm{Mat}(n_\ell,n_{\ell-1},\mathbb{R})$ and $b_\ell\in\mathbb{R}^{n_\ell}$, defining the affine map $F_\ell(x):=A_\ell x+b_\ell$ (Definition~\ref{def:affine-map}), and let $\sigma:\mathbb{R}\to\mathbb{R}$ be an activation function (Definition~\ref{def:activation}). Write
+			\[
+				\theta := (A_1,b_1,\dots,A_L,b_L)
+			\]
+			for the collection of all these matrices and vectors, the parameters of the network.
+			
+			Given an input $x_0\in\mathbb{R}^{n_0}$ (the data, not a parameter), define, for $\ell=1,\dots,L$,
+			\[
+				z_\ell := F_\ell(x_{\ell-1}) = A_\ell x_{\ell-1}+b_\ell \qquad \text{(the \emph{pre-activation} at layer $\ell$)}
+			\]
+			\[
+				x_\ell := \begin{cases} \sigma(z_\ell) & \ell < L \\ z_\ell & \ell = L \end{cases} \qquad \text{(the \emph{post-activation} at layer $\ell$)}
+			\]
+			applying $\sigma$ componentwise (Definition~\ref{def:activation}). The resulting map
+			\[
+				f_\theta : \mathbb{R}^{n_0}\to\mathbb{R}^{n_L}, \qquad f_\theta(x_0) := x_L
+			\]
+			is the feedforward network with parameters $\theta$.
+		\end{definition}
+		
+		\begin{remark}[The Forward Pass]
+			\label{rem:forward-pass}
+			Evaluating $f_\theta(x_0)$ (Definition~\ref{def:feedforward-network}), computing $x_1,x_2,\dots,x_L$ in order from a given input $x_0$, is called the forward pass. Writing it out,
+			\[
+				f_\theta = F_L \circ \sigma \circ F_{L-1} \circ \sigma \circ \cdots \circ \sigma \circ F_1,
+			\]
+			makes explicit what Definition~\ref{def:feedforward-network} already encodes: a feedforward network is precisely an alternating composition of affine maps (Definition~\ref{def:affine-map}) and activations (Definition~\ref{def:activation}), exactly the kind of object this section set out to build.
+		\end{remark}
+		
+		\begin{remark}[Parameter Count]
+			\label{rem:parameter-count}
+			The total number of scalar parameters in $\theta=(A_1,b_1,\dots,A_L,b_L)$ (Definition~\ref{def:feedforward-network}) is
+			\[
+				\sum_{\ell=1}^{L} \big(n_\ell n_{\ell-1} + n_\ell\big),
+			\]
+			since $A_\ell\in\mathrm{Mat}(n_\ell,n_{\ell-1},\mathbb{R})$ contributes $n_\ell n_{\ell-1}$ entries and $b_\ell\in\mathbb{R}^{n_\ell}$ contributes $n_\ell$ entries, at each layer $\ell$.
+		\end{remark}
+		
+	\subsection{The Softmax Output Layer}
+		
+		\begin{definition}[Softmax]
+			\label{def:softmax}
+			The softmax function is the map $\mathrm{softmax}:\mathbb{R}^K\to\mathbb{R}^K$ defined by
+			\[
+				\mathrm{softmax}(z)_k := \frac{e^{z_k}}{\sum_{j=1}^K e^{z_j}} \qquad \text{for } k=1,\dots,K
+			\]
+			for $z=(z_1,\dots,z_K)\in\mathbb{R}^K$.
+		\end{definition}
+		
+		\begin{proposition}[Softmax Output as a Valid Categorical Parameter]
+			\label{prop:softmax-simplex}
+			For any $z\in\mathbb{R}^K$, the vector $p:=\mathrm{softmax}(z)$ (Definition~\ref{def:softmax}) satisfies $p_k\ge0$ for every $k$ and $\sum_{k=1}^Kp_k=1$, which are the conditions Definition~\ref{def:categorical-distribution} requires of a parameter $p$.
+		\end{proposition}
+		
+		\begin{proof}
+			By Definition~\ref{def:softmax}, $p_k = e^{z_k}/\sum_{j=1}^Ke^{z_j}$ for each $k$. Since $e^{z_k}>0$ for every real $z_k$, and the denominator $\sum_je^{z_j}$ is a sum of such positive terms, $p_k>0$ (in particular $p_k\ge0$) for every $k$.
+			
+			Summing,
+			\[
+				\sum_{k=1}^K p_k = \sum_{k=1}^K \frac{e^{z_k}}{\sum_{j=1}^Ke^{z_j}} = \frac{\sum_{k=1}^Ke^{z_k}}{\sum_{j=1}^Ke^{z_j}} = 1
+			\]
+			since the numerator and denominator are the same sum.
+			
+			So $p=\mathrm{softmax}(z)$ satisfies both conditions of Definition~\ref{def:categorical-distribution}.
+		\end{proof}
+		
+		\begin{proposition}[Shift Invariance of Softmax]
+			\label{prop:softmax-shift-invariance}
+			For any $z\in\mathbb{R}^K$ and $c\in\mathbb{R}$,
+			\[
+				\mathrm{softmax}(z+c\mathbbm{1}) = \mathrm{softmax}(z)
+			\]
+			where $z+c\mathbbm{1} := (z_1+c,\dots,z_K+c)$.
+		\end{proposition}
+		
+		\begin{proof}
+			By Definition~\ref{def:softmax}, for each $k$,
+			\[
+				\mathrm{softmax}(z+c\mathbbm{1})_k = \frac{e^{z_k+c}}{\sum_{j=1}^Ke^{z_j+c}} = \frac{e^{z_k}e^c}{\sum_{j=1}^Ke^{z_j}e^c} = \frac{e^c\, e^{z_k}}{e^c\sum_{j=1}^Ke^{z_j}} = \frac{e^{z_k}}{\sum_{j=1}^Ke^{z_j}} = \mathrm{softmax}(z)_k
+			\]
+			using $e^{z_j+c}=e^{z_j}e^c$ and cancelling the common factor $e^c$ from numerator and denominator.
+		\end{proof}
+		
+		\begin{compremark}
+			\texttt{forward\_pass.cpp} (Appendix~\ref{app:forward-pass}) also implements \texttt{softmax()}, which subtracts $m$, the maximum logit, before calling \texttt{std::exp}. \\
+			
+			This is justified by Proposition~\ref{prop:softmax-shift-invariance}: subtracting any constant $c$ leaves softmax's output unchanged, so subtracting $m$ is not an approximation as it's one exact member of a family the proposition already guarantees is correct. It's the safest member, though: subtracting $m$ keeps the largest exponent at $e^0=1$, so nothing overflows, unlike subtracting nothing when logits are large. \\
+			
+			Verified in \texttt{main()}: with logits as far apart as $32$ and $-23$, \texttt{softmax}'s output still summed to exactly $1$ (Proposition~\ref{prop:softmax-simplex}), with one entry rounding to $\approx1.3\times10^{-24}$.
+		\end{compremark}
+		
+		\begin{remark}[The Loss Function is Cross-Entropy]
+			\label{rem:network-loss-preview}
+			Applying softmax to the network's output, $Q_\theta(x):=\mathrm{softmax}(f_\theta(x))$, produces a valid categorical parameter for every input $x$ (Proposition~\ref{prop:softmax-simplex}), exactly the object anticipated in Remark~\ref{rem:categorical-mle-to-network}.
+			
+			For a training pair $(x^{(i)},y^{(i)})$, with $\hat p^{(i)}$ the one-hot distribution on the observed label $y^{(i)}$, the same argument behind Corollary~\ref{cor:mle-min-cross-entropy} gives a per-example loss $H(\hat p^{(i)},Q_\theta(x^{(i)}))$; summing over the training set gives the objective
+			\[
+				\sum_i H\big(\hat p^{(i)}, Q_\theta(x^{(i)})\big)
+			\]
+			So the loss used to train this network in Section~\ref{sec:loss-function} is cross-entropy by derivation, not convention: applying the Chapter~\ref{chap:probability} argument example-by-example rather than to one shared distribution.
+			
+			This per-example extension of Corollary~\ref{cor:mle-min-cross-entropy} is not itself proved anywhere in this document; it is stated here as a direct analogue of the cited result, not a cited consequence of it.
+		\end{remark}
+	
