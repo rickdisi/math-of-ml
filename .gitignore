@@ -1,11 +1,7 @@
 .env
 
-# Excel workbooks
-*.xlsx
-
-# Data files
-*.csv
-*.tsv
+# Excel tracker workbook
+tracker.xlsx
 
 # LaTeX files
 *.aux
@@ -26,9 +22,6 @@ impl/**/build/
 # LaTeX build directory
 paper/build/
 *.pdf
-
-# Poetry files
-poetry.lock
 
 # Other
 *.DS_Store
