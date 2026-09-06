@@ -8,7 +8,7 @@
 	
 	This is where the pieces built across the previous three chapters assemble into a single object: a network whose expressive power comes specifically from nonlinearity, not depth alone (Remark~\ref{rem:why-nonlinearity}), and whose output is provably a categorical distribution rather than merely something shaped like one (Proposition~\ref{prop:softmax-simplex}), which is what licenses training it by minimising cross-entropy as derived in Chapter~\ref{chap:probability} and previewed in Remark~\ref{rem:network-loss-preview}. \\
 	
-	The forward pass, which is the system that evaluates the network layer by layer from input to output (Remark~\ref{rem:forward-pass}), is implemented from scratch in C++ as \texttt{forward\_pass.cpp} (Appendix~\ref{app:forward-pass}).
+	The forward pass, which is the system that evaluates the network layer by layer from input to output (Remark~\ref{rem:forward-pass}), is implemented from scratch in C++ as \texttt{network.hpp} (Appendix~\ref{app:forward-pass}).
 	
 	\subsection{Affine Maps}
 		
@@ -73,7 +73,7 @@
 		\end{proof}
 		
 		\begin{compremark}
-			\texttt{forward\_pass.cpp} implements \texttt{Network::forward()} in Appendix~\ref{app:forward-pass} as a loop over layers, applying each layer's affine map and activation in sequence. \\
+			\texttt{network.hpp} implements \texttt{Network::forward()} in Appendix~\ref{app:forward-pass} as a loop over layers, applying each layer's affine map and activation in sequence. \\
 			
 			This is worth justifying against Corollary~\ref{cor:affine-depth-collapse}: layer 0 uses \texttt{identityScalar} and the output layer applies no activation (Definition~\ref{def:feedforward-network}), so no non-affine function appears anywhere, and by that corollary this two-layer network is guaranteed to collapse to a single affine map. \texttt{forward()} could skip the loop entirely here. It doesn't, because the collapse only holds when every activation is the identity: a nonlinearity like ReLU breaks it (Remark~\ref{rem:why-nonlinearity}), so the layer-by-layer structure is what has to generalise. This identity-activation case just gives a hand-computable answer to check that structure against, not a reason to shortcut it. \\
 			
@@ -213,7 +213,7 @@
 		\end{proof}
 		
 		\begin{compremark}
-			\texttt{forward\_pass.cpp} (Appendix~\ref{app:forward-pass}) also implements \texttt{softmax()}, which subtracts $m$, the maximum logit, before calling \texttt{std::exp}. \\
+			\texttt{network.hpp} (Appendix~\ref{app:forward-pass}) also implements \texttt{softmax()}, which subtracts $m$, the maximum logit, before calling \texttt{std::exp}. \\
 			
 			This is justified by Proposition~\ref{prop:softmax-shift-invariance}: subtracting any constant $c$ leaves softmax's output unchanged, so subtracting $m$ is not an approximation as it's one exact member of a family the proposition already guarantees is correct. It's the safest member, though: subtracting $m$ keeps the largest exponent at $e^0=1$, so nothing overflows, unlike subtracting nothing when logits are large. \\
 			
@@ -233,3 +233,136 @@
 			This per-example extension of Corollary~\ref{cor:mle-min-cross-entropy} is not itself proved anywhere in this document; it is stated here as a direct analogue of the cited result, not a cited consequence of it.
 		\end{remark}
 	
+\section{Backpropagation}
+\label{sec:backpropagation}
+	
+	This section formalises the network's training objective as cross-entropy loss (Section~\ref{sec:loss-function}), then derives the backward pass: the recursion for the per-layer error term $\delta_\ell$ and the resulting gradients of the loss with respect to every layer's weights and biases via the chain rule established in Chapter~\ref{chap:calculus} (Section~\ref{sec:backward-pass}). \\
+	
+	This is where the paper's central claim is settled: backpropagation is not a separate algorithm bolted onto the network, it is Theorem~\ref{thm:chain-rule} applied repeatedly, layer by layer and every gradient a training run computes is provably the true gradient of the loss this chapter derived from maximum likelihood, not an approximation or a heuristic. \\
+	
+	The corresponding C++ implementation, shared between the forward and backward pass, is in \texttt{network.hpp} (Appendix~\ref{app:forward-pass}), with the backward pass specifically verified in \texttt{backward\_pass.cpp} (Appendix~\ref{app:backward-pass}).
+	
+	\subsection{The Loss Function}
+	\label{sec:loss-function}
+	
+		\begin{definition}[Training Loss]
+			\label{def:training-loss}
+			Let $\{(x^{(i)},y^{(i)})\}_{i=1}^n$ be a training set, with each $y^{(i)}$ a class label in $\{1,\dots,K\}$, where $K=n_L$ is the network's output width (Definition~\ref{def:feedforward-network}). Write $\hat p^{(i)}$ for the one-hot distribution on the observed label $y^{(i)}$, i.e.\ $\hat p^{(i)}_k=1$ if $k=y^{(i)}$ and $\hat p^{(i)}_k=0$ otherwise, and $Q_\theta(x):=\mathrm{softmax}(f_\theta(x))$ (Remark~\ref{rem:network-loss-preview}). The training loss is
+			\[
+				L(\theta) := \sum_{i=1}^n H\big(\hat p^{(i)}, Q_\theta(x^{(i)})\big)
+			\]
+			the sum of per-example cross-entropy terms.
+		\end{definition}
+		
+		\begin{remark}[Training Loss in Closed Form]
+			\label{rem:training-loss-closed-form}
+			Since $\hat p^{(i)}$ is one-hot on $y^{(i)}$, every term in $H(\hat p^{(i)},Q_\theta(x^{(i)}))=-\sum_k\hat p^{(i)}_k\log Q_\theta(x^{(i)})_k$ vanishes except $k=y^{(i)}$ (Definition~\ref{def:training-loss}), so
+			\[
+				L(\theta) = -\sum_{i=1}^n \log Q_\theta(x^{(i)})_{y^{(i)}}
+			\]
+		\end{remark}
+		
+		\begin{remark}[Reduction to a Single Example]
+			\label{rem:loss-single-example}
+			By linearity of differentiation, computing $\nabla_\theta L(\theta)$ (Definition~\ref{def:training-loss}) reduces to computing the gradient of a single term, $-\log Q_\theta(x)_y$, and summing over the training set. The next section, Section~\ref{sec:backward-pass}, derives this gradient for one example, dropping the $(i)$ superscript accordingly.
+		\end{remark}
+		
+	\subsection{The Backward Pass}
+	\label{sec:backward-pass}
+		
+		\begin{definition}[Backward Error Term]
+			\label{def:backward-error}
+			Fix a single training example $(x,y)$, dropping the $(i)$ superscript as in the closing remark of the above section, Section~\ref{sec:loss-function}. For each layer $\ell=1,\dots,L$, the backward error term at layer $\ell$ is
+			\[
+				\delta_\ell := \frac{\partial L}{\partial z_\ell}
+			\]
+			the gradient of the loss with respect to that layer's pre-activation (Definition~\ref{def:feedforward-network}).
+		\end{definition}
+		
+		\begin{proposition}[Output-Layer Error Term]
+			\label{prop:output-layer-error}
+			The output layer error term is
+			\[
+				\delta_L = Q_\theta(x) - \hat p
+			\]
+		\end{proposition}
+		
+		\begin{proof}
+			$L = -\log Q_\theta(x)_y = -\log\mathrm{softmax}(z_L)_y = -z_{L,y} + \log\sum_{j=1}^K e^{z_{L,j}}$ (Definition~\ref{def:softmax}). Differentiating with respect to $(z_L)_k$, by cases:
+			
+			If $k=y$: $\dfrac{\partial L}{\partial(z_L)_k} = -1 + \dfrac{e^{z_{L,k}}}{\sum_je^{z_{L,j}}} = Q_\theta(x)_k - 1$.
+			
+			If $k\neq y$: $\dfrac{\partial L}{\partial(z_L)_k} = 0 + \dfrac{e^{z_{L,k}}}{\sum_je^{z_{L,j}}} = Q_\theta(x)_k$.
+			
+			In both cases, since $\hat p_k=1$ if $k=y$ and $0$ otherwise, this is $Q_\theta(x)_k - \hat p_k$. So $\delta_L = Q_\theta(x)-\hat p$.
+		\end{proof}
+		
+		\begin{definition}[Hadamard Product]
+			\label{def:hadamard-product}
+			For $u,v\in\mathbb{R}^n$, the Hadamard product $u\odot v\in\mathbb{R}^n$ is defined entrywise by $(u\odot v)_j := u_jv_j$.
+		\end{definition}
+		
+		\begin{theorem}[Backward Recursion]
+			\label{thm:backward-recursion}
+			For $\ell=1,\dots,L-1$,
+			\[
+				\delta_\ell = \big(A_{\ell+1}^\top\delta_{\ell+1}\big) \odot \sigma'(z_\ell)
+			\]
+		\end{theorem}
+		
+		\begin{proof}
+			By the Chain Rule (Theorem~\ref{thm:chain-rule}) applied through $z_\ell \to x_\ell \to z_{\ell+1}$: since $x_\ell=\sigma(z_\ell)$ (componentwise, Definition~\ref{def:activation}) and $(z_{\ell+1})_j = \sum_m(A_{\ell+1})_{jm}(x_\ell)_m + (b_{\ell+1})_j$, for each coordinate $k$,
+			\[
+				(\delta_\ell)_k = \frac{\partial L}{\partial(z_\ell)_k} = \sum_j \frac{\partial L}{\partial(z_{\ell+1})_j} \frac{\partial(z_{\ell+1})_j}{\partial(x_\ell)_k} \frac{\partial(x_\ell)_k}{\partial(z_\ell)_k} = \sum_j (\delta_{\ell+1})_j(A_{\ell+1})_{jk} \sigma'((z_\ell)_k)
+			\]
+			using $\partial(z_{\ell+1})_j/\partial(x_\ell)_k=(A_{\ell+1})_{jk}$ and, since $(x_\ell)_k=\sigma((z_\ell)_k)$ depends only on coordinate $k$ (Definition~\ref{def:activation}), $\partial(x_\ell)_k/\partial(z_\ell)_k=\sigma'((z_\ell)_k)$. This is
+			\[
+				(\delta_\ell)_k = \big(A_{\ell+1}^\top\delta_{\ell+1}\big)_k \sigma'((z_\ell)_k)
+			\]
+			i.e.\ $\delta_\ell = (A_{\ell+1}^\top\delta_{\ell+1})\odot\sigma'(z_\ell)$ (Definition~\ref{def:hadamard-product}). When $\sigma=\mathrm{ReLU}$, $\sigma'((z_\ell)_k)$ at any coordinate where $(z_\ell)_k=0$ is understood via the convention $\mathrm{ReLU}'(0):=0$ (Remark~\ref{rem:relu-nondifferentiable}).
+		\end{proof}
+		
+		\begin{compremark}
+			\texttt{backwardStep()} in \texttt{network.hpp}, Appendix~\ref{app:backward-pass}, implements Theorem~\ref{thm:backward-recursion}.
+			
+			It reuses \texttt{applyActivation()}, the same componentwise-apply function used to compute $\sigma(z_\ell)$ during the forward pass, to compute $\sigma'(z_\ell)$ as well, simply by passing it a different function pointer. 
+			
+			This is justified directly by Definition~\ref{def:activation}: componentwise application doesn't care what scalar function it's given, $\sigma$ or $\sigma'$, only that it's applied coordinate-by-coordinate with no interaction between them, so the same generic machinery correctly computes either.
+			
+			This is verified by the gradient check at \texttt{net.layers[0].A(0,0)}: numerical $0.853139$ against analytic $0.853139$, a difference of $6.3396\times10^{-12}$. This is the one non-degenerate check among those run, the entry whose gradient depends on the recursion propagating $\delta$ backward through both layers, so it is the check that genuinely stresses Theorem~\ref{thm:backward-recursion} rather than confirming a simpler, more local computation.
+		\end{compremark}
+		
+		\begin{proposition}[Parameter Gradients]
+			\label{prop:parameter-gradients}
+			For $\ell=1,\dots,L$,
+			\[
+				\frac{\partial L}{\partial A_\ell} = \delta_\ell x_{\ell-1}^\top, \qquad \frac{\partial L}{\partial b_\ell} = \delta_\ell
+			\]
+		\end{proposition}
+		
+		\begin{proof}
+			Since $(z_\ell)_j = \sum_k(A_\ell)_{jk}(x_{\ell-1})_k + (b_\ell)_j$, for each entry $(A_\ell)_{jk}$,
+			\[
+				\frac{\partial L}{\partial(A_\ell)_{jk}} = \frac{\partial L}{\partial(z_\ell)_j} \frac{\partial(z_\ell)_j}{\partial(A_\ell)_{jk}} = (\delta_\ell)_j(x_{\ell-1})_k
+			\]
+			which is exactly the $(j,k)$ entry of $\delta_\ell x_{\ell-1}^\top$, so $\partial L/\partial A_\ell = \delta_\ell x_{\ell-1}^\top$. Similarly, $\partial(z_\ell)_j/\partial(b_\ell)_j=1$, so $\partial L/\partial(b_\ell)_j=(\delta_\ell)_j$, i.e.\ $\partial L/\partial b_\ell=\delta_\ell$.
+		\end{proof}
+		
+		\begin{compremark}
+			\texttt{parameterGradients()} in \texttt{network.hpp}, Appendix~\ref{app:backward-pass}, implements Proposition~\ref{prop:parameter-gradients}.
+			
+			The outer product $\delta_\ell x_{\ell-1}^\top$ is computed directly via the existing \texttt{Matrix} \texttt{operator*} and \texttt{.transpose()}, rather than a dedicated outer-product routine: since \texttt{operator*} already handles matrix multiplication for any compatible dimensions, a column vector times a row vector is already exactly what it computes, so no special-cased routine is needed.
+			
+			Verified by \texttt{net.layers[1].A(1,2)} and \texttt{net.layers[0].b(2,0)}, both exactly $0$: the third hidden unit's pre-activation is negative ($z_1(2)=-0.25$), so $\mathrm{ReLU}'$ is $0$ there (Remark~\ref{rem:relu-nondifferentiable}), zeroing the corresponding entry of $\delta_1$ via the backward recursion (Theorem~\ref{thm:backward-recursion}) and propagating through to both formulas exactly.
+		\end{compremark}
+		
+		\begin{remark}[Backpropagation]
+			\label{rem:backpropagation}
+			Computing the network's output requires one forward sweep through the layers $\ell=1,\dots,L$, producing every $z_\ell,x_\ell$ (Remark~\ref{rem:forward-pass}). \\
+			
+			Afterward, $\delta_L$ is computed first (Proposition~\ref{prop:output-layer-error}), then Theorem~\ref{thm:backward-recursion} gives $\delta_{L-1},\dots,\delta_1$ in order, traversing the layers opposite to the forward sweep. This is the reason for the name: the error term propagates backward, against the direction the input flowed forward. \\
+			
+			The gradients are not a separate pass: at each layer $\ell$, Proposition~\ref{prop:parameter-gradients} gives $\partial L/\partial A_\ell$ and $\partial L/\partial b_\ell$ directly from $\delta_\ell$ and the cached $x_{\ell-1}$, so every gradient falls out of the same backward sweep: one forward pass plus one backward pass, total, regardless of $L$. \\
+			
+			This two-phase procedure, forward to compute the output, backward to read off the error terms and gradients together, is what the term backpropagation refers to.
+		\end{remark}

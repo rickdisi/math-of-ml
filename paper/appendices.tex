@@ -43,5 +43,13 @@
 {../impl/probability/categorical_mle.cpp}
 
 \section{Forward Pass}\label{app:forward-pass}
+\lstinputlisting[style=cpp, title={network.hpp}]
+{../impl/neural_networks/network.hpp}
 \lstinputlisting[style=cpp, title={forward\_pass.cpp}]
 {../impl/neural_networks/forward_pass.cpp}
+
+\section{Backward Pass}\label{app:backward-pass}
+The shared network definitions used by both passes (\texttt{Layer}, \texttt{Network}, and every function called from \texttt{backward()}) are listed as \texttt{network.hpp} in Appendix~\ref{app:forward-pass}.
+
+\lstinputlisting[style=cpp, title={backward\_pass.cpp}]
+{../impl/neural_networks/backward_pass.cpp}
