@@ -366,3 +366,152 @@
 			
 			This two-phase procedure, forward to compute the output, backward to read off the error terms and gradients together, is what the term backpropagation refers to.
 		\end{remark}
+	
+\section{Universal Approximation}
+\label{sec:universal-approximation}
+	
+	This section constructs a single-hidden-layer ReLU network that approximates any continuous function on a compact interval to arbitrary accuracy, by building tent functions from ReLUs, showing their sums interpolate a target function, bounding the interpolation error via uniform continuity, and assembling these into the Universal Approximation Theorem. \\
+	
+	This closes a gap the rest of this chapter leaves open. Sections~\ref{sec:backpropagation} and \ref{sec:network-architecture} built the network architecture and showed how to train it, but neither addresses whether the architecture can represent what training is asked to find in the first place. Chapter~\ref{chap:calculus}'s gradient descent convergence theorem answers whether training can find a good solution, given one exists; this section answers whether one exists at all. It also depends specifically on the choice made in Section~\ref{sec:network-architecture} (Example~\ref{ex:relu-sigmoid}): the entire construction rests on ReLU's piecewise-linear shape, which is exactly what makes tent functions expressible as a finite sum of ReLUs (Proposition~\ref{prop:tent-relu}) whereas a smooth activation like sigmoid would not admit nearly as direct a construction.
+
+	\subsection{Tent Functions}
+		
+		\begin{definition}[Tent Function]
+			\label{def:tent-function}
+			Let $x_{k-1}<x_k<x_{k+1}$ be three points. The tent function $T_k:\mathbb{R}\to\mathbb{R}$ is the piecewise-linear function that is $0$ outside the interval $[x_{k-1},x_{k+1}]$, rises linearly from $0$ to $1$ on $[x_{k-1},x_k]$, and falls linearly from $1$ to $0$ on $[x_k,x_{k+1}]$.
+		\end{definition}
+		
+		\begin{proposition}[Tent Functions as a Sum of ReLUs]
+			\label{prop:tent-relu}
+			With $T_k$ as in Definition~\ref{def:tent-function},
+			\[
+				T_k(x) = c_1\,\mathrm{ReLU}(x-x_{k-1}) + c_2\,\mathrm{ReLU}(x-x_k) + c_3\,\mathrm{ReLU}(x-x_{k+1})
+			\]
+			where
+			\[
+				c_1 = \frac{1}{x_k-x_{k-1}} \qquad c_2 = -\frac{1}{x_k-x_{k-1}} - \frac{1}{x_{k+1}-x_k} \qquad c_3 = \frac{1}{x_{k+1}-x_k}
+			\]
+		\end{proposition}
+		
+		\begin{proof}
+			Each $\mathrm{ReLU}(x-c)$ has slope $0$ below $c$ and slope $1$ above it, so a sum of such terms has, at any point, a slope equal to the sum of coefficients of the breakpoints already passed. \\
+			
+			Write $R(x) := c_1\,\mathrm{ReLU}(x-x_{k-1}) + c_2\,\mathrm{ReLU}(x-x_k) + c_3\,\mathrm{ReLU}(x-x_{k+1})$. Its slope in the four regions determined by $x_{k-1},x_k,x_{k+1}$ is $0$, $c_1$, $c_1+c_2$, $c_1+c_2+c_3$, respectively. By Definition~\ref{def:tent-function}, $T_k$'s slopes there are $0$, $\dfrac{1}{x_k-x_{k-1}}$, $\dfrac{-1}{x_{k+1}-x_k}$, $0$. The first region already matches; equating the rest gives
+			\[
+				c_1 = \frac{1}{x_k-x_{k-1}} \qquad c_1+c_2 = \frac{-1}{x_{k+1}-x_k} \qquad c_1+c_2+c_3=0
+			\]
+			which solve to the claimed $c_1,c_2,c_3$. \\
+			
+			Matching slopes alone only pins down each piece up to a constant, so we check one anchor point: $T_k(x_{k-1})=0$, and $R(x_{k-1})=0$ too, since every $\mathrm{ReLU}(x_{k-1}-\cdot)$ term vanishes there. With the same breakpoints, same slopes, and the same value at $x_{k-1}$, $T_k$ and $R$ agree everywhere.
+		\end{proof}
+		
+		\begin{remark}[Boundary Tents]
+			\label{rem:boundary-tents}
+			Definition~\ref{def:tent-function} needs a neighbour on each side of $x_k$, but the endpoints $x_0,x_n$ of a partition $x_0<\cdots<x_n$ have only one. Introduce phantom points $x_{-1}<x_0$ and $x_{n+1}>x_n$ (any choice works) so $T_0,T_n$ are still well-defined by the same formula. Neither phantom point matters beyond this: on $[x_0,x_n]$, $T_0$ and $T_n$ just reduce to a single linear ramp.
+		\end{remark}
+		
+	\subsection{Piecewise-Linear Interpolation}
+		
+		\begin{definition}[Piecewise-Linear Interpolant]
+			\label{def:piecewise-linear-interpolant}
+			Let $x_0<\cdots<x_n$ and let $f$ be defined at each $x_j$. The \emph{piecewise-linear interpolant} of $f$ through $(x_j,f(x_j))_{j=0}^n$ is the function $I:[x_0,x_n]\to\mathbb{R}$, linear on each $[x_{j-1},x_j]$, with $I(x_j)=f(x_j)$ for every $j$.
+		\end{definition}
+		
+		\begin{proposition}[The Interpolant as a Sum of Tents]
+			\label{prop:interpolant-tent-sum}
+			With $I$ as above and $T_j$ the tent centred at $x_j$ (Definition~\ref{def:tent-function}, Remark~\ref{rem:boundary-tents}),
+			\[
+				I(x) = \sum_{j=0}^{n} f(x_j)\,T_j(x) \qquad \text{for all } x\in[x_0,x_n]
+			\]
+		\end{proposition}
+		
+		\begin{proof}
+			Fix $x\in[x_0,x_n]$, with $x\in[x_{k-1},x_k]$ for the appropriate $k$ (at the endpoints $x_0,x_n$ only one tent survives; both cases below specialise cleanly). \\
+			
+			For $|j-k|\ge2$, $T_j(x)=0$: either $x$ lies strictly outside $T_j$'s support $[x_{j-1},x_{j+1}]$, or $x$ coincides with one of that support's endpoints, where $T_j$ itself takes the value $0$ (Definition~\ref{def:tent-function}). Either way, only $j=k-1,k$ can contribute. \\
+			
+			Writing $x=(1-\lambda)x_{k-1}+\lambda x_k$ for $\lambda\in[0,1]$: $T_{k-1}$ falls linearly from $1$ to $0$ on this interval, so $T_{k-1}(x)=1-\lambda$; $T_k$ rises from $0$ to $1$, so $T_k(x)=\lambda$. Hence
+			\[
+				\sum_{j=0}^n f(x_j)T_j(x) = f(x_{k-1})(1-\lambda) + f(x_k)\lambda
+			\]
+			the line segment through $(x_{k-1},f(x_{k-1}))$ and $(x_k,f(x_k))$ at $x$ — exactly $I(x)$ (Definition~\ref{def:piecewise-linear-interpolant}). Since $x$ was arbitrary, this holds on every subinterval.
+		\end{proof}
+		
+	\subsection{Uniform Continuity and the Approximation Bound}
+		
+		\begin{theorem}[Uniform Continuity on a Compact Interval]
+			\label{thm:uniform-continuity}
+			Let $f:[a,b]\to\mathbb{R}$ be continuous. Then $f$ is uniformly continuous for every $\varepsilon>0$, there exists $\delta>0$ such that for all $x,x'\in[a,b]$,
+			\[
+				|x-x'|<\delta \implies |f(x)-f(x')|<\varepsilon
+			\]
+		\end{theorem}
+		
+		\begin{proof}
+			See \cite[\S4.19]{Rudin1976}.
+		\end{proof}
+		
+		\begin{proposition}[Piecewise-Linear Interpolation Error Bound]
+			\label{prop:interpolation-error-bound}
+			Let $f:[a,b]\to\mathbb{R}$ be continuous and let $\varepsilon>0$. Let $\delta>0$ be as given by Theorem~\ref{thm:uniform-continuity} for $\varepsilon/2$. If $x_0<x_1<\cdots<x_n$ is a partition of $[a,b]$ with mesh $\max_j(x_j-x_{j-1})<\delta$, and $I$ is the piecewise-linear interpolant of $f$ through this partition (Definition~\ref{def:piecewise-linear-interpolant}), then
+			\[
+				|f(x)-I(x)| < \varepsilon \qquad \text{for all } x\in[a,b]
+			\]
+		\end{proposition}
+		
+		\begin{proof}
+			Fix $x\in[a,b]$, with $x\in[x_{k-1},x_k]$ for the appropriate $k$. Since the mesh is $<\delta$, $|x-x_{k-1}|<\delta$ and $|x-x_k|<\delta$, so by Theorem~\ref{thm:uniform-continuity} (applied with $\varepsilon/2$),
+			\[
+				|f(x)-f(x_{k-1})| < \frac{\varepsilon}{2} \qquad |f(x)-f(x_k)| < \frac{\varepsilon}{2}
+			\]
+			
+			By Proposition~\ref{prop:interpolant-tent-sum}'s proof, $I(x) = (1-\lambda)f(x_{k-1}) + \lambda f(x_k)$ for some $\lambda\in[0,1]$. So
+			\[
+				f(x) - I(x) = f(x) - (1-\lambda)f(x_{k-1}) - \lambda f(x_k) = (1-\lambda)\big(f(x)-f(x_{k-1})\big) + \lambda\big(f(x)-f(x_k)\big)
+			\]
+			using $(1-\lambda)+\lambda=1$ to rewrite $f(x)=(1-\lambda)f(x)+\lambda f(x)$ first. By the triangle inequality,
+			\[
+				|f(x)-I(x)| \le (1-\lambda)|f(x)-f(x_{k-1})| + \lambda|f(x)-f(x_k)| < (1-\lambda)\frac{\varepsilon}{2} + \lambda\frac{\varepsilon}{2} = \frac{\varepsilon}{2}
+			\]
+			using $0\le\lambda\le1$. So $|f(x)-I(x)| < \varepsilon/2 < \varepsilon$, and since $x\in[a,b]$ was arbitrary, this holds for every $x$.
+		\end{proof}
+		
+	\subsection{The Universal Approximation Theorem}
+		
+		\begin{theorem}[Universal Approximation, One Dimension]
+			\label{thm:uat-1d}
+			Let $f:[a,b]\to\mathbb{R}$ be continuous, and let $\varepsilon>0$. Then there exists a single-hidden-layer feedforward network $N$ with ReLU activation (Definition~\ref{def:feedforward-network}, Example~\ref{ex:relu-sigmoid}) such that
+			\[
+				|N(x)-f(x)| < \varepsilon \qquad \text{for all } x\in[a,b]
+			\]
+		\end{theorem}
+		
+		\begin{proof}
+			By Proposition~\ref{prop:interpolation-error-bound}, choose $\delta>0$ so that any partition of $[a,b]$ with mesh $<\delta$ yields a piecewise-linear interpolant $I$ (Definition~\ref{def:piecewise-linear-interpolant}) satisfying $|f(x)-I(x)|<\varepsilon$ for all $x\in[a,b]$. Fix such a partition $x_0<x_1<\cdots<x_n$. \\
+			
+			It remains to show $I$ itself is the output of a single-hidden-layer ReLU network. By Proposition~\ref{prop:interpolant-tent-sum},
+			\[
+				I(x) = \sum_{j=0}^n f(x_j)\,T_j(x)
+			\]
+			and by Proposition~\ref{prop:tent-relu}, each tent $T_j$ is itself a linear combination of at most three ReLU terms of affine functions of $x$,
+			\[
+				T_j(x) = c_1^{(j)}\mathrm{ReLU}(x-x_{j-1}) + c_2^{(j)}\mathrm{ReLU}(x-x_j) + c_3^{(j)}\mathrm{ReLU}(x-x_{j+1})
+			\]
+			Substituting,
+			\[
+				I(x) = \sum_{j=0}^n f(x_j)\left(c_1^{(j)}\mathrm{ReLU}(x-x_{j-1}) + c_2^{(j)}\mathrm{ReLU}(x-x_j) + c_3^{(j)}\mathrm{ReLU}(x-x_{j+1})\right)
+			\]
+			which, expanding and collecting terms, is a finite sum of the form $\sum_{i=1}^{m} w_i\,\mathrm{ReLU}(x - t_i)$ for some weights $w_i$ and breakpoints $t_i$, with $m \le 3(n+1)$. \\
+			
+			This is precisely a single-hidden-layer network in the sense of Definition~\ref{def:feedforward-network}: each term $\mathrm{ReLU}(x-t_i)$ is the ReLU activation applied to the affine map $x\mapsto x-t_i$ (a hidden unit with weight $1$ and bias $-t_i$), and $I(x)$ is a linear combination of these hidden units with weights $w_i$ and no further activation — exactly $L=2$ with a ReLU hidden layer of width $m\le3(n+1)$ and a linear (activation-free) output layer of width $1$. Setting $N:=I$ under this construction, $N$ is such a network with
+			\[
+				|N(x)-f(x)| = |I(x)-f(x)| < \varepsilon \qquad \text{for all } x\in[a,b]
+			\]
+		\end{proof}
+		
+		\begin{remark}[Representability]
+			\label{rem:uat-representability-only}
+			Theorem~\ref{thm:uat-1d} shows that a network with the right weights exists, however it says nothing about whether gradient descent (Theorem~\ref{thm:gd-convergence}) can find those weights from a random initialisation, nor how many training steps that would take. \\
+			
+			The construction here is entirely explicit and non-adaptive, chosen directly from $f$ and a fine enough partition; nothing in this proof involves training a network on data. Universal approximation is a statement about what functions are representable within the network's architecture, not a guarantee about learnability.
+		\end{remark}
