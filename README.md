@@ -30,8 +30,8 @@ The paper stands on its own; the C++ implementations are a companion that demons
 - [X] **M9** — Probability spaces, conditional probability, Bernoulli/categorical distributions, Jensen's inequality, KL divergence — no C++ deliverable
 - [X] **M10** — Maximum likelihood estimation, cross-entropy derived from categorical MLE — categorical MLE demo
 - [X] **M11** — Network architecture: affine maps, activations, feedforward networks, softmax output layer — forward pass
-- [ ] **M12** — Backpropagation derived rigorously from the chain rule — backward pass
-- [ ] **M13** — Universal Approximation Theorem via a ReLU staircase/bump construction — no C++ deliverable
+- [X] **M12** — Backpropagation derived rigorously from the chain rule — backward pass
+- [X] **M13** — Universal Approximation Theorem via a ReLU staircase/bump construction — no C++ deliverable
 - [ ] **M14** — MNIST data loading, weight initialisation, training scaffold — IDX binary loader, scaffold
 - [ ] **M15** — MNIST training and evaluation — mini-batch SGD, end-to-end run
 - [ ] **M16** — Final paper polish, figures, narrative coherence pass
@@ -49,7 +49,8 @@ math-of-ml/
 │   │   ├── 01_linear_algebra.tex
 │   │   ├── 02_calculus.tex
 │   │   ├── 03_probability.tex
-│   │   └── 04_neural_networks.tex
+|	|	├── 04_neural_networks.tex
+│   │   └── 05_mnist.tex
 │   └── references.bib
 └── impl/                      # C++ implementations, one file per algorithm
     ├── linear_algebra/        # Matrix class, LU solver, QR, Jacobi eigensolver, SVD
