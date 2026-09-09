@@ -2,6 +2,7 @@
 
 
 int main() {
+    // Main test function written by Claude
 
     Network net;
     net.layers.push_back(Layer(2, 2, true));

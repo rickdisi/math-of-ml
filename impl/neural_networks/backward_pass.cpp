@@ -3,7 +3,9 @@
 #include "../linear_algebra/matrix.hpp"
 #include "../neural_networks/network.hpp"
 
+
 int main() {
+    // Main test function written by Claude
     // Step 1: build the network
     Network net;
     net.layers.push_back(Layer(2, 3, true));   // hidden layer, ReLU

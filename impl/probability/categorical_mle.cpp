@@ -65,6 +65,7 @@ std::vector<double> perturb(const std::vector<double>& p, int i, int j, double e
 }
 
 int main() {
+    // Main test function written by Claude
     std::mt19937 rng(42);
 
     // True distribution and sample size
