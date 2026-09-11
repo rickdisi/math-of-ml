@@ -19,6 +19,9 @@ a.out
 impl/**/*.out
 impl/**/build/
 
+# MNIST dataset
+impl/mnist/data/
+
 # LaTeX build directory
 paper/build/
 *.pdf
