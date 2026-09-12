@@ -100,7 +100,6 @@ LayerGradients parameterGradients(const Matrix& delta, const Matrix& xMinusOne) 
     return LayerGradients(gradLA, gradLb);
 }
 
-
 struct Layer {
     Matrix A;
     Matrix b;
@@ -163,3 +162,35 @@ struct Network {
         return grads;
     }
 };
+
+
+void applyGradients(Network& net, const std::vector<LayerGradients>& grads, double learningRate) {
+    for (size_t i = 0; i < net.layers.size(); ++i) {
+        subtractInPlace(net.layers[i].A, scale(grads[i].gradLA, learningRate));
+        subtractInPlace(net.layers[i].b, scale(grads[i].gradLb, learningRate));
+    }
+}
+
+double evaluateAccuracy(Network& net, const std::vector<Matrix>& images, const std::vector<int>& labels) {
+    int correct = 0;
+    int total = static_cast<int>(images.size());
+
+    for (int i = 0; i < total; ++i) {
+        Matrix output = net.forward(images[i]);
+
+        int predicted = 0;
+        double maxVal = output(0, 0);
+        for (int r = 1; r < output.rows(); ++r) {
+            if (output(r, 0) > maxVal) {
+                maxVal = output(r, 0);
+                predicted = static_cast<int>(r);
+            }
+        }
+
+        if (predicted == labels[i]) {
+            ++correct;
+        }
+    }
+
+    return static_cast<double>(correct) / static_cast<double>(total);
+}

@@ -99,19 +99,24 @@ double norm(const Matrix& v) {
     return std::sqrt(dot(v, v));
 }
 
-// scale(v, c): returns c * v for an n x 1 vector v
+// scale(v, c): returns c * v, elementwise, for any matrix v
 Matrix scale(const Matrix& v, double c) {
     int n = v.rows();
-    Matrix result(n, 1);
+    int m = v.cols();
+    Matrix result(n, m);
     for (int i = 0; i < n; ++i) {
-        result(i, 0) = c * v(i, 0);
+        for (int j = 0; j < m; ++j) {
+            result(i, j) = c * v(i, j);
+        }
     }
     return result;
 }
 
-// subtractInPlace(u, w): u -= w, for n x 1 vectors
+// subtractInPlace(u, w): u -= w, elementwise, for matrices of equal dimensions
 void subtractInPlace(Matrix& u, const Matrix& w) {
     for (int i = 0; i < u.rows(); ++i) {
-        u(i, 0) -= w(i, 0);
+        for (int j = 0; j < u.cols(); ++j) {
+            u(i, j) -= w(i, j);
+        }
     }
 }
