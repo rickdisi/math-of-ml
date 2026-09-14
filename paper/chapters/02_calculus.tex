@@ -197,13 +197,46 @@
 			\]
 			both inequalities must be equalities. The second is exactly the equality condition of Cauchy-Schwarz (Theorem~\ref{thm:cauchy-schwarz}), so $\nabla f(a)$ and $u$ are linearly dependent: $u = t\,\nabla f(a)$ for some $t\in\mathbb{R}$. Since $\|u\|=1$, $|t|=1/\|\nabla f(a)\|$. The first equality, $\langle\nabla f(a),u\rangle = |\langle\nabla f(a),u\rangle|$, forces $\langle\nabla f(a),u\rangle\ge0$; substituting $u=t\nabla f(a)$ gives $t\|\nabla f(a)\|^2\ge0$, so $t\ge0$, hence $t=1/\|\nabla f(a)\|$ (not its negative). So $u=\nabla f(a)/\|\nabla f(a)\|$ is the unique maximiser.
 		\end{proof}
+		
+		\begin{figure}[h]
+			\centering
+			\begin{tikzpicture}
+				\begin{axis}[
+					width=10cm, height=8cm,
+					view={-30}{25},
+					xlabel={$x$}, ylabel={$y$}, zlabel={$f(x,y)$},
+					domain=-2.5:2.5, y domain=-2.5:2.5,
+					samples=40,
+					colormap/blackwhite,
+					axis lines=center,
+					]
+					% Surface f(x,y) = x^2 + 2y^2
+					\addplot3[surf, opacity=0.6, shader=interp]
+					{x^2 + 2*y^2};
+					
+					% Point a = (1,1,3) on the surface
+					\addplot3[only marks, mark=*, mark size=2pt]
+					coordinates {(1,1,3)};
+					\node at (axis cs:1.5,1,1.6) {$a=(1,1)$};
+					
+					% Gradient arrow: in the (x,y) plane at height f(a)=3, direction (2,4) scaled by 0.4,
+					% drawn as a 3D arrow lying flat (constant z) to represent the gradient direction
+					% projected onto the domain, anchored at the surface point above a.
+					\addplot3[->, thick]
+					coordinates {(1,1,3) (1.8,2.6,3)};
+					\node at (axis cs:2.2,2.6,4) {$\nabla f(a)$};
+				\end{axis}
+			\end{tikzpicture}
+			\caption{The surface $f(x,y)=x^2+2y^2$, with the point $a=(1,1)$ marked and $\nabla f(a)=(2,4)$ shown as a horizontal arrow anchored at $a$. By Theorem~\ref{thm:steepest-ascent}, this direction maximises the directional derivative $D_uf(a)$ among all unit vectors $u$.}
+			\label{fig:steepest-ascent}
+		\end{figure}
 	
 \section{Gradient Descent}
 \label{sec:gradient-descent}
 	
 	This section covers convexity and $L$-smoothness, the two hypothesis classes gradient descent's guarantees rest on; the Descent Lemma, built from the multivariate Taylor theorem and a Hessian bound derived via the spectral theorem; and the convergence theorem itself, which combines the Descent Lemma with convexity in a telescoping argument to bound how quickly gradient descent approaches a minimiser. \\
 	
-	This is where Chapter~\ref{chap:calculus}'s calculus machinery (the gradient and the spectral theorem via the Descent Lemma) becomes a working algorithm. Gradient descent is defined and proven to converge. This is the training algorithm Chapter~\ref{chap:neural-networks} uses. \\
+	This is where this Chapter's calculus machinery (the gradient and the spectral theorem via the Descent Lemma) becomes a working algorithm. Gradient descent is defined and proven to converge. This is the training algorithm Chapter~\ref{chap:neural-networks} uses. \\
 	
 	The algorithm is implemented from scratch in C++ as \texttt{gradient\_descent.cpp} (Appendix~\ref{app:gradient-descent}).
 	
@@ -461,3 +494,40 @@
 		\label{rem:lagrange-geometric}
 		The proof above shows $\ker(Dg(x^\star))\subseteq\{v:\langle\nabla f(x^\star),v\rangle=0\}$ (Remark~\ref{rem:directional-derivative-gradient}): every tangent direction of the constraint surface $\{g=0\}$ is also tangent to $f$'s level set through $x^\star$. So the contours of $f$ touch the constraint surface at $x^\star$ rather than crossing it. The tangent spaces don't coincide in general, however: since $\ker(Dg(x^\star))$ has dimension $n-m$ while the level set's tangent hyperplane has dimension $n-1$, they coincide only when $m=1$.
 	\end{remark}
+	
+	\begin{figure}[h]
+		\centering
+		\begin{tikzpicture}
+			\begin{axis}[
+				width=10cm, height=8cm,
+				view={-30}{20},
+				xlabel={$x_1$}, ylabel={$x_2$}, zlabel={$f(x_1,x_2)$},
+				domain=-0.5:1.5, y domain=-0.5:1.5,
+				samples=40,
+				colormap/blackwhite,
+				shader=interp,
+				axis lines=center,
+				]
+				% The bowl: f(x1,x2) = (x1^2 + x2^2)/2
+				\addplot3[surf, opacity=0.6, shader=interp]
+				{(x^2 + y^2)/2};
+				
+				% Constraint curve lifted onto the surface: (t, 1-t, f(t,1-t))
+				\addplot3[black, thick, domain=-0.3:1.3, samples=60, smooth]
+				({x}, {1-x}, {(x^2 + (1-x)^2)/2});
+				
+				% Minimum point on the curve
+				\addplot3[only marks, mark=*, mark size=2.5pt, black]
+				coordinates {(0.5,0.5,0.25)};
+				\node at (axis cs:0.5,0.5,0.6) {$x^\star=(0.5,0.5)$};
+				
+				% Gradient of f at x*, direction (0.5,0.5) scaled by 0.5, anchored at the point
+				\addplot3[->, thick]
+				coordinates {(0.5,0.5,0.25) (0.85,0.85,0.25)};
+				\node[right] at (axis cs:0.75,0.75,0.25) {$\nabla f(x^\star)$};
+				
+			\end{axis}
+		\end{tikzpicture}
+		\caption{The surface $f(x_1,x_2)=\tfrac12(x_1^2+x_2^2)$ with the constraint curve $x_1+x_2=1$ lifted onto it, tracing the objective's value as $x_1,x_2$ move along the constraint. At the marked point $x^\star=(0.5,0.5)$, where $f(x^\star)=0.25$, the curve's tangent direction is horizontal, zero slope along the constraint, which is exactly why it is the constrained minimum. The arrow shows $\nabla f(x^\star)=(0.5,0.5)$: it points in the same direction as the constraint line's own normal $\nabla g(x^\star)=(1,1)$, the literal content of $\nabla f(x^\star)=Dg(x^\star)^\top\lambda$ (Theorem~\ref{thm:lagrange-multipliers}).}
+		\label{fig:lagrange-3d}
+	\end{figure}

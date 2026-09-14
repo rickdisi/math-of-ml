@@ -185,6 +185,29 @@
 			($\Leftarrow$) Conversely, let $n = \dim_{\mathbb{F}}(V)$ and let $\{v_1, \dots, v_n\}$ be a basis of $V$. Then, for any $v \in V$, the set $\{v, v_1, \dots, v_n\}$ is linearly dependent by the definition of a basis. Finally, Proposition~\ref{prop:extension-lemma} implies that $v \in \operatorname{span}_{\mathbb{F}}\{v_1, \dots, v_n\}$, which concludes the proof.
 		\end{proof}
 		
+		\begin{figure}[h]
+			\centering
+			\begin{tikzpicture}
+				
+				% Shaded region indicating span(v1,v2) = R^2, drawn first so it sits underneath everything else
+				\fill[gray!10] (-3,-3) rectangle (3,3);
+				
+				% Axes
+				\draw[->] (-3,0) -- (3,0) node[right] {};
+				\draw[->] (0,-3) -- (0,3) node[above] {};
+				
+				% Vectors v1 = (2,1), v2 = (1,2)
+				\draw[->, thick, blue] (0,0) -- (2,1) node[right] {$v_1$};
+				\draw[->, thick, red] (0,0) -- (1,2) node[above] {$v_2$};
+				
+				% Label for the span
+				\node[align=left] at (-2.2,-2.5) {$\mathrm{span}(v_1,v_2)=\mathbb{R}^2$};
+				
+			\end{tikzpicture}
+			\caption{Two linearly independent vectors $v_1,v_2\in\mathbb{R}^2$ span the entire plane: every point in $\mathbb{R}^2$ is a linear combination of $v_1$ and $v_2$.}
+			\label{fig:basis-span}
+		\end{figure}
+		
 		\begin{example}[Standard Basis for Mat$(m,n,\mathbb{F})$]
 			The vector space Mat$(m,n,\mathbb{F})$ is spanned by the matrices $E_{ij}$ having $1$ in the $(i,j)$ position and zero elsewhere. The set of all such matrices is easily shown to be linearly independent. It is the standard basis for Mat$(m,n,\mathbb{F})$ and $\dim_{\mathbb{F}}(\text{Mat}(m,n,\mathbb{F})) = mn$.
 		\end{example}
@@ -373,7 +396,7 @@
 		\end{theorem}
 		
 		\begin{proof}
-			A full treatment of this proof is given in \cite{GolubVanLoan2013}.
+			A full treatment of this proof is given in \cite[\S3.2]{GolubVanLoan2013}.
 		\end{proof}
 		
 		\begin{example}[A Zero Pivot]
@@ -411,8 +434,9 @@
 			\]
 			where $L$ is unit lower triangular and $U$ is upper triangular.
 		\end{theorem}
+		
 		\begin{proof}
-			A full treatment of this proof is given in \cite{GolubVanLoan2013}.
+			A full treatment of this proof is given in \cite[\S3.4]{GolubVanLoan2013}.
 		\end{proof}
 		
 	\subsection{Solving the Linear System}
@@ -532,7 +556,7 @@
 			Let $A \in \mathrm{Mat}(n,\mathbb{F})$ be invertible. Then at every step $k=1,\dots,n-1$ of Gaussian elimination with partial pivoting, the active column contains at least one non-zero entry, so a valid pivot row $r$ always exists.
 		\end{proposition}
 		\begin{proof}
-			A full treatment of this proof is given in \cite{GolubVanLoan2013}.
+			A full treatment of this proof is given in \cite[\S3.4]{GolubVanLoan2013}.
 		\end{proof}
 		
 		\noindent But why should one bother with partial pivoting? After all, Theorem~\ref{thm:pa-lu-existence} already guarantees some valid $P$ exists for any invertible $A$, so why does the specific pivoting strategy matter?
@@ -806,7 +830,7 @@
 		\end{theorem}
 		
 		\begin{proof}
-			A full treatment of this proof is given in \cite{GolubVanLoan2013}.
+			A full treatment of this proof is given in \cite[\S5.2]{GolubVanLoan2013}.
 		\end{proof}
 		
 		\begin{corollary}[Existence of an Orthonormal Basis]
@@ -907,7 +931,7 @@
 			\]
 			Since $u_k \neq 0_V$ (Gram-Schmidt produces nonzero vectors, as used already in Corollary~\ref{cor:orthonormal-basis-exists}), positive-definiteness \ref{ax:IP3} gives $\|u_k\| > 0$. Hence $R_{kk} > 0$ for all $k$. This establishes existence of the decomposition $A = QR$ with the stated properties.
 			
-			To prove uniqueness of the QR decomposition, we rely on \cite{GolubVanLoan2013}.
+			To prove uniqueness of the QR decomposition, we rely on \cite[\S5.2]{GolubVanLoan2013}.
 		\end{proof}
 		
 		\begin{proposition}[Solving $Ax=b$ via $A=QR$]
@@ -1136,7 +1160,7 @@
 			
 			Since $U$ is invariant under $A$ (Definition~\ref{def:invariant-subspace}) and $u \in U$,
 			\[
-			Au \in U
+				Au \in U
 			\]
 			
 			We now have $\langle Au, w\rangle$ with $Au \in U$ and $w \in U^\perp$. By Definition~\ref{def:orthogonal-complement}, the inner product of any element of $U$ with any element of $U^\perp$ is zero:
@@ -1166,7 +1190,7 @@
 			\]
 			so $w\in\ker(A)^\perp$. Hence $\operatorname{im}(A^\top)\subseteq\ker(A)^\perp$.
 			
-			By Rank-Nullity (Theorem~\ref{thm:rank-nullity}), $\dim\ker(A)=n-\operatorname{rank}(A)$. For any subspace $U\subseteq\mathbb{R}^n$, $\dim U^\perp = n-\dim U$ \citep{GolubVanLoan2013}, so $\dim\ker(A)^\perp = \operatorname{rank}(A)$. Also, row rank equals column rank, $\operatorname{rank}(A^\top) = \operatorname{rank}(A)$ by \cite{GolubVanLoan2013}, so $\dim\operatorname{im}(A^\top)=\operatorname{rank}(A)$ too. So $\ker(A)^\perp$ and $\operatorname{im}(A^\top)$ have equal dimension.
+			By Rank-Nullity (Theorem~\ref{thm:rank-nullity}), $\dim\ker(A)=n-\operatorname{rank}(A)$. For any subspace $U\subseteq\mathbb{R}^n$, $\dim U^\perp = n-\dim U$ \citep{HornJohnson2013}, so $\dim\ker(A)^\perp = \operatorname{rank}(A)$. Also, row rank equals column rank, $\operatorname{rank}(A^\top) = \operatorname{rank}(A)$ by \cite{HornJohnson2013}, so $\dim\operatorname{im}(A^\top)=\operatorname{rank}(A)$ too. So $\ker(A)^\perp$ and $\operatorname{im}(A^\top)$ have equal dimension.
 			
 			Equal dimension plus containment gives equality: $\ker(A)^\perp = \operatorname{im}(A^\top)$.
 		\end{proof}
@@ -1209,6 +1233,35 @@
 			
 			This completes the induction.
 		\end{proof}
+		
+		\begin{figure}[h]
+			\centering
+			\begin{tikzpicture}
+				
+				% Axes
+				\draw[->] (-3.5,0) -- (3.5,0);
+				\draw[->] (0,-3.5) -- (0,3.5);
+				
+				% Unit circle (the "before" picture, i.e. all unit vectors)
+				\draw[thick] (0,0) circle (1);
+				
+				% The ellipse A maps the unit circle to: semi-axes 3 (along (1,1) direction, 45 degrees)
+				% and 1 (along (1,-1) direction, -45 degrees). TikZ's ellipse rotate parameter rotates
+				% the local coordinate frame, so rotate=45 aligns the "3" semi-axis with the (1,1)
+				% eigenvector direction and the "1" semi-axis with the perpendicular (1,-1) direction.
+				\draw[thick, rotate=45] (0,0) ellipse (3 and 1);
+				
+				% Eigenvector direction lines, extended to touch the ellipse's semi-axis tips
+				\draw[dashed, gray] (0,0) -- (2.2,2.2) node[right] {$\lambda_1=3$, $v_1=(1,1)$};
+				\draw[dashed, gray] (0,0) -- (0.9,-0.9) node[below right] {$\lambda_2=1$, $v_2=(1,-1)$};
+				
+				\node[left] at (-1.25,0.3) {unit circle};
+				\node[right] at (2.3,1.3) {$A\cdot(\text{unit circle})$};
+				
+			\end{tikzpicture}
+			\caption{The symmetric matrix $A=\begin{bmatrix}2&1\\1&2\end{bmatrix}$ maps the unit circle (blue) to an ellipse (red) whose semi-axes are exactly $A$'s eigenvalues, $3$ and $1$, along its orthogonal eigenvectors, $(1,1)$ and $(1,-1)$. This is what Theorem~\ref{thm:spectral-theorem} guarantees geometrically: a symmetric matrix acts as pure stretching along an orthogonal pair of directions, with no rotation or shearing, unlike a general matrix.}
+			\label{fig:spectral-theorem}
+		\end{figure}
 		
 	\begin{compremark}
 		\texttt{jacobi\_eigensolver.cpp} (Appendix~\ref{app:jacobi-solver}) makes two algorithmic choices worth justifying. These are choices about how quickly and reliably the method converges in floating point, not consequences of Theorem~\ref{thm:spectral-theorem} itself. The theorem guarantees that an orthonormal eigenbasis exists, but doesn't tell us how to compute one.
@@ -1256,6 +1309,37 @@
 		
 		It suffices to check $AV=U\Sigma$, i.e.\ $Av_k = \sigma_k u_k$ for every $k$. For $k\le r$ this is immediate from how $u_k$ was defined. For $k>r$, $\sigma_k=0$ and $\lambda_k=0$, so $\|Av_k\|^2 = \langle A^\top Av_k,v_k\rangle = 0$, forcing $Av_k=0=\sigma_k u_k$ too. So $Av_k=\sigma_k u_k$ holds for every $k$, giving $AV=U\Sigma$. Multiplying by $V^\top=V^{-1}$ on the right gives $A=U\Sigma V^\top$.
 	\end{proof}
+	
+	\begin{figure}[h]
+		\centering
+		\begin{tikzpicture}[scale=1.3]
+			\draw[->] (-1.4,0) -- (1.4,0);
+			\draw[->] (0,-1.4) -- (0,1.4);
+			\draw[thick] (0,0) circle (1);
+			\draw[dashed, rotate=58.28] (-1.2,0) -- (1.2,0) node[right] {$v_1$};
+			\draw[dashed, rotate=58.28] (0,-1.2) -- (0,1.2) node[above] {$v_2$};
+			\node[below] at (0,-1.6) {(a) Unit circle, input directions $v_1,v_2$};
+		\end{tikzpicture}
+		\hfill
+		\begin{tikzpicture}[scale=1.3]
+			\draw[->] (-1.4,0) -- (1.4,0);
+			\draw[->] (0,-1.4) -- (0,1.4);
+			\draw[thick] (0,0) circle (1);
+			\draw[dashed] (-1.2,0) -- (1.2,0) node[above right] {$v_1$};
+			\draw[dashed] (0,-1.2) -- (0,1.2) node[above right] {$v_2$};
+			\node[below] at (0,-1.6) {(b) After $V^\top$: same circle, axes realigned};
+		\end{tikzpicture}
+		\hfill
+		\begin{tikzpicture}[scale=1.3]
+			\draw[->] (-2,0) -- (2,0);
+			\draw[->] (0,-1.4) -- (0,1.4);
+			\draw[thick, rotate=31.72] (0,0) ellipse (1.618 and 0.618);
+			\draw[dashed, rotate=31.72] (-1.9,0) -- (1.9,0) node[right] {$u_1$};
+			\draw[dashed, rotate=31.72] (0,-0.8) -- (0,0.8) node[above] {$u_2$};
+			\node[below] at (0,-1.6) {(c) After $\Sigma$ and $U$: ellipse along $u_1,u_2$};
+		\end{tikzpicture}
+		\caption{The SVD of the shear $A=\begin{bmatrix}1&1\\0&1\end{bmatrix}$ (Theorem~\ref{thm:svd}). The circle's input axes $v_1,v_2$ (eigenvectors of $A^\top A$) sit at $58.28°$; $V^\top$ leaves the circle unchanged, just re-expressed in this frame. Scaling by $\Sigma\approx\mathrm{diag}(1.618,0.618)$ and rotating by $U$ gives the final ellipse, with axes $u_1,u_2$ at $31.72°$, a different angle from $v_1,v_2$. This input/output asymmetry is what distinguishes SVD from the spectral decomposition of a symmetric matrix, where the two angles coincide.}
+	\end{figure}
 	
 	\begin{compremark}
 		\texttt{svd\_jacobi.cpp}'s \texttt{computeSigmaAndU()} (Appendix~\ref{app:svd-jacobi}) uses a thin $U$ with zero columns, not the full orthonormal extension Theorem~\ref{thm:svd}'s proof builds. That proof works to extend $\{u_1,\dots,u_r\}$ into a full $m\times m$ orthogonal matrix (Corollary~\ref{cor:basis-extension}, Gram-Schmidt, Remark~\ref{rem:gram-schmidt-fixes-orthonormal}). The code skips this: \texttt{U} is $m\times n$, and columns past $r$ stay zero by default. This is safe because those columns get multiplied by zero entries of $\Sigma$ anyway, so they never affect $U\Sigma V^\top$. The full extension makes $U$ mathematically complete, but isn't needed for reconstruction.
@@ -1388,7 +1472,7 @@
 		\]
 		which is also the "moreover" clause of the theorem.
 		
-		Now let $B$ have $\operatorname{rank}(B)\le k$. By Weyl's inequality for singular values \citep{GolubVanLoan2013}, $\sigma_{i+k}(A) \le \sigma_i(A-B) + \sigma_{k+1}(B)$ for every $i\ge1$; since $B$ has at most $k$ nonzero singular values, $\sigma_{k+1}(B)=0$, so
+		Now let $B$ have $\operatorname{rank}(B)\le k$. By Weyl's inequality for singular values \citep{HornJohnson2013}, $\sigma_{i+k}(A) \le \sigma_i(A-B) + \sigma_{k+1}(B)$ for every $i\ge1$; since $B$ has at most $k$ nonzero singular values, $\sigma_{k+1}(B)=0$, so
 		\[
 			\sigma_{i+k}(A) \le \sigma_i(A-B).
 		\]

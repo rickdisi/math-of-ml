@@ -19,14 +19,18 @@ int main() {
     net.activation = reluScalar;
     net.activationDerivative = reluScalarDerivative;
 
-    int numEpochs = 3;
+    int numEpochs = 100;
     size_t batchSize = 32;
     double learningRate = 0.1;
+    int loggingFrequency = 2;
 
     size_t N = trainImages.size();
     std::vector<size_t> indices(N);
     std::iota(indices.begin(), indices.end(), 0);
     std::mt19937 rng(std::random_device{}());
+
+    std::ofstream logFile("impl/mnist/data/training_log.csv");
+    logFile << "epoch,accuracy,loss\n";
 
     for (int epoch = 0; epoch < numEpochs; ++epoch) {
         std::shuffle(indices.begin(), indices.end(), rng);
@@ -61,9 +65,18 @@ int main() {
             applyGradients(net, accum, learningRate);
         }
 
-        std::cout << "epoch " << epoch << " complete\n";
-        double accuracy = evaluateAccuracy(net, testImages, testLabels);
-        std::cout << "epoch " << epoch << " test accuracy: " << accuracy << "\n";
+        if (epoch % loggingFrequency == 0 || epoch == numEpochs - 1) {
+            std::cout << "epoch " << epoch << " complete\n";
+
+            double accuracy = evaluateAccuracy(net, testImages, testLabels);
+            double trainLoss = evaluateLoss(net, trainImages, trainLabels);
+
+            std::cout << "epoch " << epoch << " test accuracy: " << accuracy
+            << ", training loss: " << trainLoss << "\n";
+
+            logFile << epoch << "," << accuracy << "," << trainLoss << "\n";
+        }
+
     }
 
     return 0;

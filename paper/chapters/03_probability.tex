@@ -6,7 +6,7 @@
 	
 	This section develops probability spaces, conditional probability and independence, the Bernoulli and categorical distributions, random variables and expectation, and closes with Jensen's inequality and KL divergence. \\
 	
-	The categorical distribution developed here is the object Chapter~\ref{chap:probability} builds its maximum likelihood estimator toward and the parameter that estimator fits is precisely what Chapter~\ref{chap:neural-networks}'s softmax output layer models. \\
+	The categorical distribution developed here is the object this Chapter builds its maximum likelihood estimator toward and the parameter that estimator fits is precisely what Chapter~\ref{chap:neural-networks}'s softmax output layer models. \\
 	
 	\subsection{Probability Spaces and Kolmogorov's Axioms}
 		
@@ -231,6 +231,42 @@
 			using $\lambda q_i=p_i$.
 		\end{proof}
 		
+		\begin{figure}[h]
+			\centering
+			\begin{tikzpicture}
+				
+				% Axes
+				\draw[->] (-1.8,0) -- (2.8,0) node[right] {$x$};
+				\draw[->] (0,-0.3) -- (0,4.5) node[above] {$\varphi(x)$};
+				
+				% Curve phi(x) = x^2
+				\draw[thick, domain=-1.5:2.5, samples=60, smooth]
+				plot (\x, {\x*\x});
+				
+				% Chord from (-1,1) to (2,4)
+				\draw[thick] (-1,1) -- (2,4);
+				
+				% The two marked points on the curve
+				\filldraw (-1,1) circle (0.04) node[above left] {$(x_1,\varphi(x_1))$};
+				\filldraw (2,4) circle (0.04) node[above right] {$(x_2,\varphi(x_2))$};
+				
+				% Vertical dashed line at x=1 up to the curve: (1,1)
+				\draw[dashed, gray] (1,0) -- (1,1);
+				\filldraw (1,1) circle (0.04) node[below right] {$\varphi(\mathbb{E}[X])$};
+				
+				% Vertical dashed line at x=1 up to the chord: (1,3)
+				\draw[dashed, gray] (1,1) -- (1,3);
+				\filldraw (1,3) circle (0.04) node[above right] {$\mathbb{E}[\varphi(X)]$};
+				
+				% x-axis tick label for E[X]
+				\node[below] at (1,0) {$\mathbb{E}[X]$};
+				
+			\end{tikzpicture}
+			\caption{Jensen's inequality (Theorem~\ref{thm:jensen}) for $\varphi(x)=x^2$: the curve lies below its own chord. With $x_1=-1,x_2=2$ and weights $p_1=\frac13,p_2=\frac23$, $\mathbb{E}[X]=1$, so $\varphi(\mathbb{E}[X])=1$ while $\mathbb{E}[\varphi(X)]=3$, the chord's height at the same point.}
+			\label{fig:jensen}
+		\end{figure}
+		
+		
 		\begin{corollary}[Jensen's Inequality on an Interval]
 			\label{cor:jensen-interval}
 			Let $I\subseteq\mathbb{R}$ be an interval, let $X:\Omega\to\mathbb{R}$ have finite range contained in $I$, and let $\varphi:I\to\mathbb{R}$ be convex on $I$ (i.e.\ satisfy Remark~\ref{rem:convex-first-order-characterisation}'s inequality for all $x,y\in I$, $\lambda\in[0,1]$). Then
@@ -437,5 +473,5 @@
 		
 		\begin{remark}[Single Distribution to a Model per Example]
 			\label{rem:categorical-mle-to-network}
-			Proposition~\ref{prop:categorical-mle} fits one distribution $\hat p$ to an entire sample, in closed form. Chapter~\ref{chap:neural-networks} instead fits a distribution $Q_\theta(x)=\mathrm{softmax}(z(\theta,x))$ per input $x$, sharing parameters $\theta$ across examples. No closed form exists for this, so $\theta$ is instead fit by gradient descent (Section~\ref{sec:gradient-descent}), minimising the same cross-entropy objective derived here, one step at a time.
+			Proposition~\ref{prop:categorical-mle} fits one distribution $\hat p$ to an entire sample, in closed form. Chapter~\ref{chap:neural-networks} instead fits a distribution $Q_\theta(x)=\mathrm{softmax}(f_\theta(x))$ per input $x$, sharing parameters $\theta$ across examples. No closed form exists for this, so $\theta$ is instead fit by gradient descent (Section~\ref{sec:gradient-descent}), minimising the same cross-entropy objective derived here, one step at a time.
 		\end{remark}

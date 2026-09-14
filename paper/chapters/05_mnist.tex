@@ -1,0 +1,95 @@
+\chapter{MNIST}
+	
+	This chapter trains the network built in Chapter~\ref{chap:neural-networks} on real data and reports what happened. \\
+	
+	This is where the abstract machinery built across four chapters is tested against something concrete: every piece used here, the architecture, the loss, the gradients, the update rule, was defined and proved correct in earlier chapters, and this chapter is the point at which that machinery either produces a working digit classifier or it doesn't.
+	
+	The implementation is in \texttt{impl/mnist/}.
+	
+\section{Data and Network Setup}
+	
+	This section covers getting real data into the network's expected input form, and getting the network itself into a trainable starting state. \\
+	
+	Neither step is proved correct by anything in Chapters 1--4: both are engineering decisions, made explicit here and justified against the architecture those chapters actually built, rather than left implicit. \\
+	
+	Implemented in \texttt{mnist\_loader.hpp} (Appendix~\ref{app:load-mnist}), specifically \texttt{loadImages()}, \texttt{loadLabels()}, and \texttt{initializeWeights()}. \\
+	
+	MNIST is distributed in the IDX file format: a short binary header, a magic number identifying the file type followed by dimension counts (number of images, then rows and columns per image, or just a count for the label file), followed by the raw data itself as one unsigned byte per pixel or per label, with no delimiters between records. Reading it is a matter of parsing this header correctly and then reading the expected number of bytes directly into memory. \\
+	
+	Each $28\times28$ image is flattened into a single $784\times1$ column vector. This is not an incidental detail of the loader: it is exactly the input vector $x_0\in\mathbb{R}^{n_0}$ of Definition~\ref{def:feedforward-network}, with $n_0=784$ the network built in Chapter~\ref{chap:neural-networks} takes a vector as input, so an image has to be presented as one before the network can act on it at all.
+	
+	Each pixel, originally an integer in $[0,255]$, is rescaled to $[0,1]$ by dividing by $255$.
+	
+	\begin{compremark}
+		\texttt{loadImages()} (\texttt{mnist\_loader.hpp}, Appendix~\ref{app:load-mnist}) rescales every pixel from $[0,255]$ to $[0,1]$ before returning the image as a $784\times1$ \texttt{Matrix}.
+		
+		This is an engineering decision, not something proved in earlier chapters, but it is not an arbitrary one. Nothing in the forward pass (Definition~\ref{def:feedforward-network}, \texttt{forward\_pass.cpp}) includes any built-in normalisation of its input. Feeding raw pixel values in $[0,255]$ directly into the first layer would push pre-activation magnitudes up to $255$ times higher than expected, far outside the input scale the fan-in-scaled weight initialisation below assumes.
+	\end{compremark}
+	
+	Every layer's weight matrix $A_\ell$ must also be initialised before training can begin.
+	
+	Initialising every entry of $A_\ell$ to zero fails, and this follows directly from Proposition~\ref{prop:parameter-gradients}. If every weight feeding into a layer is identical, every neuron in that layer receives the same input and computes the same pre-activation. Since $\partial L/\partial A_\ell=\delta_\ell x_{\ell-1}^\top$ depends on $\delta_\ell$, which in turn depends on $A_{\ell+1}^\top\delta_{\ell+1}$ via the backward recursion (Theorem~\ref{thm:backward-recursion}) applied symmetrically to every identical neuron, every neuron in the layer receives an identical gradient at every step. The layer can never break this symmetry: its neurons remain identical to each other for the entire duration of training. \\
+	
+	\texttt{initializeWeights()} instead draws each entry of $A_\ell$ independently and uniformly from $\left[-\frac{1}{\sqrt{n_{\ell-1}}},\frac{1}{\sqrt{n_{\ell-1}}}\right]$, where $n_{\ell-1}$ is the layer's fan-in (Definition~\ref{def:feedforward-network}), with each bias $b_\ell$ left at zero. Unlike the zero-initialisation failure above, this specific scheme is not something Chapters~\ref{chap:linear-algebra}--\ref{chap:probability} prove correct. It is a standard engineering convention, scaling the initial weight range down as the number of inputs to a neuron grows to keep pre-activation magnitudes from growing uncontrollably with layer width, rather than a derived result.
+
+\section{Mini-Batch Stochastic Gradient Descent}
+\label{sec:mnist-sgd}
+	
+	This section covers the update procedure used to train the network.
+	
+	Implemented in \texttt{train\_mnist.cpp}, specifically \texttt{applyGradients()} and the batch loop in \texttt{main()}.
+	
+	Theorem~\ref{thm:gd-convergence} was proved for full-batch gradient descent: every step uses the gradient of the loss over the entire training set. At the other extreme, stochastic gradient descent (SGD) takes a step using the gradient from a single training example at a time. Mini-batch SGD sits between these: each step uses the average gradient over a small, randomly chosen subset (a batch) of the training set, here of size $32$, rather than the full set of $60{,}000$ or a single example. \\
+	
+	The batch's gradient is averaged, not summed, over the examples in it. This keeps the effective step size independent of batch size: doubling the batch size would double a summed gradient's magnitude, requiring the learning rate to be re-tuned every time the batch size changes, whereas an averaged gradient's magnitude does not depend on how many examples contributed to it. Averaging also handles the last batch of an epoch correctly when the training set size is not an exact multiple of the batch size, since that batch is smaller than the rest. \\
+	
+	The training order is reshuffled at the start of every epoch, so that each epoch sees the training examples grouped into different batches rather than the same fixed groupings repeatedly. \\
+	
+	The most important thing to say about this section is what it does not have: Theorem~\ref{thm:gd-convergence}, the only convergence guarantee this paper has proved for gradient descent, requires the objective to be convex and $L$-smooth. The cross-entropy loss composed with this multi-layer network is, in general, neither. Running mini-batch SGD on this network is therefore not licensed by anything proved in this paper. It is standard practice, but Chapters~\ref{chap:linear-algebra}--\ref{chap:neural-networks} provide no theorem that says it has to work here.
+	
+	\begin{compremark}
+		\texttt{applyGradients()} (\texttt{train\_mnist.cpp}, Appendix~\ref{app:train-mnist}) implements the gradient descent update $A_\ell \leftarrow A_\ell - \eta\,\partial L/\partial A_\ell$, $b_\ell \leftarrow b_\ell - \eta\,\partial L/\partial b_\ell$ (Definition~\ref{def:gradient-descent}), applied to the batch-averaged gradients rather than a single example's.
+		
+		No theoretical verification is offered here, consistent with the caveat above: Theorem~\ref{thm:gd-convergence}'s hypotheses do not hold for this objective, so there is no theorem-predicted quantity to check the implementation against. The only verification available is empirical, and is deferred to Section~\ref{sec:mnist-results}'s accuracy trajectory.
+	\end{compremark}
+
+\section{Results}
+\label{sec:mnist-results}
+	
+	This section reports what happened when the procedure of Section~\ref{sec:mnist-sgd} was run.
+	
+	This is arguably the payoff of the whole paper: everything from Chapter~\ref{chap:linear-algebra} onward was building toward a network that can be trained, and this section is where that claim is checked against an actual run rather than asserted. \\
+	
+	The network used is $784 \to 128$ (ReLU) $\to 10$ (softmax, cross-entropy loss), trained with batch size $32$, learning rate $\eta=0.1$, for $100$ epochs.
+	
+	Test accuracy and loss after each epoch:
+	
+	\begin{figure}[htbp]
+		\centering
+		\begin{tikzpicture}
+			\begin{axis}[
+				axis y line*=left,
+				xlabel={epoch}, ylabel={training loss},
+				yticklabel style={/pgf/number format/fixed},
+				]
+				\addplot[thick] table[x=epoch, y=loss, col sep=comma] {../impl/mnist/data/training_log.csv};
+			\end{axis}
+			\begin{axis}[
+				axis y line*=right,
+				axis x line=none,
+				ylabel={test accuracy},
+				]
+				\addplot[thick] table[x=epoch, y=accuracy, col sep=comma] {../impl/mnist/data/training_log.csv};
+			\end{axis}
+		\end{tikzpicture}
+		\caption{Training loss (left axis) and test accuracy (right axis) after each epoch of Section~\ref{sec:mnist-results}, read from \texttt{training\_log.csv}.}
+		\label{fig:accuracy-and-loss}
+	\end{figure}
+	
+	Training loss falls monotonically across all one hundred epochs. Test accuracy, however, rises only for roughly the first $15$ to $20$ epochs, then plateaus and oscillates in a narrow $98.0\%$ to $98.2\%$ band for the remainder of training, rather than continuing to climb alongside the loss. Neither trend is something Section~\ref{sec:mnist-sgd} predicted, since it admitted no theorem in this paper guarantees either behaviour on this non-convex objective; both are empirical results standing in for the theoretical guarantee that section explicitly does not have. \\
+	
+	The interesting fact is not these two observations in isolation, but that they diverge: the loss keeps shrinking long after accuracy stops improving. This is suggestive of the standard overfitting story. The network keeps growing more confident on the training examples, pushing $Q_\theta(x)_y$ closer to $1$ for the correct label $y$, without that increasing confidence translating into further gains on the held-out test set. This is a suggestion as only test accuracy was tracked, and the textbook signature of overfitting is test loss itself rising, which cannot be checked from the data collected in this run. \\
+	
+	This is an expected result for a minimal, from-scratch, two-layer fully connected network and is presented as exactly that: not a claim of state-of-the-art performance, competitive accuracy, or anything beyond what a small MLP trained for a few epochs on MNIST ordinarily achieves. \\
+	
+	Hyperparameter tuning and more expressive architectures such as convolutional networks would all likely improve on this result; none are attempted here since demonstrating that the machinery built in this paper trains at all is the object of this chapter, not maximal accuracy.

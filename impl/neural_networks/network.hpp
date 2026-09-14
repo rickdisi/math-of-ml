@@ -194,3 +194,20 @@ double evaluateAccuracy(Network& net, const std::vector<Matrix>& images, const s
 
     return static_cast<double>(correct) / static_cast<double>(total);
 }
+
+double crossEntropyLoss(const Matrix& zL, int y) {
+    Matrix probs = softmax(zL);
+    return -std::log(probs(y, 0));
+}
+
+double evaluateLoss(Network& net, const std::vector<Matrix>& images, const std::vector<int>& labels) {
+    double totalLoss = 0.0;
+    int total = static_cast<int>(images.size());
+
+    for (int i = 0; i < total; ++i) {
+        Matrix output = net.forward(images[i]);
+        totalLoss += crossEntropyLoss(output, labels[i]);
+    }
+
+    return totalLoss / static_cast<double>(total);
+}

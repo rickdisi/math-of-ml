@@ -102,7 +102,7 @@
 			\label{ex:relu-sigmoid}
 			Two activation functions (Definition~\ref{def:activation}) used throughout this chapter are:
 			\begin{enumerate}[label=\roman*.]
-				\item \label{ex:relu} The \emph{Rectified Linear Unit} (ReLU):
+				\item \label{ex:relu} The \emph{Rectified Linear Unit} (ReLU) \citep{NairHinton2010}:
 				\[
 					\mathrm{ReLU}(t) := \max(t,0) = \begin{cases} t & t\ge0 \\ 0 & t<0 \end{cases}
 				\]
@@ -144,16 +144,57 @@
 			\]
 			applying $\sigma$ componentwise (Definition~\ref{def:activation}). The resulting map
 			\[
-				f_\theta : \mathbb{R}^{n_0}\to\mathbb{R}^{n_L}, \qquad f_\theta(x_0) := x_L
+				f_\theta : \mathbb{R}^{n_0}\to\mathbb{R}^{n_L} \qquad f_\theta(x_0) := x_L
 			\]
 			is the feedforward network with parameters $\theta$.
 		\end{definition}
+		
+		\begin{figure}[htbp]
+			\centering
+			\begin{tikzpicture}[node distance=1.2cm, >=stealth]
+				% Input layer: 784 nodes, reduced to 5 + vdots
+				\foreach \i in {1,2,3,4}
+				\node[circle, draw, minimum size=0.5cm] (L0-\i) at (0, -\i*0.7) {};
+				\node (L0-dots) at (0, -4*0.7-0.5) {$\vdots$};
+				\node[circle, draw, minimum size=0.5cm] (L0-6) at (0, -4*0.7-1.3) {};
+				
+				% Hidden layer: 128 nodes, reduced to 5 + vdots
+				\foreach \i in {1,2,3,4}
+				\node[circle, draw, minimum size=0.5cm] (L1-\i) at (3, -\i*0.7-0.3) {};
+				\node (L1-dots) at (3, -4*0.7-0.8) {$\vdots$};
+				\node[circle, draw, minimum size=0.5cm] (L1-6) at (3, -4*0.7-1.6) {};
+				
+				% Output layer: all 10 nodes
+				\foreach \i in {1,...,10}
+				\node[circle, draw, minimum size=0.5cm] (L2-\i) at (6, -\i*0.55) {};
+				
+				% Edges: input -> hidden (only drawn to/from the visible nodes, not \vdots)
+				\foreach \i in {1,2,3,4,6}
+				\foreach \j in {1,2,3,4,6}
+				\draw[->] (L0-\i) -- (L1-\j);
+				
+				% Edges: hidden -> output
+				\foreach \i in {1,2,3,4,6}
+				\foreach \j in {1,...,10}
+				\draw[->] (L1-\i) -- (L2-\j);
+				
+				% Labels
+				\node[below=0.3cm of L0-6] {$x_0 \in \mathbb{R}^{784}$};
+				\node[below=0.3cm of L1-6] {$x_1 \in \mathbb{R}^{128}$};
+				\node[below=0.3cm of L2-10] {$x_2 \in \mathbb{R}^{10}$};
+				
+				\node[above] at (1.5, 0.2) {$A_1, b_1$};
+				\node[above] at (4.5, 0.2) {$A_2, b_2$};
+			\end{tikzpicture}
+			\caption{The feedforward network (Definition~\ref{def:feedforward-network}) used later in this paper: an input layer of $784$ nodes ($x_0\in\mathbb{R}^{784}$), a hidden layer of $128$ nodes ($x_1\in\mathbb{R}^{128}$) with ReLU activation, and an output layer of $10$ nodes ($x_2\in\mathbb{R}^{10}$). Each arrow bundle represents the affine map $A_\ell x_{\ell-1}+b_\ell$; the nonlinearity is applied at the nodes it feeds into, not on the arrows themselves.}
+			\label{fig:network-diagram}
+		\end{figure}
 		
 		\begin{remark}[The Forward Pass]
 			\label{rem:forward-pass}
 			Evaluating $f_\theta(x_0)$ (Definition~\ref{def:feedforward-network}), computing $x_1,x_2,\dots,x_L$ in order from a given input $x_0$, is called the forward pass. Writing it out,
 			\[
-				f_\theta = F_L \circ \sigma \circ F_{L-1} \circ \sigma \circ \cdots \circ \sigma \circ F_1,
+				f_\theta = F_L \circ \sigma \circ F_{L-1} \circ \sigma \circ \cdots \circ \sigma \circ F_1
 			\]
 			makes explicit what Definition~\ref{def:feedforward-network} already encodes: a feedforward network is precisely an alternating composition of affine maps (Definition~\ref{def:affine-map}) and activations (Definition~\ref{def:activation}), exactly the kind of object this section set out to build.
 		\end{remark}
@@ -162,7 +203,7 @@
 			\label{rem:parameter-count}
 			The total number of scalar parameters in $\theta=(A_1,b_1,\dots,A_L,b_L)$ (Definition~\ref{def:feedforward-network}) is
 			\[
-				\sum_{\ell=1}^{L} \big(n_\ell n_{\ell-1} + n_\ell\big),
+				\sum_{\ell=1}^{L} \big(n_\ell n_{\ell-1} + n_\ell\big)
 			\]
 			since $A_\ell\in\mathrm{Mat}(n_\ell,n_{\ell-1},\mathbb{R})$ contributes $n_\ell n_{\ell-1}$ entries and $b_\ell\in\mathbb{R}^{n_\ell}$ contributes $n_\ell$ entries, at each layer $\ell$.
 		\end{remark}
@@ -238,9 +279,9 @@
 	
 	This section formalises the network's training objective as cross-entropy loss (Section~\ref{sec:loss-function}), then derives the backward pass: the recursion for the per-layer error term $\delta_\ell$ and the resulting gradients of the loss with respect to every layer's weights and biases via the chain rule established in Chapter~\ref{chap:calculus} (Section~\ref{sec:backward-pass}). \\
 	
-	This is where the paper's central claim is settled: backpropagation is not a separate algorithm bolted onto the network, it is Theorem~\ref{thm:chain-rule} applied repeatedly, layer by layer and every gradient a training run computes is provably the true gradient of the loss this chapter derived from maximum likelihood, not an approximation or a heuristic. \\
+	This is where the paper's central claim is settled: backpropagation is not a separate algorithm bolted onto the network, it is Theorem~\ref{thm:chain-rule} applied repeatedly \citep{RumelhartHintonWilliams1986}, layer by layer and every gradient a training run computes is provably the true gradient of the loss this chapter derived from maximum likelihood, not an approximation or a heuristic. \\
 	
-	The corresponding C++ implementation, shared between the forward and backward pass, is in \texttt{network.hpp} (Appendix~\ref{app:forward-pass}), with the backward pass specifically verified in \texttt{backward\_pass.cpp} (Appendix~\ref{app:backward-pass}).
+	The corresponding C++ implementation, shared between the forward and backward pass, is in \texttt{network.hpp} (Appendix~\ref{app:forward-pass}), with the backward pass specifically verified in \texttt{backward\allowbreak\_pass.cpp} (Appendix~\ref{app:backward-pass}).
 	
 	\subsection{The Loss Function}
 	\label{sec:loss-function}
@@ -251,7 +292,7 @@
 			\[
 				L(\theta) := \sum_{i=1}^n H\big(\hat p^{(i)}, Q_\theta(x^{(i)})\big)
 			\]
-			the sum of per-example cross-entropy terms.
+			the sum of per-example cross-entropy terms \citep{GoodfellowBengioCourville2016}.
 		\end{definition}
 		
 		\begin{remark}[Training Loss in Closed Form]
@@ -372,7 +413,9 @@
 	
 	This section constructs a single-hidden-layer ReLU network that approximates any continuous function on a compact interval to arbitrary accuracy, by building tent functions from ReLUs, showing their sums interpolate a target function, bounding the interpolation error via uniform continuity, and assembling these into the Universal Approximation Theorem. \\
 	
-	This closes a gap the rest of this chapter leaves open. Sections~\ref{sec:backpropagation} and \ref{sec:network-architecture} built the network architecture and showed how to train it, but neither addresses whether the architecture can represent what training is asked to find in the first place. Chapter~\ref{chap:calculus}'s gradient descent convergence theorem answers whether training can find a good solution, given one exists; this section answers whether one exists at all. It also depends specifically on the choice made in Section~\ref{sec:network-architecture} (Example~\ref{ex:relu-sigmoid}): the entire construction rests on ReLU's piecewise-linear shape, which is exactly what makes tent functions expressible as a finite sum of ReLUs (Proposition~\ref{prop:tent-relu}) whereas a smooth activation like sigmoid would not admit nearly as direct a construction.
+	This closes a gap the rest of this chapter leaves open. Sections~\ref{sec:backpropagation} and \ref{sec:network-architecture} built the network architecture and showed how to train it, but neither addresses whether the architecture can represent what training is asked to find in the first place. \\
+	
+	Chapter~\ref{chap:calculus}'s gradient descent convergence theorem answers whether training can find a good solution, given one exists; this section answers whether one exists at all. It also depends specifically on the choice made in Section~\ref{sec:network-architecture} (Example~\ref{ex:relu-sigmoid}): the entire construction rests on ReLU's piecewise-linear shape, which is exactly what makes tent functions expressible as a finite sum of ReLUs (Proposition~\ref{prop:tent-relu}) whereas a smooth activation like sigmoid would not admit nearly as direct a construction.
 
 	\subsection{Tent Functions}
 		
@@ -380,6 +423,35 @@
 			\label{def:tent-function}
 			Let $x_{k-1}<x_k<x_{k+1}$ be three points. The tent function $T_k:\mathbb{R}\to\mathbb{R}$ is the piecewise-linear function that is $0$ outside the interval $[x_{k-1},x_{k+1}]$, rises linearly from $0$ to $1$ on $[x_{k-1},x_k]$, and falls linearly from $1$ to $0$ on $[x_k,x_{k+1}]$.
 		\end{definition}
+		
+		\begin{figure}[h]
+			\centering
+			\begin{tikzpicture}
+				
+				% x-axis
+				\draw[->] (-1,0) -- (4,0) node[right] {$x$};
+				
+				% Dashed zero-line reinforcing "zero outside [x_{k-1}, x_{k+1}]"
+				\draw[dashed, gray] (-1,0) -- (0,0);
+				\draw[dashed, gray] (3,0) -- (4,0);
+				
+				% The tent itself: two line segments
+				\draw[thick] (0,0) -- (1,1) -- (3,0);
+				
+				% Points on the x-axis
+				\filldraw (0,0) circle (0.03) node[below] {$x_{k-1}$};
+				\filldraw (1,0) circle (0.03) node[below] {$x_k$};
+				\filldraw (3,0) circle (0.03) node[below] {$x_{k+1}$};
+				
+				% Peak height label
+				\draw[dashed, gray] (1,0) -- (1,1);
+				\node[left] at (0,1) {$1$};
+				\draw[dashed, gray] (0,1) -- (1,1);
+				
+			\end{tikzpicture}
+			\caption{The tent function $T_k$ (Definition~\ref{def:tent-function}) for the asymmetric choice $x_{k-1}=0$, $x_k=1$, $x_{k+1}=3$: piecewise-linear, rising to height $1$ at $x_k$ and falling back to $0$ at $x_{k+1}$, zero outside $[x_{k-1},x_{k+1}]$.}
+			\label{fig:tent-function}
+		\end{figure}
 		
 		\begin{proposition}[Tent Functions as a Sum of ReLUs]
 			\label{prop:tent-relu}
@@ -486,7 +558,10 @@
 			\]
 		\end{theorem}
 		
+		This is a version of the classical Universal Approximation Theorem, not the theorem in its full generality: Cybenko \citep{Cybenko1989} established it for sigmoidal activations and Hornik \citep{Hornik1991} generalised it to a broader class of activation functions, both over compact subsets of $\mathbb{R}^n$, whereas Theorem~\ref{thm:uat-1d} is restricted to the ReLU activation specifically and a one-dimensional domain $[a,b]$.
+		
 		\begin{proof}
+			
 			By Proposition~\ref{prop:interpolation-error-bound}, choose $\delta>0$ so that any partition of $[a,b]$ with mesh $<\delta$ yields a piecewise-linear interpolant $I$ (Definition~\ref{def:piecewise-linear-interpolant}) satisfying $|f(x)-I(x)|<\varepsilon$ for all $x\in[a,b]$. Fix such a partition $x_0<x_1<\cdots<x_n$. \\
 			
 			It remains to show $I$ itself is the output of a single-hidden-layer ReLU network. By Proposition~\ref{prop:interpolant-tent-sum},
@@ -508,6 +583,42 @@
 				|N(x)-f(x)| = |I(x)-f(x)| < \varepsilon \qquad \text{for all } x\in[a,b]
 			\]
 		\end{proof}
+		
+		\begin{figure}[h]
+			\centering
+			\begin{tikzpicture}
+				
+				% Axes
+				\draw[->] (-0.3,0) -- (6.6,0) node[right] {$x$};
+				\draw[->] (0,-1.3) -- (0,1.3) node[above] {$f(x)$};
+				
+				% Smooth curve f(x) = sin(x), radians
+				\draw[gray, thick, domain=0:6.283, samples=100, smooth]
+				plot (\x, {sin(\x r)});
+				
+				% Partition points, evenly spaced, 6 points on [0, 2*pi]
+				% x_j = j * 2*pi/5 for j = 0,...,5
+				\foreach \j in {0,1,2,3,4,5} {
+					\pgfmathsetmacro{\xj}{\j * 2*3.14159/5}
+					\pgfmathsetmacro{\yj}{sin(\xj*180/3.14159)} % convert to degrees for TikZ's sin
+					\filldraw (\xj,\yj) circle (0.05);
+				}
+				
+				% Interpolant: straight lines connecting consecutive partition points
+				\draw[thick]
+				plot[mark=none] coordinates {
+					(0,{sin(0)})
+					(1.2566,{sin(1.2566 r)})
+					(2.5133,{sin(2.5133 r)})
+					(3.7699,{sin(3.7699 r)})
+					(5.0265,{sin(5.0265 r)})
+					(6.2832,{sin(6.2832 r)})
+				};
+				
+			\end{tikzpicture}
+			\caption{$f(x)=\sin(x)$ on $[0,2\pi]$ (grey) and its piecewise-linear interpolant $I(x)$ (black) through $6$ evenly spaced points (Definition~\ref{def:piecewise-linear-interpolant}). The visible gap between the two curves is exactly what Proposition~\ref{prop:interpolation-error-bound} bounds.}
+			\label{fig:uat}
+		\end{figure}
 		
 		\begin{remark}[Representability]
 			\label{rem:uat-representability-only}

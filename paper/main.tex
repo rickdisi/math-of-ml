@@ -2,16 +2,30 @@
 
 \input{preamble}
 
-\title{\textbf{The Mathematics of Machine Learning}}
-\author{Riccardo di Silvio}
+\title{\Huge\bfseries The Mathematics of Machine Learning}
+\author{\Large Riccardo di Silvio}
 
 
 \begin{document}
 
-\maketitle
+\pagenumbering{roman}
+\begin{titlepage}
+	\centering
+	\vspace*{3cm}
+	{\Huge\bfseries The Mathematics of Machine Learning\par}
+	\vspace{0.8cm}
+	{\Large From First Principles to a Neural Network in C++\par}
+	\vspace{2.5cm}
+	{\Large Riccardo di Silvio}
+	\vfill
+\end{titlepage}
+
 \tableofcontents
 
 \input{chapters/00_preface}
+\clearpage
+\pagenumbering{arabic}
+
 \input{chapters/01_linear_algebra}
 \input{chapters/02_calculus}
 \input{chapters/03_probability}
