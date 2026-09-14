@@ -6,18 +6,19 @@ A self-directed study project building rigorously from linear algebra through to
 
 The end product is a single expository paper with a coherent narrative arc: each chapter earns the next, and every result in the neural networks chapter traces back to something proved earlier in the paper. No result is stated without proof or derivation, and no algorithm is used without having been implemented from scratch — no linear algebra, calculus, or ML libraries anywhere in the codebase, only the C++ standard library.
 
-The paper stands on its own; the C++ implementations are a companion that demonstrates the mathematics actually works, and doubles as practice with systems-level C++ (manual memory management, RAII, cache-friendly data layout). Originally scoped at roughly 40 pages, the paper has grown to 81 as of Chapter 4's opening section — a consequence of writing the exposition at full rigour rather than trimming it to fit the original estimate.
+The paper stands on its own; the C++ implementations are a companion that demonstrates the mathematics actually works, and doubles as practice with systems-level C++ (manual memory management, RAII, cache-friendly data layout). Originally scoped at roughly 40 pages, the finished paper runs to 105 — a consequence of writing the exposition at full rigour rather than trimming it to fit the original estimate.
 
 ## Topics
 
 1. **Linear algebra** — vector spaces and linear operators, rank-nullity theorem, LU decomposition with partial pivoting, inner product spaces and Gram-Schmidt, QR decomposition, eigenvalues and the spectral theorem for symmetric matrices, SVD derived from eigendecomposition
 2. **Calculus and optimisation** — the multivariable chain rule (the mathematical heart of backpropagation), the gradient as the direction of steepest ascent, convergence of gradient descent under L-smoothness and convexity, Lagrange multipliers and constrained optimisation
 3. **Probability and statistics** — probability spaces and Kolmogorov's axioms, conditional probability and independence, Bernoulli and categorical distributions, maximum likelihood estimation as a principled framework, cross-entropy loss derived from categorical MLE, Jensen's inequality, KL divergence
-4. **Neural networks** — affine maps and why composing them alone gains nothing, activation functions, the feedforward network architecture, softmax as a categorical distribution, backpropagation derived from the chain rule, the Universal Approximation Theorem via a ReLU staircase/bump construction, trained on MNIST
+4. **Neural networks** — affine maps and why composing them alone gains nothing, activation functions, the feedforward network architecture, softmax as a categorical distribution, backpropagation derived from the chain rule, the Universal Approximation Theorem via a ReLU staircase/bump construction
+5. **MNIST** — discursive, not proof-driven: the IDX data loader, weight initialisation, mini-batch stochastic gradient descent, and the resulting training loss and test accuracy over 100 epochs, closing the loop from Chapter 1's linear algebra to a working, trained digit classifier
 
 ## Progress
 
-16 milestones in total, each pairing a piece of mathematics with a from-scratch C++ implementation. 11 of 16 complete.
+16 milestones in total, each pairing a piece of mathematics with a from-scratch C++ implementation. All 16 complete.
 
 - [X] **M1** — Vector spaces and linear maps, rank-nullity theorem — `Matrix` class
 - [X] **M2** — LU decomposition with partial pivoting — LU solver
@@ -32,9 +33,9 @@ The paper stands on its own; the C++ implementations are a companion that demons
 - [X] **M11** — Network architecture: affine maps, activations, feedforward networks, softmax output layer — forward pass
 - [X] **M12** — Backpropagation derived rigorously from the chain rule — backward pass
 - [X] **M13** — Universal Approximation Theorem via a ReLU staircase/bump construction — no C++ deliverable
-- [ ] **M14** — MNIST data loading, weight initialisation, training scaffold — IDX binary loader, scaffold
-- [ ] **M15** — MNIST training and evaluation — mini-batch SGD, end-to-end run
-- [ ] **M16** — Final paper polish, figures, narrative coherence pass
+- [X] **M14** — MNIST data loading, weight initialisation, training scaffold — IDX binary loader, weight init, training loop scaffold
+- [X] **M15** — MNIST training and evaluation — mini-batch SGD, accuracy/loss evaluation, end-to-end run
+- [X] **M16** — Final paper polish — 9 figures, citation pass across all four maths chapters, narrative coherence pass
 
 ## Structure
 
@@ -56,7 +57,8 @@ math-of-ml/
     ├── linear_algebra/        # Matrix class, LU solver, QR, Jacobi eigensolver, SVD
     ├── calculus/              # gradient checker, gradient descent, KKT solver
     ├── probability/           # categorical MLE
-    └── neural_networks/       # forward pass
+    ├── neural_networks/       # network.hpp, forward pass, backward pass
+    └── mnist/                 # IDX loader, weight init, mini-batch SGD training loop
 ```
 
 ## Tooling
